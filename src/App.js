@@ -12,7 +12,10 @@ import DefaultComponent from './components/DefaultComponent/DefaultComponent'
             const Page=route.page
             const Layout = route.isShowHeader ? DefaultComponent : Fragment
             return (
-              <Route path={route.path} element={<Page/>}/>
+              <Route path={route.path} element={
+                <Layout>
+              <Page/>
+              </Layout>}/>
             )
             })}
         </Routes>
