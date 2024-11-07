@@ -1,23 +1,34 @@
 const Styles = {
-    iconStyles: {
+    iconHeader: {
       color: '#FFFFFF',
       fontSize: '24px',
     },
 
-    titleTextHeader:{
-        color: '#FFFFFF', 
-        fontSize: '24px',
+    titleText:{
+        color: '#198754', 
+        fontSize: '18px',
     },
 
     textHeader:{
-        color: '#FFFFFF', 
-        fontSize: '16px',
+        color: '#198754', 
+        fontSize: '18px',
     },
 
-    iconStyles2: {
-      color: '#000000',
+    text:{
+      color: '#111111', 
+      fontSize: '16px',
+  },
+
+    iconHeader2: {
+      color: '#198754',
       fontSize: '24px',
+      marginRight: '8px',
+      marginLeft: '8px',
     },
+
+    backgroundPage:{
+      color: '#F9F6F2',
+    }
 };
 
   export default Styles;
