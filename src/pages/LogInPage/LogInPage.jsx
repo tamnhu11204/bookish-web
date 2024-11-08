@@ -68,20 +68,11 @@ const LogInPage = () => {
             Forgot password?
           </a>
 
-          <ButtonComponent
-            style={{
-              width: "100%",
-              padding: "10px",
-              backgroundColor: "#5C9EAD",
-              color: "#fff",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Log In
-          </ButtonComponent>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                        <ButtonComponent
+                            textButton="Log In"
+                        />
+                    </div>
         </form>
         <div
           style={{

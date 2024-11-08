@@ -25,10 +25,7 @@ const HeaderComponent = () => {
       </div>
     </nav>
 
-    {/* <hr style={{ background: 'black', height: '2px', border: 'none' }} /> */}
-
-      {/* Tại chưa dẫn link nên nó cảnh báo thôi, kh sao đâu nha */}
-      <nav className="navbar" style={{ backgroundColor: '#F9F6F2', height: '60px' }}>
+      <nav className="navbar" style={{  height: '60px' }}>
         <div class="container">
           <ul class="nav nav-underline">
             <li class="nav-item">
@@ -57,7 +54,7 @@ const HeaderComponent = () => {
           <ul class="nav nav-underline">
             <li class="nav-item">
               <a class="nav-link" href="#" style={Styles.textHeader}>
-                <i class="bi bi-arrow-left-right" style={Styles.iconHeader2}></i>
+                <i class="bi bi-ui-radios" style={Styles.iconHeader2}></i>
                 Comparison
               </a>
             </li>

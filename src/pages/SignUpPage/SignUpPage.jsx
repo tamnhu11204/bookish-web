@@ -1,11 +1,10 @@
 import React from "react";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
-// import Styles from "../../style";
 
 const SignUpPage = () => {
     return (
-        // <div style={Styles.backgroundPage}> 
+
         <div
             className="signup-container"
             style={{
@@ -45,10 +44,9 @@ const SignUpPage = () => {
                 >
                     <FormComponent
                         id="emailInput"
-                        label="Email"
-                        type="email"
                         placeholder="Enter your email"
-                        // style={Styles.text}
+                        type="email"
+                        label="Email"
                     ></FormComponent>
 
                     <FormComponent
@@ -93,21 +91,13 @@ const SignUpPage = () => {
                         placeholder="Enter your address"
                     ></FormComponent>
 
-                    <ButtonComponent
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            backgroundColor: "#5C9EAD",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "5px",
-                            cursor: "pointer",
-                            fontWeight: "bold",
-                            marginTop: "10px",
-                        }}
-                    >
-                        Sign Up
-                    </ButtonComponent>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                        <ButtonComponent
+                            textButton="Sign Up"
+
+                        />
+                    </div>
+
                 </form>
                 <div
                     style={{

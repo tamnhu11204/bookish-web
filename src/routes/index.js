@@ -5,7 +5,7 @@ import LogInPage from "../pages/LogInPage/LogInPage";
 
 export const routes =[
     {
-        path: '/',
+        path: '/homepage',
         page: HomePage,
         isShowHeader: true
     },

@@ -1,20 +1,19 @@
 import React from "react";
 
-const ButtonComponent = (props) => {
+const ButtonComponent = ({ textButton, ...rests }) => {
   return (
-    <button
-    type="button"
-      className="btn btn-success"
+    <button className='btn'
       style={{
-        borderRadius: '10px',
-        border: 'none',
-        color: '#FFFFFF',
+        backgroundColor: '#198754',
+        height: '40px',
+        width: 'fit-content',
+        padding: '0 20px', // Thêm padding để có khoảng cách hai bên chữ
         fontSize: '16px',
-        height: "35px",
-        width: "fit-content",
+        display: 'inline-block' // Đảm bảo nút chỉ chiếm không gian cần thiết
       }}
+      {...rests}
     >
-      {props.children}
+      <span style={{color: '#FFFFFF'}}>{textButton}</span>
     </button>
   );
 };

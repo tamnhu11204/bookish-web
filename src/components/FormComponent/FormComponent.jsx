@@ -1,21 +1,22 @@
 import React from "react";
 
-const FormComponent = (props) => {
+const FormComponent = ({placeholder, type, label,...rests }) => {
     return (
-        <div className="mb-3" style={{
-            display: 'flex',
-            justifyContent: 'center',
-            flexDirection: 'column',
-            width: '421px'
-        }}>
-            <label htmlFor="exampleFormControlInput1" className="form-label">
-                {props.label}
-            </label>
+        <div style={{ marginBottom: '10px' }}>
+            <label className="form-label" style={{ display: 'block', marginBottom: '5px', fontSize:'16px' }}>{label}</label>
             <input
-                type={props.type}
-                className="form-control"
-                id={props.id}
-                placeholder={props.placeholder}
+                placeholder={placeholder}
+                type={type}
+                style={{
+                    padding:'0 20px',
+                    backgroundColor: '#E4F7CB',
+                    fontSize: '14px',
+                    width: '400px',
+                    height: '35px',
+                    border: 'none',
+                    borderRadius: '10px',
+                }}
+                {...rests}
             />
         </div>
     );
