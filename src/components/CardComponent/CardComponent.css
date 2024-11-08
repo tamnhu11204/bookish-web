@@ -1,0 +1,15 @@
+.card-product {
+    background-color: #FFFFFF;
+    border: 1px solid #198754; /* Viền màu đen */
+    border-radius: 10px; /* Bo góc 10px */
+}
+
+.card-header{
+    padding: 0 10px;
+    font-size: 20px;
+    color: #198754;
+}
+
+.line{
+    border: 1px solid #198754
+}
