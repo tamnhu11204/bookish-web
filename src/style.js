@@ -11,7 +11,7 @@ const Styles = {
 
     textHeader:{
         color: '#198754', 
-        fontSize: '18px',
+        fontSize: '20px',
     },
 
     text:{
