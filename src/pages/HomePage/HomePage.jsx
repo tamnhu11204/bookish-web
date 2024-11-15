@@ -2,7 +2,7 @@ import React from 'react'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
 import img1 from '../../assets/img/img1.png'
 import img2 from '../../assets/img/img2.png'
-import CardComponent from '../../components/CardComponent/CardComponent'
+import img3 from '../../assets/img/img3.jpg'
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
 import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent'
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
@@ -22,38 +22,45 @@ const HomePage = () => {
       <div style={{ backgroundColor: '#198754', marginTop: '30px' }}>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
         <div class="container" >
-          <CardComponent
-            textHeader="Catagory"
-            headerButton={
-              <ButtonComponent
-                icon={<i className="bi bi-ui-checks-grid" />}
-              />
-            }>
-            <div className="d-flex justify-content-between">
+          <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
+
+            <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
+              <a class="text-decoration-underline"
+                        href="./catagory">
+              <ButtonComponent icon={<i className="bi bi-ui-checks-grid" />} />
+              </a>
+              Danh mục
+            </div>
+
+            <hr className="line" style={{ border: '1px solid #198754' }} />
+
+            <div className="card-body-1" style={{ marginLeft: '45px', marginTop: '10px' }}>
               {[...Array(5)].map((_, index) => (
                 <MiniCardComponent key={index}
-                  img={img1}
-                  content="NXB Trẻ" />
+                  img={img3}
+                  content="Văn học" />
               ))}
             </div>
-          </CardComponent>
+          </div>
         </div>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
       </div>
 
       <div style={{ backgroundColor: '#F9F6F2' }}>
         <div class="container" style={{ marginTop: '30px' }}>
-          <CardComponent
-            textHeader="Book purchasing trends"
-            headerButton={
-              <ButtonComponent
-                icon={<i className="bi bi-graph-up-arrow" />}
-              />
-            }>
-            <div className="d-flex justify-content-between">
-              {[...Array(5)].map((_, index) => (
+          <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
+
+            <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
+              <ButtonComponent icon={<i className="bi bi-graph-up-arrow" />} />
+              Xu hướng mua sách
+            </div>
+
+            <hr className="line" style={{ border: '1px solid #198754' }} />
+
+            <div className="card-body-1" style={{ marginLeft: '45px', marginTop: '10px' }}>
+              {[...Array(10)].map((_, index) => (
                 <CardProductComponent key={index}
-                  img={img1}
+                  img={img3}
                   proName="Ngàn mặt trời rực rỡ"
                   currentPrice="120000"
                   sold="12"
@@ -61,23 +68,31 @@ const HomePage = () => {
                   score="210" />
               ))}
             </div>
-          </CardComponent>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                <ButtonComponent
+                    textButton="Xem thêm"
+                    icon={<i className="bi bi-chevron-right" />}/>
+            </div>
+          </div>
         </div>
       </div>
 
       <div style={{ backgroundColor: '#F9F6F2' }}>
         <div class="container" style={{ marginTop: '30px' }}>
-          <CardComponent
-            textHeader="New books"
-            headerButton={
-              <ButtonComponent
-                icon={<i className="bi bi-book" />}
-              />
-            }>
-            <div className="d-flex justify-content-between">
-              {[...Array(5)].map((_, index) => (
+          <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
+
+            <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
+              <ButtonComponent icon={<i className="bi bi-book" />} />
+              Sách mới
+            </div>
+
+            <hr className="line" style={{ border: '1px solid #198754' }} />
+
+            <div className="card-body-1" style={{ marginLeft: '45px', marginTop: '10px' }}>
+              {[...Array(10)].map((_, index) => (
                 <CardProductComponent key={index}
-                  img={img1}
+                  img={img3}
                   proName="Ngàn mặt trời rực rỡ"
                   currentPrice="120000"
                   sold="12"
@@ -85,45 +100,55 @@ const HomePage = () => {
                   score="210" />
               ))}
             </div>
-          </CardComponent>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                <ButtonComponent
+                    textButton="Xem thêm"
+                    icon={<i className="bi bi-chevron-right" />}/>
+            </div>
+          </div>
         </div>
       </div>
 
       <div style={{ backgroundColor: '#198754', marginTop: '30px' }}>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
         <div class="container" >
-          <CardComponent
-            textHeader="Publisher"
-            headerButton={
-              <ButtonComponent
-                icon={<i className="bi bi-pen" />}
-              />
-            }>
-            <div className="d-flex justify-content-between">
+          <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
+
+            <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
+              <ButtonComponent icon={<i className="bi bi-pen" />} />
+              Nhà xuất bản
+            </div>
+
+            <hr className="line" style={{ border: '1px solid #198754' }} />
+
+            <div className="card-body-1" style={{ marginLeft: '45px', marginTop: '10px' }}>
               {[...Array(5)].map((_, index) => (
                 <MiniCardComponent key={index}
-                  img={img1}
+                  img={img3}
                   content="NXB Trẻ" />
               ))}
             </div>
-          </CardComponent>
+          </div>
         </div>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
       </div>
 
       <div style={{ backgroundColor: '#F9F6F2' }}>
         <div class="container" style={{ marginTop: '30px' }}>
-          <CardComponent
-            textHeader="Monthly best-seller chart"
-            headerButton={
-              <ButtonComponent
-                icon={<i className="bi bi-arrow-up-right-square" />}
-              />
-            }>
-            <div className="d-flex justify-content-between">
-              {[...Array(5)].map((_, index) => (
+          <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
+
+            <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
+              <ButtonComponent icon={<i className="bi bi-arrow-up-right-square" />} />
+              Sách bán chạy theo tháng
+            </div>
+
+            <hr className="line" style={{ border: '1px solid #198754' }} />
+
+            <div className="card-body-1" style={{ marginLeft: '45px', marginTop: '10px' }}>
+              {[...Array(10)].map((_, index) => (
                 <CardProductComponent key={index}
-                  img={img1}
+                  img={img3}
                   proName="Ngàn mặt trời rực rỡ"
                   currentPrice="120000"
                   sold="12"
@@ -131,7 +156,13 @@ const HomePage = () => {
                   score="210" />
               ))}
             </div>
-          </CardComponent>
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                <ButtonComponent
+                    textButton="Xem thêm"
+                    icon={<i className="bi bi-chevron-right" />}/>
+            </div>
+          </div>
         </div>
       </div>
     </div>

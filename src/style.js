@@ -1,7 +1,7 @@
 const Styles = {
     iconHeader: {
       color: '#FFFFFF',
-      fontSize: '24px',
+      fontSize: '20px',
     },
 
     titleText:{

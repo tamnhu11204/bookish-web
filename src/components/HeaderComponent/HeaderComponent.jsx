@@ -11,7 +11,7 @@ const HeaderComponent = () => {
             <img src={logo} alt="Logo" style={{height:'40px', width:'auto'}}/>
           </a>
 
-          <input className="form-control" type="text" placeholder="Search book" style={{ width: '500px', height: '35px', fontSize: '14px' }}></input>
+          <input className="form-control" type="text" placeholder="Tìm" style={{ width: '500px', height: '35px', fontSize: '14px' }}></input>
 
           <div>
             <div className="btn">
@@ -33,7 +33,7 @@ const HeaderComponent = () => {
             <li className="nav-item">
               <a className="nav-link" href="/" style={Styles.textHeader}>
                 <i className="bi bi-house-door" style={Styles.iconHeader2}></i>
-                Home
+                Trang chủ
               </a>
             </li>
           </ul>
@@ -41,7 +41,7 @@ const HeaderComponent = () => {
             <li className="nav-item">
               <a className="nav-link" href="/catagory" style={Styles.textHeader}>
                 <i className="bi bi-ui-checks-grid" style={Styles.iconHeader2}></i>
-                Category
+                Danh mục
               </a>
             </li>
           </ul>
@@ -49,7 +49,7 @@ const HeaderComponent = () => {
             <li className="nav-item">
               <a className="nav-link" href="/discount" style={Styles.textHeader}>
                 <i className="bi bi-gift" style={Styles.iconHeader2}></i>
-                Discount
+                Khuyến mãi
               </a>
             </li>
           </ul>
@@ -57,7 +57,7 @@ const HeaderComponent = () => {
             <li className="nav-item">
               <a className="nav-link" href="/comparison" style={Styles.textHeader}>
                 <i className="bi bi-ui-radios" style={Styles.iconHeader2}></i>
-                Comparison
+                So sánh
               </a>
             </li>
           </ul>

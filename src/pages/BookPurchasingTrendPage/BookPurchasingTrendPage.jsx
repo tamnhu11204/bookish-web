@@ -21,7 +21,10 @@ const BookPurchasingTrendPage = () => {
                 <div className="container" style={{ marginTop: '30px' }}>
                     <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
 
-                        <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>Book purchasing trends</div>
+                        <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
+                        <ButtonComponent icon={<i className="bi bi-graph-up-arrow" />} />
+                            Xu hướng mua sách
+                        </div>
 
                         <hr className="line" style={{ border: '1px solid #198754' }} />
                         <div style={{ backgroundColor: '#198754', height: '40px' , marginTop:'-10px'}}>

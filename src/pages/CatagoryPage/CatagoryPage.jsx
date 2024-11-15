@@ -120,6 +120,7 @@ const CatagoryPage = () => {
                     </div>
 
                     <div style={{ backgroundColor: '#F9F6F2' }}>
+                        
                 <div className="container" style={{ marginTop: '30px' }}>
                     <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
 
