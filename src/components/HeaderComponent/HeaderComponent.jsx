@@ -7,7 +7,7 @@ const HeaderComponent = () => {
     <>
       <nav className="navbar" style={{ backgroundColor: '#198754', height: '60px' }} >
         <div className="container">
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" href="/">
             <img src={logo} alt="Logo" style={{height:'40px', width:'auto'}}/>
           </a>
 
@@ -31,7 +31,7 @@ const HeaderComponent = () => {
         <div className="container">
           <ul className="nav nav-underline">
             <li className="nav-item">
-              <a className="nav-link" href="#" style={Styles.textHeader}>
+              <a className="nav-link" href="/" style={Styles.textHeader}>
                 <i className="bi bi-house-door" style={Styles.iconHeader2}></i>
                 Home
               </a>
@@ -39,7 +39,7 @@ const HeaderComponent = () => {
           </ul>
           <ul className="nav nav-underline">
             <li className="nav-item">
-              <a className="nav-link" href="#" style={Styles.textHeader}>
+              <a className="nav-link" href="/catagory" style={Styles.textHeader}>
                 <i className="bi bi-ui-checks-grid" style={Styles.iconHeader2}></i>
                 Category
               </a>
@@ -47,7 +47,7 @@ const HeaderComponent = () => {
           </ul>
           <ul className="nav nav-underline">
             <li className="nav-item">
-              <a className="nav-link" href="#" style={Styles.textHeader}>
+              <a className="nav-link" href="/discount" style={Styles.textHeader}>
                 <i className="bi bi-gift" style={Styles.iconHeader2}></i>
                 Discount
               </a>
@@ -55,7 +55,7 @@ const HeaderComponent = () => {
           </ul>
           <ul className="nav nav-underline">
             <li className="nav-item">
-              <a className="nav-link" href="#" style={Styles.textHeader}>
+              <a className="nav-link" href="/comparison" style={Styles.textHeader}>
                 <i className="bi bi-ui-radios" style={Styles.iconHeader2}></i>
                 Comparison
               </a>

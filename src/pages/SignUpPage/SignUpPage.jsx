@@ -5,7 +5,7 @@ import FormComponent from "../../components/FormComponent/FormComponent";
 const SignUpPage = () => {
     return (
 
-        <div
+        <div 
             className="signup-container"
             style={{
                 display: "flex",
