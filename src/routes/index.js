@@ -9,6 +9,7 @@ import BookPurchasingTrendPage from "../pages/BookPurchasingTrendPage/BookPurcha
 import CatagoryPage from "../pages/CatagoryPage/CatagoryPage";
 import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
 import ComparisonPage from "../pages/ComparisonPage/ComparisonPage";
+import OrderPage from "../pages/OrderPage/OrderPage";
 
 export const routes =[
     {
@@ -73,6 +74,12 @@ export const routes =[
     {
         path: '/comparison',
         page: ComparisonPage,
+        isShowHeader: true
+    },
+
+    {
+        path: '/order',
+        page: OrderPage,
         isShowHeader: true
     },
 

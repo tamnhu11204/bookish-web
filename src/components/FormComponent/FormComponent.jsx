@@ -11,7 +11,7 @@ const FormComponent = ({placeholder, type, label,...rests }) => {
                     padding:'0 20px',
                     backgroundColor: '#E4F7CB',
                     fontSize: '14px',
-                    width: '400px',
+                    width: '100%',
                     height: '35px',
                     border: 'none',
                     borderRadius: '10px',

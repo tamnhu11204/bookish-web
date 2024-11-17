@@ -31,7 +31,7 @@ const LogInPage = () => {
             color: "#198754",
           }}
         >
-          LOG IN
+          ĐĂNG KÝ
         </h1>
         <form
           className="login__form"
@@ -45,14 +45,14 @@ const LogInPage = () => {
             id="emailInput"
             label="Email"
             type="email"
-            placeholder="Enter your email"
+            placeholder="Nhập email"
           ></FormComponent>
 
           <FormComponent
             id="passwordInput"
-            label="Password"
+            label="Mật khẩu"
             type="password"
-            placeholder="Enter your password"
+            placeholder="Nhập mật khẩu"
           ></FormComponent>
 
           <a
@@ -65,14 +65,14 @@ const LogInPage = () => {
               textDecoration: "none",
             }}
           >
-            Forgot password?
+            Quên mật khẩu?
           </a>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                        <ButtonComponent
-                            textButton="Log In"
-                        />
-                    </div>
+            <ButtonComponent
+              textButton="Đăng nhập"
+            />
+          </div>
         </form>
         <div
           style={{
@@ -82,7 +82,7 @@ const LogInPage = () => {
             color: "#333",
           }}
         >
-          You don't have an account?{" "}
+          Bạn chưa có tài khoản?{" "}
           <a class="text-decoration-underline"
             href="./signup"
             style={{
@@ -91,7 +91,7 @@ const LogInPage = () => {
               fontStyle: "italic",
             }}
           >
-            Sign Up
+            Đăng ký
           </a>
         </div>
       </div>

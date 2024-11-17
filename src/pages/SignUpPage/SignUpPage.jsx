@@ -1,17 +1,17 @@
 import React from "react";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
+import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
 
 const SignUpPage = () => {
     return (
-
-        <div 
+        <div
             className="signup-container"
             style={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                marginTop: "30px"
+                marginTop: "30px",
             }}
         >
             <div
@@ -32,7 +32,7 @@ const SignUpPage = () => {
                         color: "#198754",
                     }}
                 >
-                    SIGN UP
+                    ĐĂNG KÝ
                 </h1>
                 <form
                     className="signup__form"
@@ -44,60 +44,79 @@ const SignUpPage = () => {
                 >
                     <FormComponent
                         id="emailInput"
-                        placeholder="Enter your email"
+                        placeholder="Nhập email"
                         type="email"
                         label="Email"
                     ></FormComponent>
 
                     <FormComponent
                         id="passwordInput"
-                        label="Password"
+                        label="Mật khẩu"
                         type="password"
-                        placeholder="Enter your password"
+                        placeholder="Nhập mật khẩu"
                     ></FormComponent>
 
                     <FormComponent
                         id="confirmPasswordInput"
-                        label="Confirm password"
+                        label="Xác nhận mật khẩu"
                         type="password"
-                        placeholder="Confirm your password"
+                        placeholder="Nhập lại mật khẩu ở trên"
                     ></FormComponent>
 
                     <FormComponent
                         id="nameInput"
-                        label="Name"
-                        type="tel"
-                        placeholder="Enter your name"
+                        label="Họ và tên"
+                        type="text"
+                        placeholder="Nhập họ và tên"
                     ></FormComponent>
 
                     <FormComponent
                         id="phoneInput"
-                        label="Phone number"
+                        label="Số điện thoại"
                         type="tel"
-                        placeholder="Enter your phone number"
+                        placeholder="Nhập số điện thoại"
                     ></FormComponent>
 
                     <FormComponent
                         id="birthInput"
-                        label="Birthday"
+                        label="Ngày sinh"
                         type="date"
-                        placeholder="Pick your birthday"
+                        placeholder="Chọn ngày sinh"
                     ></FormComponent>
 
-                    <FormComponent
-                        id="addressInput"
-                        label="Address"
+                    {/* Địa chỉ được tách thành các trường riêng biệt */}
+                    <FormSelectComponent
+                        id="wardInput"
+                        label="Xã/Phường"
                         type="text"
-                        placeholder="Enter your address"
-                    ></FormComponent>
+                        placeholder="Nhập Xã/Phường"
+                    ></FormSelectComponent>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                    <FormSelectComponent
+                        id="districtInput"
+                        label="Quận/Huyện/TP"
+                        type="text"
+                        placeholder="Nhập Quận/Huyện/TP"
+                    ></FormSelectComponent>
+
+                    <FormSelectComponent
+                        id="provinceInput"
+                        label="Tỉnh"
+                        type="text"
+                        placeholder="Nhập Tỉnh"
+                    ></FormSelectComponent>
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "10px",
+                        }}
+                    >
                         <ButtonComponent
-                            textButton="Sign Up"
-
+                            textButton="Đăng ký"
                         />
                     </div>
-
                 </form>
                 <div
                     style={{
@@ -107,8 +126,9 @@ const SignUpPage = () => {
                         color: "#333",
                     }}
                 >
-                    You already have an account?{" "}
-                    <a class="text-decoration-underline"
+                    Bạn đã có tài khoản?{" "}
+                    <a
+                        className="text-decoration-underline"
                         href="./login"
                         style={{
                             color: "#198754",
@@ -116,12 +136,11 @@ const SignUpPage = () => {
                             fontStyle: "italic",
                         }}
                     >
-                        Log in
+                        Đăng nhập
                     </a>
                 </div>
             </div>
         </div>
-        // </div>
     );
 };
 
