@@ -10,6 +10,7 @@ import CatagoryPage from "../pages/CatagoryPage/CatagoryPage";
 import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
 import ComparisonPage from "../pages/ComparisonPage/ComparisonPage";
 import OrderPage from "../pages/OrderPage/OrderPage";
+import AdminPage from "../pages/AdminPage/AdminPage";
 
 export const routes =[
     {
@@ -80,6 +81,12 @@ export const routes =[
     {
         path: '/order',
         page: OrderPage,
+        isShowHeader: true
+    },
+
+    {
+        path: '/admin',
+        page: AdminPage,
         isShowHeader: true
     },
 
