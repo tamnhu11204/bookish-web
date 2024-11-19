@@ -11,6 +11,9 @@ import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
 import ComparisonPage from "../pages/ComparisonPage/ComparisonPage";
 import RatingProductPage from "../pages/RatingProduct/RatingProduct"
 
+import OrderPage from "../pages/OrderPage/OrderPage";
+import AdminPage from "../pages/AdminPage/AdminPage";
+
 export const routes =[
     {
         path: '/',
@@ -78,8 +81,20 @@ export const routes =[
     },
 
     {
+
         path: '/ratingproduct',
         page: RatingProductPage,
+
+    },
+    {
+        path: '/order',
+        page: OrderPage,
+        isShowHeader: true
+    },
+
+    {
+        path: '/admin',
+        page: AdminPage,
         isShowHeader: true
     },
 

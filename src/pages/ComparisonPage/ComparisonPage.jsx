@@ -2,15 +2,66 @@ import React from 'react'
 import './ComparisonPage.css'
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
 import img4 from '../../assets/img/img4.png'
+import TableComparison from '../../components/TableComponent/TableComponent'
+import CardComponent from '../../components/CardComponent/CardComponent'
 
 const ComparisonPage = () => {
+
+    //bảng thông tin nổi bật
+    const comparisonData = [
+        { criteria: 'Giá bìa', product1: '200.000đ -50%', product2: '100.000đ -0%' },
+        { criteria: 'Giá sau sale', product1: '100.000đ', product2: '100.000đ' },
+        { criteria: 'Điểm', product1: '2222 điểm', product2: '2100 điểm' },
+        { criteria: 'Lượt bán', product1: '11', product2: '11' },
+        { criteria: 'Đánh giá', product1: '4,5/5 ⭐ (2000 đánh giá)', product2: '4,3/5 ⭐ (1230 đánh giá)' },
+        { criteria: 'Lượt xem', product1: '5000', product2: '5100' },
+    ];
+
+    //bảng thông tin chi tiết
+    const comparisonData1 = [
+        { criteria: 'Mã hàng', product1: '200.000đ -50%', product2: '100.000đ -0%' },
+        { criteria: 'Tác giả', product1: '100.000đ', product2: '100.000đ' },
+        { criteria: 'Nhà xuất bản', product1: '2222 điểm', product2: '2100 điểm' },
+        { criteria: 'Năm xuất bản', product1: '11', product2: '11' },
+        { criteria: 'Ngôn ngữ', product1: '4,5/5 ⭐ (2000 đánh giá)', product2: '4,3/5 ⭐ (1230 đánh giá)' },
+        { criteria: 'Trọng lượng', product1: '5000', product2: '5100' },
+        { criteria: 'Kích thước', product1: '5000', product2: '5100' },
+        { criteria: 'Số trang', product1: '5000', product2: '5100' },
+        { criteria: 'Hình thức', product1: '5000', product2: '5100' },
+    ];
+
+    //body của card dùng để lọc các thông tin nổi bật
+    const comparison1 = (
+        <>
+            <TableComparison
+                data={comparisonData}
+                pro1="Sản phẩm 1"
+                pro2="Sản phẩm 2"
+                pro3="Sản phẩm 3"
+            />
+        </>
+    )
+
+    //body của card dùng để lọc các thông tin chi tiết
+    const comparison2 = (
+        <>
+            <TableComparison
+                data={comparisonData1}
+                pro1="Sản phẩm 1"
+                pro2="Sản phẩm 2"
+                pro3="Sản phẩm 3"
+            />
+        </>
+    )
+
     return (
         <div style={{ backgroundColor: '#F9F6F2' }}>
             <div class="container">
-                <div class="card-comparison">
-                    <div class="card-body-comparison">
-                        <h5 class="card-title-comparison">So sánh sách</h5>
 
+                {/* chứa các sản phẩm chọn để so sánh */}
+                <div class="card-comparison">
+                    <div class="card-body-comparison" >
+                        <h5 class="card-title-comparison">So sánh sách</h5>
                         <div className="row">
                             <div className="col-3"></div>
                             <div className="col-3">
@@ -44,112 +95,25 @@ const ComparisonPage = () => {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="container">
-                <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
-
-                    <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
-                        So sánh điểm nổi bật
-                    </div>
-
-                    <hr className="line" style={{ border: '1px solid #198754' }} />
-
-                    <div className="card-body-1" style={{ marginLeft: '45px', marginTop: '10px' }}>
-                        <table class="table table-striped w-100">
-                            <thead className="bg-success text-white text-center">
-                                <tr>
-                                    <th>Số sánh nổi bật</th>
-                                    <th>Giá bìa</th>
-                                    <th>Giảm giá</th>
-                                    <th>Giá sau sale</th>
-                                    <th>Điểm</th>
-                                    <th>Lượt bán</th>
-                                    <th>Đánh giá</th>
-                                    <th>Lượt xem</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-center">
-                                <tr>
-                                    <td>Trên biển nhà đẹp khóc</td>
-                                    <td>200.000₫</td>
-                                    <td>-50%</td>
-                                    <td>100.000₫</td>
-                                    <td>2222 điểm</td>
-                                    <td>11</td>
-                                    <td>4,5/5 (2000 đánh giá)</td>
-                                    <td>5000</td>
-                                </tr>
-                                <tr>
-                                    <td>Đến nhớ và những đứa con của biển</td>
-                                    <td>200.000₫</td>
-                                    <td>-0%</td>
-                                    <td>100.000₫</td>
-                                    <td>2100 điểm</td>
-                                    <td>11</td>
-                                    <td>4,3/5 (1230 đánh giá)</td>
-                                    <td>5100</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-
-                </div>
+            <div class="container" style={{ marginTop: '30px' }}>
+                <CardComponent
+                    title="Danh mục"
+                    bodyContent={comparison1}
+                    icon="bi bi-bookmark-star"
+                />
             </div>
 
-            <div class="container">
-                <div className="card-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #198754', borderRadius: '10px' }}>
-
-                    <div className="card-header" style={{ padding: '0 10px', fontSize: '25px', marginLeft: '10px', marginTop: '8px', color: '#198754' }}>
-                        Thông tin chi tiết
-                    </div>
-
-                    <hr className="line" style={{ border: '1px solid #198754' }} />
-
-                    <div className="card-body-1" style={{ marginLeft: '45px', marginTop: '10px' }}>
-                        <table class="table table-striped w-100">
-                            <thead className="bg-success text-white text-center">
-                                <tr>
-                                    <th>Số sánh nổi bật</th>
-                                    <th>Giá bìa</th>
-                                    <th>Giảm giá</th>
-                                    <th>Giá sau sale</th>
-                                    <th>Điểm</th>
-                                    <th>Lượt bán</th>
-                                    <th>Đánh giá</th>
-                                    <th>Lượt xem</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-center">
-                                <tr>
-                                    <td>Trên biển nhà đẹp khóc</td>
-                                    <td>200.000₫</td>
-                                    <td>-50%</td>
-                                    <td>100.000₫</td>
-                                    <td>2222 điểm</td>
-                                    <td>11</td>
-                                    <td>4,5/5 (2000 đánh giá)</td>
-                                    <td>5000</td>
-                                </tr>
-                                <tr>
-                                    <td>Đến nhớ và những đứa con của biển</td>
-                                    <td>200.000₫</td>
-                                    <td>-0%</td>
-                                    <td>100.000₫</td>
-                                    <td>2100 điểm</td>
-                                    <td>11</td>
-                                    <td>4,3/5 (1230 đánh giá)</td>
-                                    <td>5100</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="container" style={{ marginTop: '30px' }}>
+                <CardComponent
+                    title="Danh mục"
+                    bodyContent={comparison2}
+                    icon="bi bi-card-list"
+                />
             </div>
         </div>
     )

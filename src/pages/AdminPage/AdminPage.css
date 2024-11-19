@@ -1,0 +1,73 @@
+  .nav-pills .nav-link {
+      color: #198754;
+      background-color: transparent;
+      border: 1px solid transparent;
+      transition: all 0.3s ease-in-out;
+  }
+
+  .nav-pills .nav-link:hover {
+      color: white;
+      background-color: #198754;
+  }
+
+  .nav-pills .nav-link.active {
+      color: white;
+      background-color: #198754;
+  }
+
+  .bi-nav{
+    font-size: 20px;
+  }
+
+
+.title-section {
+    width: 100%;
+    background-color: #E4F7CB; 
+    padding: 15px;
+    border-bottom: 2px solid #198754;
+  }
+  
+  .title-section h3 {
+    margin: 0;
+    color: #198754;
+    font-size: 25px;
+    font-weight: bold;
+  }
+  
+  
+  .custom-table th,
+  .custom-table td {
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap; /* Không xuống dòng */
+  }
+  
+  .custom-table td {
+    vertical-align: middle;
+  }
+
+  .table-light{
+    font-size: 16px;
+  }
+
+  .table-content{
+    font-size: 16px;
+  }
+  
+  .nav-tabs .nav-link.active {
+    font-size: 16px;
+    color: white;
+    background-color: #96D347;
+}
+
+.nav-tabs .nav-link {
+  font-size: 16px;
+  color: #96D347;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.3s ease-in-out;
+}
+
+.form-check{
+  font-size: 16px;
+}
