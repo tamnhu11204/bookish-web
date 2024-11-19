@@ -1,8 +1,9 @@
 import React from 'react';
 import PromoItemComponent from '../../components/PromoItemComponent/PromoItemComponent';
-
+import "../PromoSelectionPage/Promo.css"
 const PromoSelectionPage = () => {
   return (
+    <div className='promo'>
     <div className="p-4 border rounded" style={{ maxWidth: '600px', margin: '0 auto' }}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="text-success mb-0">
@@ -56,6 +57,7 @@ const PromoSelectionPage = () => {
           actionLabel=""
         />
       </div>
+    </div>
     </div>
   );
 };

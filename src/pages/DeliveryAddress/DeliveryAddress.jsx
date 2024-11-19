@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-
+import "../DeliveryAddress/DeliveryAddress.css"
 const DeliveryAddress = () => {
   const [selectedOption, setSelectedOption] = useState('default');
 
   return (
+    <div className="address">
     <div className="p-4 border rounded" style={{ maxWidth: '500px', margin: '0 auto' }}>
       <h4 className="text-center mb-4 text-success">CHỌN ĐỊA ĐIỂM GIAO HÀNG</h4>
 
@@ -74,6 +75,7 @@ const DeliveryAddress = () => {
         <button className="btn btn-success me-2">Xác nhận</button>
         <button className="btn btn-outline-secondary">Hủy</button>
       </div>
+    </div>
     </div>
   );
 };

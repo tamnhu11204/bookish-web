@@ -1,0 +1,8 @@
+.address {
+    font-size: 16px;
+  }
+
+  /* Đảm bảo rằng các thành phần cụ thể vẫn giữ định dạng mong muốn */
+.address-header {
+  font-size: 18px; /* Kế thừa cỡ chữ từ .cart-page */
+}

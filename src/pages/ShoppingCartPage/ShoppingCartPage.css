@@ -1,0 +1,11 @@
+/* CSS để đặt cỡ chữ chung cho CartPage */
+.cart-page {
+  font-size: 16px;
+}
+
+/* Đảm bảo rằng các thành phần cụ thể vẫn giữ định dạng mong muốn */
+.cart-header,
+.cart-items,
+.checkout-section {
+  font-size: inherit; /* Kế thừa cỡ chữ từ .cart-page */
+}
