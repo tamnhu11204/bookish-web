@@ -3,6 +3,7 @@ import './AdminPage.css'
 import CatagoryTab from './CatagoryTab';
 import PromotionTab from './PromotionTab';
 import AccountManagementTab from './AccountManagementTab';
+import OptionTab from './OptionTab';
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("profile");
@@ -107,6 +108,8 @@ const AdminPage = () => {
                     {activeTab === "catagoryManagement" && <CatagoryTab />}
                     {activeTab === "promotionManagement" && <PromotionTab />}
                     {activeTab === "accountManagement" && <AccountManagementTab />}
+                    {activeTab === "options" && <OptionTab />}
+                    {/* {activeTab === "orderManagement" && <OptionTab />} */}
                 </div>
             </div>
         </div>

@@ -106,6 +106,7 @@ const AccountManagementTab = () => {
                     type="text"
                     placeholder="Nhập Tỉnh"
                 ></FormSelectComponent>
+                
                 <div className="col-6">
                     <div className="form-check ">
                         <input
