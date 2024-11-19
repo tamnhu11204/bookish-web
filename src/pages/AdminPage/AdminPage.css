@@ -54,4 +54,20 @@
     font-size: 16px;
   }
   
-  
+  .nav-tabs .nav-link.active {
+    font-size: 16px;
+    color: white;
+    background-color: #96D347;
+}
+
+.nav-tabs .nav-link {
+  font-size: 16px;
+  color: #96D347;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.3s ease-in-out;
+}
+
+.form-check{
+  font-size: 16px;
+}

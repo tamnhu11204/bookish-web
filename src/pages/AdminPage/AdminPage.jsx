@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import './AdminPage.css'
 import CatagoryTab from './CatagoryTab';
+import PromotionTab from './PromotionTab';
+import AccountManagementTab from './AccountManagementTab';
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("profile");
@@ -103,6 +105,8 @@ const AdminPage = () => {
             <div className="tab-content" style={{ flexGrow: 1 }}>
                 <div className="tab-pane fade show active">
                     {activeTab === "catagoryManagement" && <CatagoryTab />}
+                    {activeTab === "promotionManagement" && <PromotionTab />}
+                    {activeTab === "accountManagement" && <AccountManagementTab />}
                 </div>
             </div>
         </div>

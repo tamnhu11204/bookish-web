@@ -21,6 +21,7 @@
 }
 
 .modal-header {
+    color:#198754;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -32,10 +33,6 @@
     margin-bottom: 15px;
 }
 
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-}
 
 .close-button {
     background: none;
@@ -46,4 +43,16 @@
 
 .close-button:hover {
     color: red;
+}
+
+.modal-title{
+    font-size: 25px;
+}
+
+.modal-footer .modal-button {
+    margin-left: 20px; /* Khoảng cách giữa các nút */
+}
+
+.modal-footer .modal-button:first-child {
+    margin-left: 0; /* Đảm bảo nút đầu tiên không có margin */
 }

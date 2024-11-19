@@ -22,90 +22,95 @@ const CatagoryTab = () => {
         },
     ];
 
+    // State quản lý modal
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState(null);
-    const [modalAction, setModalAction] = useState(() => {}); // Function to execute on Save
-
-    // Mở modal cho chức năng Thêm
-    const handleAddCategory = () => {
-        setModalTitle('Thêm danh mục');
-        setModalBody(
-            <form>
-                <div className="mb-3">
-                    <label htmlFor="categoryName" className="form-label">
-                        Tên danh mục
-                    </label>
-                    <input type="text" className="form-control" id="categoryName" />
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="categoryDescription" className="form-label">
-                        Mô tả
-                    </label>
-                    <textarea className="form-control" id="categoryDescription" rows="3" />
-                </div>
-            </form>
-        );
-        setModalAction(() => () => {
-            alert('Danh mục mới đã được thêm!');
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
-
-    // Mở modal cho chức năng Sửa
-    const handleEditCategory = (category) => {
-        setModalTitle('Sửa danh mục');
-        setModalBody(
-            <form>
-                <div className="mb-3">
-                    <label htmlFor="categoryName" className="form-label">
-                        Tên danh mục
-                    </label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="categoryName"
-                        defaultValue={category.name}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="categoryDescription" className="form-label">
-                        Mô tả
-                    </label>
-                    <textarea
-                        className="form-control"
-                        id="categoryDescription"
-                        rows="3"
-                        defaultValue={category.description}
-                    />
-                </div>
-            </form>
-        );
-        setModalAction(() => () => {
-            alert(`Danh mục ${category.name} đã được sửa!`);
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
-
-    // Mở modal cho chức năng Xóa
-    const handleDeleteCategory = (category) => {
-        setModalTitle('Xác nhận xóa');
-        setModalBody(
-            <p>
-                Bạn có chắc chắn muốn xóa danh mục <strong>{category.name}</strong> không?
-            </p>
-        );
-        setModalAction(() => () => {
-            alert(`Danh mục ${category.name} đã được xóa!`);
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
+    const [textButton1, setTextButton1] = useState(''); // Nút Lưu/Cập nhật
+    const [onSave, setOnSave] = useState(() => () => {});
+    const [onCancel, setOnCancel] = useState(() => () => {});
 
     const handleCloseModal = () => {
         setShowModal(false);
+    };
+
+    // Hàm mở modal thêm danh mục
+    const handleAddCategory = () => {
+        setModalTitle('THÊM DANH MỤC');
+        setModalBody(
+            <>
+                <FormComponent
+                    id="nameCatagoryInput"
+                    label="Tên danh mục"
+                    type="text"
+                    placeholder="Nhập tên danh mục"
+                />
+                <FormComponent
+                    id="descCatagoryInput"
+                    label="Mô tả"
+                    type="text"
+                    placeholder="Nhập mô tả"
+                />
+            </>
+        );
+        setTextButton1('Thêm'); // Đặt nút là "Thêm"
+        setOnSave(() => () => {
+            alert('Danh mục mới đã được thêm!');
+            setShowModal(false);
+        });
+        setOnCancel(() => () => {
+            alert('Hủy thêm danh mục!');
+            setShowModal(false);
+        });
+        setShowModal(true);
+    };
+
+    // Hàm mở modal sửa danh mục
+    const handleEditCategory = (category) => {
+        setModalTitle('CẬP NHẬT DANH MỤC');
+        setModalBody(
+            <>
+                <FormComponent
+                    id="nameCatagoryInput"
+                    label="Tên danh mục"
+                    type="text"
+                    defaultValue={category.name}
+                />
+                <FormComponent
+                    id="descCatagoryInput"
+                    label="Mô tả"
+                    type="text"
+                    defaultValue={category.description}
+                />
+            </>
+        );
+        setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
+        setOnSave(() => () => {
+            alert(`Danh mục "${category.name}" đã được cập nhật!`);
+            setShowModal(false);
+        });
+        setOnCancel(() => () => {
+            alert('Hủy cập nhật danh mục!');
+            setShowModal(false);
+        });
+        setShowModal(true);
+    };
+
+    // Hàm mở modal xóa danh mục
+    const handleDeleteCategory = (category) => {
+        setModalTitle('Xác nhận xóa');
+        setModalBody(
+            <p style={{fontSize:'16px'}}>Bạn có chắc chắn muốn xóa danh mục <strong>{category.name}</strong> không?</p>
+        );
+        setTextButton1('Xóa'); // Có thể tùy chỉnh nếu cần
+        setOnSave(() => () => {
+            alert(`Danh mục "${category.name}" đã được xóa!`);
+            setShowModal(false);
+        });
+        setOnCancel(() => () => {
+            setShowModal(false);
+        });
+        setShowModal(true);
     };
 
     return (
@@ -128,12 +133,12 @@ const CatagoryTab = () => {
                         <ButtonComponent
                             textButton="Thêm danh mục"
                             icon={<i className="bi bi-plus-circle"></i>}
-                            onClick={handleAddCategory} // Thêm danh mục
+                            onClick={handleAddCategory}
                         />
                     </div>
                 </div>
 
-                <table className="table custom-table">
+                <table className="table custom-table" style={{marginTop:'30px'}}>
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '10%' }}>Mã</th>
@@ -161,13 +166,13 @@ const CatagoryTab = () => {
                                 <td>
                                     <button
                                         className="btn btn-sm btn-primary me-2"
-                                        onClick={() => handleEditCategory(category)} // Sửa danh mục
+                                        onClick={() => handleEditCategory(category)}
                                     >
                                         <i className="bi bi-pencil-square"></i>
                                     </button>
                                     <button
                                         className="btn btn-sm btn-danger"
-                                        onClick={() => handleDeleteCategory(category)} // Xóa danh mục
+                                        onClick={() => handleDeleteCategory(category)}
                                     >
                                         <i className="bi bi-trash"></i>
                                     </button>
@@ -178,13 +183,13 @@ const CatagoryTab = () => {
                 </table>
             </div>
 
-            {/* Sử dụng Modal Component */}
             <ModalComponent
                 isOpen={showModal}
-                onClose={handleCloseModal}
-                onSave={modalAction}
                 title={modalTitle}
                 body={modalBody}
+                textButton1={textButton1} 
+                onClick1={onSave} 
+                onClick2={onCancel} 
             />
         </div>
     );

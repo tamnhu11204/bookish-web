@@ -1,10 +1,11 @@
 import React from "react";
 
-const ButtonComponent2 = ({ textButton, icon, ...rests }) => {
+const ButtonComponent2 = ({ textButton, icon, onClick }) => {
   return (
-    <button type="button" class="btn btn-outline-success" style={{ fontSize:'16px'}}>
-      <span style={{color: '#198754'}}>{textButton}</span>
-      {icon && <span style={{ color:"#FFFFFF", fontSize:'20px' }}>{icon}</span>} 
+    <button type="button" class="btn btn-outline-success" style={{ fontSize:'16px'}}
+    onClick={onClick}>
+      <span >{textButton}</span>
+      {icon && <span style={{ fontSize:'20px' }}>{icon}</span>} 
 
     </button>
   );
