@@ -9,6 +9,8 @@ import BookPurchasingTrendPage from "../pages/BookPurchasingTrendPage/BookPurcha
 import CatagoryPage from "../pages/CatagoryPage/CatagoryPage";
 import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
 import ComparisonPage from "../pages/ComparisonPage/ComparisonPage";
+import RatingProductPage from "../pages/RatingProduct/RatingProduct"
+
 import OrderPage from "../pages/OrderPage/OrderPage";
 import AdminPage from "../pages/AdminPage/AdminPage";
 
@@ -78,6 +80,12 @@ export const routes =[
         isShowHeader: true
     },
 
+    {
+
+        path: '/ratingproduct',
+        page: RatingProductPage,
+
+    },
     {
         path: '/order',
         page: OrderPage,

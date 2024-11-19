@@ -1,88 +1,112 @@
-import React from 'react'
-import img1 from '../../assets/img/img3.jpg'
+import React, { useState } from 'react'
+import img3 from '../../assets/img/img3.jpg';
 import ProductItem from '../../components/ProductItemComponent/ProductItemComponent'
+import "../ShoppingCartPage/ShoppingCartPage.css"
+
 export const ShoppingCartPage = () => {
-  const products = [
+  const [ProductItems, setCartItems] = useState([
     {
-      image: {img1},
+      id: 1,
       name: 'Ngàn mặt trời rực rỡ',
-      price: '100.000',
+      price: 100000,
       quantity: 1,
-      checked: false,
+      image: img3,
     },
     {
-      image: {img1},
+      id: 2,
       name: 'Thư gửi quý nhà giàu Việt Nam',
-      price: '100.000',
+      price: 100000,
       quantity: 1,
-      checked: true,
+      image: img3,
     },
-  ];
+  ]);
 
-  const handleQuantityChange = (index, newQuantity) => {
-    console.log(`Sản phẩm ${index} có số lượng mới: ${newQuantity}`);
+  const handleQuantityChange = (id, newQuantity) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: newQuantity } : item
+      )
+    );
   };
 
-  const handleDelete = (index) => {
-    console.log(`Xóa sản phẩm ở vị trí: ${index}`);
+  const handleRemove = (id) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
+
+  const totalPrice = ProductItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+  const discount = 25000;
 
   return (
-    <div className="container my-4">
-      <h2 className="mb-4">GIỎ HÀNG ( {products.length} sản phẩm )</h2>
+    <div className="cart-page">
+      <h3 className="cart-title mb-4">Giỏ Hàng ({ProductItems.length} sản phẩm)</h3>
 
-      {/* Header */}
-      <div className="row align-items-center border-bottom pb-2 mb-3">
-        <div className="col-6">
-          <input type="checkbox" className="me-2" />
-          <span>Chọn tất cả ( {products.length} sản phẩm )</span>
+      {/* Bố cục chính: Sản phẩm và Thanh toán/Khuyến mãi ngang nhau */}
+      <div className="d-flex">
+        {/* Phần hiển thị sản phẩm */}
+        <div className="flex-grow-1">
+          {/* Header nằm phía trên phần sản phẩm */}
+          <div className="cart-header d-flex align-items-center border-bottom pb-2 mb-3">
+            <input type="checkbox" className="me-3" />
+            <span className="header-label flex-grow-1">Chọn tất cả ({ProductItems.length} sản phẩm)</span>
+            <span className="header-quantity text-center" style={{ width: '100px' }}>
+              Số lượng
+            </span>
+            <span className="header-price text-end" style={{ width: '120px' }}>
+              Thành tiền
+            </span>
+          </div>
+
+          {/* Hiển thị danh sách sản phẩm */}
+          <div className="cart-items">
+            {ProductItems.map((item, index) => (
+              <ProductItem
+                key={index}
+                image={item.image}
+                name={item.name}
+                price={item.price}
+                quantity={item.quantity}
+                onQuantityChange={(newQuantity) => handleQuantityChange(index, newQuantity)}
+                onRemove={() =>handleRemove(index)}
+              />
+            ))}
+          </div>
         </div>
-        <div className="col-3 text-end">Số lượng</div>
-        <div className="col-3 text-center">Thành tiền</div>
-      </div>
 
-      {/* Hiển thị sản phẩm */}
-      {products.map((product, index) => (
-        <ProductItem
-          key={index}
-          image= {img1}
-          name={product.name}
-          price={product.price}
-          quantity={product.quantity}
-          checked={product.checked}
-          onQuantityChange={(newQuantity) => handleQuantityChange(index, newQuantity)}
-          onDelete={() => handleDelete(index)}
-        />
-      ))}
-
-      {/* Phần thanh toán */}
-      <div className="row mt-4">
-        <div className="col-12 col-md-4 offset-md-8">
-          <div className="border p-3 rounded">
-            <p className="d-flex justify-content-between">
+        {/* Phần Khuyến mãi và Thanh toán */}
+        <div className="checkout-section ms-4" style={{ width: '300px' }}>
+          {/* Phần Khuyến mãi */}
+          <div className="promo-section mb-3">
+            <div className="d-flex justify-content-between border-bottom pb-2">
               <span>Khuyến mãi</span>
-              <button className="btn btn-link btn-sm p-0">Xem thêm &gt;</button>
-            </p>
-            <div className="d-flex justify-content-between bg-light p-2 rounded mb-2">
-              <span>Mã giảm 25k</span>
-              <button className="btn btn-sm btn-close"></button>
+              <a href="#" className="text-decoration-none">Xem thêm</a>
             </div>
-            <p className="text-muted small">Chỉ có thể áp dụng tối đa 1 mã giảm giá</p>
-            <hr />
-            <p className="d-flex justify-content-between">
+            <div className="promo-details bg-light p-2 my-2">
+              <div className="d-flex justify-content-between align-items-center">
+                <span>Mã giảm 25k</span>
+                <button className="btn btn-sm btn-danger">X</button>
+              </div>
+              <small>Chỉ có thể áp dụng tối đa 1 mã giảm giá</small>
+            </div>
+          </div>
+
+          {/* Phần Thanh toán */}
+          <div className="payment-section border-top pt-2">
+            <div className="d-flex justify-content-between">
               <span>Thành tiền:</span>
               <span>100.000đ</span>
-            </p>
-            <p className="d-flex justify-content-between text-danger">
+            </div>
+            <div className="d-flex justify-content-between">
               <span>Giảm giá:</span>
               <span>-25.000đ</span>
-            </p>
-            <hr />
-            <p className="d-flex justify-content-between fw-bold">
+            </div>
+            <div className="d-flex justify-content-between fw-bold text-danger">
               <span>Tổng số tiền:</span>
-              <span className="text-danger">75.000đ</span>
-            </p>
-            <button className="btn btn-success w-100">THANH TOÁN</button>
+              <span>75.000đ</span>
+            </div>
+            <button className="btn btn-success w-100 mt-3">THANH TOÁN</button>
           </div>
         </div>
       </div>
