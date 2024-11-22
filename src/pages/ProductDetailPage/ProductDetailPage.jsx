@@ -103,21 +103,21 @@ const ProductDetailPage = () => {
   //body của card chứa các sản phẩm gợi ý cho khách hàng
   const relatedProductInfo = (
     <>
-        <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-            {[...Array(5)].map((_, index) => (
-                <CardProductComponent
-                    key={index}
-                    img={img4}
-                    proName="Ngàn mặt trời rực rỡ"
-                    currentPrice="120000"
-                    sold="12"
-                    star="4.5"
-                    score="210"
-                />
-            ))}
-        </div>
+      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+        {[...Array(5)].map((_, index) => (
+          <CardProductComponent
+            key={index}
+            img={img4}
+            proName="Ngàn mặt trời rực rỡ"
+            currentPrice="120000"
+            sold="12"
+            star="4.5"
+            score="210"
+          />
+        ))}
+      </div>
     </>
-)
+  )
 
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
@@ -126,81 +126,83 @@ const ProductDetailPage = () => {
         {/* row đầu tiên chứa các thông tin liên quan đến sản phẩm */}
         <div className="row">
           <div className="col-4">
-            <div className="card p-3" style={{ maxWidth: "400px", margin: "auto" }}>
-              {/* Hình ảnh chính */}
-              <img
-                src={img4} 
-                className="custom-img"
-                alt="Product"
-                style={{ objectFit: "cover" }}
-              />
+            <div className="sticky-card" >
+              <div className="card p-3" style={{ maxWidth: "400px", margin: "auto" }}>
+                {/* Hình ảnh chính */}
+                <img
+                  src={img4}
+                  className="custom-img"
+                  alt="Product"
+                  style={{ objectFit: "cover" }}
+                />
 
-              {/* Nội dung chi tiết */}
-              <div className="card-body text-center">
-                {/* Các hình ảnh nhỏ */}
-                <div className="d-flex justify-content-center my-2">
-                  <img
-                    src={img4}
-                    alt="Thumbnail 1"
-                    className="img-thumbnail mx-1"
-                    style={{ width: "50px", height: "50px" }}
-                  />
-                  <img
-                    src={img4}
-                    alt="Thumbnail 2"
-                    className="img-thumbnail mx-1"
-                    style={{ width: "50px", height: "50px" }}
-                  />
-                  <img
-                    src={img4}
-                    alt="Thumbnail 3"
-                    className="img-thumbnail mx-1"
-                    style={{ width: "50px", height: "50px" }}
-                  />
-                  <div
-                    className="img-thumbnail d-flex align-items-center justify-content-center mx-1"
+                {/* Nội dung chi tiết */}
+                <div className="card-body text-center">
+                  {/* Các hình ảnh nhỏ */}
+                  <div className="d-flex justify-content-center my-2">
+                    <img
+                      src={img4}
+                      alt="Thumbnail 1"
+                      className="img-thumbnail mx-1"
+                      style={{ width: "50px", height: "50px" }}
+                    />
+                    <img
+                      src={img4}
+                      alt="Thumbnail 2"
+                      className="img-thumbnail mx-1"
+                      style={{ width: "50px", height: "50px" }}
+                    />
+                    <img
+                      src={img4}
+                      alt="Thumbnail 3"
+                      className="img-thumbnail mx-1"
+                      style={{ width: "50px", height: "50px" }}
+                    />
+                    <div
+                      className="img-thumbnail d-flex align-items-center justify-content-center mx-1"
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        backgroundColor: "#d6c7c7",
+                        color: "#fff",
+                      }}
+                    >
+                      +2
+                    </div>
+                  </div>
+
+                  {/* Chọn số lượng */}
+                  <div className="my-3">
+                    <div className="d-flex justify-content-center align-items-center">
+                      <button className="btn btn-outline-secondary px-2">-</button>
+                      <span className="mx-2">1</span>
+                      <button className="btn btn-outline-secondary px-2">+</button>
+                    </div>
+                  </div>
+
+                  {/* Nút thêm vào giỏ hàng và mua ngay */}
+                  <div className="d-flex justify-content-between mt-3">
+                    <ButtonComponent
+                      textButton="Thêm vào giỏ hàng"
+                    />
+                    <ButtonComponent2
+                      textButton="Mua ngay"
+                    />
+                  </div>
+
+                  {/* Nút so sánh */}
+                  <a class="text-decoration-underline"
+                    href="./comparison"
                     style={{
-                      width: "50px",
-                      height: "50px",
-                      backgroundColor: "#d6c7c7",
-                      color: "#fff",
+                      color: "#198754",
+                      textDecoration: "none",
+                      fontStyle: "italic",
+                      fontSize: '14px'
                     }}
                   >
-                    +2
-                  </div>
+                    So sánh với sách khác
+                  </a>
                 </div>
-
-                {/* Chọn số lượng */}
-                <div className="my-3">
-                  <div className="d-flex justify-content-center align-items-center">
-                    <button className="btn btn-outline-secondary px-2">-</button>
-                    <span className="mx-2">1</span>
-                    <button className="btn btn-outline-secondary px-2">+</button>
-                  </div>
-                </div>
-
-                {/* Nút thêm vào giỏ hàng và mua ngay */}
-                <div className="d-flex justify-content-between mt-3">
-                  <ButtonComponent
-                    textButton="Thêm vào giỏ hàng"
-                  />
-                  <ButtonComponent2
-                    textButton="Mua ngay"
-                  />
-                </div>
-
-                {/* Nút so sánh */}
-                <a class="text-decoration-underline"
-                  href="./comparison"
-                  style={{
-                    color: "#198754",
-                    textDecoration: "none",
-                    fontStyle: "italic",
-                    fontSize: '14px'
-                  }}
-                >
-                  So sánh với sách khác
-                </a>
               </div>
             </div>
           </div>
@@ -292,15 +294,15 @@ const ProductDetailPage = () => {
 
         {/* row tiếp theo là các sản phẩm gợi ý cho khách hàng */}
         <div className="row">
-        <div style={{ backgroundColor: '#F9F6F2' }}>
-              <div className="container" style={{ marginTop: '30px' }}>
-                <CardComponent
-                  title="Có thể bạn sẽ quan tâm"
-                  bodyContent={relatedProductInfo}
-                  icon="bi bi-bag-heart"
-                />
-              </div>
+          <div style={{ backgroundColor: '#F9F6F2' }}>
+            <div className="container" style={{ marginTop: '30px' }}>
+              <CardComponent
+                title="Có thể bạn sẽ quan tâm"
+                bodyContent={relatedProductInfo}
+                icon="bi bi-bag-heart"
+              />
             </div>
+          </div>
         </div>
       </div>
     </div>

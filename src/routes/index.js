@@ -13,6 +13,7 @@ import RatingProductPage from "../pages/RatingProduct/RatingProduct"
 
 import OrderPage from "../pages/OrderPage/OrderPage";
 import AdminPage from "../pages/AdminPage/AdminPage";
+import MonthlyBestSellPage from "../pages/MonthlyBestSellPage/MonthlyBestSellPage";
 
 export const routes =[
     {
@@ -95,6 +96,12 @@ export const routes =[
     {
         path: '/admin',
         page: AdminPage,
+        isShowHeader: true
+    },
+
+    {
+        path: '/monthlybestsell',
+        page: MonthlyBestSellPage,
         isShowHeader: true
     },
 
