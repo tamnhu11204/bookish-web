@@ -4,14 +4,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const CardComponent = ({ title, bodyContent, icon }) => {
     return (
         <div className="card border-0" style={{ borderRadius: "10px" }}>
-            {/* Header */}
             <div
                 className="card-header"
                 style={{
                     backgroundColor: "#E4F7CB",
                     borderTopLeftRadius: "10px",
                     borderTopRightRadius: "10px",
-                    height: "50px", // Set the height to 50px
+                    height: "50px",
                 }}
             >
                 <div className="d-flex align-items-center" style={{ height: "100%" }}>
@@ -24,7 +23,6 @@ const CardComponent = ({ title, bodyContent, icon }) => {
                             borderRadius: "5px",
                         }}
                     >
-                        {/* Sử dụng icon thay vì ButtonComponent */}
                         <i
                             className={icon}
                             style={{ color: "#FFFFFF", fontSize: "20px" }}
@@ -36,7 +34,6 @@ const CardComponent = ({ title, bodyContent, icon }) => {
                 </div>
             </div>
 
-            {/* Body */}
             <div
                 className="card-body "
                 style={{

@@ -1,37 +1,35 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-const OrderProductComponent = () => {
-  const [quantity, setQuantity] = useState(1);
-  const price = 100000; // Giá sản phẩm
-
-  const handleQuantityChange = (e) => {
-    setQuantity(e.target.value);
-  };
-
+const OrderProductComponent = ({ imageSrc, name, price, initialQuantity }) => {
   return (
-    <div className="card mb-3" style={{ maxWidth: '540px' }}>
-      <div className="row g-0">
-        <div className="col-md-4">
-          <img src="path_to_image" className="img-fluid rounded-start" alt="Product" />
-        </div>
-        <div className="col-md-8">
-          <div className="card-body">
-            <h5 className="card-title">Sách thuốc Nam</h5>
-            <p className="card-text">Giá: {price.toLocaleString()} ₫</p>
-            <div className="input-group mb-3">
-              <span className="input-group-text">Số lượng</span>
-              <input
-                type="number"
-                className="form-control"
-                value={quantity}
-                onChange={handleQuantityChange}
-                min="1"
-              />
-            </div>
-            <p className="card-text">Tổng: {(price * quantity).toLocaleString()} ₫</p>
-          </div>
-        </div>
+    <div
+      className="card mb-3 d-flex flex-row align-items-center p-3"
+      style={{ maxWidth: "100%" }}
+    >
+      <div className="flex-shrink-0">
+        <img
+          src={imageSrc}
+          className="img-fluid rounded"
+          alt={name}
+          style={{ width: "120px", height: "auto"}}
+        />
+      </div>
+
+      <div
+        className="flex-grow-1 d-flex justify-content-between align-items-center ms-3"
+        style={{ flexWrap: "wrap", fontSize:'16px' }}
+      >
+
+        <h5 className="mb-0 me-3" style={{fontSize:'20px'}}>{name}</h5>
+
+        <p className="mb-0 me-3">{price.toLocaleString()} ₫</p>
+
+        <p className="mb-0 me-3">x {initialQuantity}</p>
+
+        <p className="mb-0 ms-3">
+          Thành tiền: {(price * initialQuantity).toLocaleString()} ₫
+        </p>
       </div>
     </div>
   );
