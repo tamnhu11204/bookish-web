@@ -15,10 +15,15 @@ const HeaderComponent = () => {
 
           <div>
             <div className="btn">
-              <i className="bi bi-person-circle" style={Styles.iconHeader}></i>
+            <a className="nav-link"href="/profile">
+              <i className="bi bi-person-circle"  style={Styles.iconHeader}></i>
+              </a>
             </div>
-            <div className="btn">
-              <i className="bi bi-cart3" style={Styles.iconHeader}></i>
+            
+            <div className="btn" >
+            <a className="nav-link"href="/shoppingcart">
+              <i className="bi bi-cart3"  style={Styles.iconHeader}></i>
+              </a>
             </div>
             <div className="btn">
               <i className="bi bi-bell" style={Styles.iconHeader}></i>

@@ -10,7 +10,7 @@ import CatagoryPage from "../pages/CatagoryPage/CatagoryPage";
 import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
 import ComparisonPage from "../pages/ComparisonPage/ComparisonPage";
 import RatingProductPage from "../pages/RatingProduct/RatingProduct"
-
+import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OrderPage from "../pages/OrderPage/OrderPage";
 import AdminPage from "../pages/AdminPage/AdminPage";
 
@@ -83,7 +83,8 @@ export const routes =[
     {
 
         path: '/ratingproduct',
-        page: RatingProductPage,
+        page: RatingProductPage, 
+        isShowHeader: true
 
     },
     {
@@ -95,6 +96,11 @@ export const routes =[
     {
         path: '/admin',
         page: AdminPage,
+        isShowHeader: true
+    },
+    {
+        path: '/profile',
+        page: ProfilePage,
         isShowHeader: true
     },
 

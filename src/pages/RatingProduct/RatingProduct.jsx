@@ -7,7 +7,7 @@ function RatingProduct() {
       <div className="container p-4">
         <div className="card">
           <div className="card-header bg-light text-success" style={{ fontSize: '20px' }}>
-            <h5 className="mb-0">ĐÁNH GIÁ SẢN PHẨM</h5>
+            <h5 className="text">ĐÁNH GIÁ SẢN PHẨM</h5>
           </div>
           <div className="card-body" style={{ fontSize: '16px' }}>
             <div className="d-flex align-items-center mb-3">
