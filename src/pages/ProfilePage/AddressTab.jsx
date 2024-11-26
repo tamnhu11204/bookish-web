@@ -51,8 +51,8 @@ const AddressTab = () => {
       const [onSave, setOnSave] = useState(() => () => {});
       const [onCancel, setOnCancel] = useState(() => () => {});
     
-      const handleAddLanguage = () => {
-        setModalTitle('THÊM NGÔN NGỮ');
+      const handleAddress = () => {
+        setModalTitle('THÊM ĐỊA CHỈ');
        
         setTextButton1('Thêm'); // Đặt nút là "Thêm"
         setOnSave(() => () => {
@@ -83,9 +83,9 @@ const AddressTab = () => {
 
                     <div className="col-6 text-end">
                         <ButtonComponent
-                            textButton="Thêm ngôn ngữ"
+                            textButton="Thêm địa chỉ"
                             icon={<i className="bi bi-plus-circle"></i>}
-                            onClick={handleAddLanguage}
+                            onClick={handleAddress}
                         />
                     </div>
                 </div>
@@ -102,8 +102,8 @@ const AddressTab = () => {
 
 <AddAddress
         isOpen={showModal}
-        onClick11={onSave}
-        onClick12={onCancel} />
+        onClick1={onCancel}
+        onClick2={onSave} />
           </div>
         </div>
       );

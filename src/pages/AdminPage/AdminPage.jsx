@@ -5,6 +5,10 @@ import PromotionTab from './PromotionTab';
 import AccountManagementTab from './AccountManagementTab';
 import OptionTab from './OptionTab';
 import StatisticTab from './StatisticTab';
+import AccountTab from './AccountTab';
+import ImportTab from './ImportTab';
+import OrderTab from './OrderTab';
+import ProductTab from './ProductTab';
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("profile");
@@ -111,7 +115,10 @@ const AdminPage = () => {
                     {activeTab === "accountManagement" && <AccountManagementTab />}
                     {activeTab === "options" && <OptionTab />}
                     {activeTab === "statistics" && <StatisticTab />}
-                    {/* {activeTab === "orderManagement" && <OptionTab />} */}
+                    {activeTab === "profile" && <AccountTab />} 
+                    {activeTab === "importManagement" && <ImportTab />}
+                    {activeTab === "orderManagement" && <OrderTab />}
+                    {activeTab === "productManagement" && <ProductTab />}
                 </div>
             </div>
         </div>

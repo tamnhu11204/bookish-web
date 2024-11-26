@@ -4,6 +4,8 @@ import SupplierSubTab from './SupplierSubTab';
 import PublisherSubTab from './PublisherSubTab';
 import LanguageSubTab from './LanguageSubTab';
 import StatusSubTab from './StatusSubTab';
+import FormSubTab from './FormSubTab';
+import UnitSubTab from './UnitSubTab';
 
 const OptionTab = () => {
     const [activeTab, setActiveTab] = useState("language");
@@ -57,8 +59,8 @@ const OptionTab = () => {
 
                 <div className="tab-content" style={{ flexGrow: 1 }}>
                     {activeTab === "language" && <LanguageSubTab/>}
-                    {activeTab === "format" && <div>Hình thức nội dung</div>}
-                    {activeTab === "unit" && <div>Đơn vị nội dung</div>}
+                    {activeTab === "format" && <FormSubTab/>}
+                    {activeTab === "unit" && <UnitSubTab/>}
                     {activeTab === "publisher" && <PublisherSubTab/>}
                 </div>
             </div>

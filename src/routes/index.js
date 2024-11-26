@@ -14,6 +14,8 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import OrderPage from "../pages/OrderPage/OrderPage";
 import AdminPage from "../pages/AdminPage/AdminPage";
 import MonthlyBestSellPage from "../pages/MonthlyBestSellPage/MonthlyBestSellPage";
+import DiscountPage from "../pages/DiscountPage/DiscountPage";
+import OrderDetailsPage from "../pages/OrderDetailsPage/OrderDetailsPage";
 
 export const routes =[
     {
@@ -108,6 +110,16 @@ export const routes =[
     {
         path: '/monthlybestsell',
         page: MonthlyBestSellPage,
+        isShowHeader: true
+    },
+    {
+        path: '/discount',
+        page: DiscountPage,
+        isShowHeader: true
+    },
+    {
+        path: '/orderdetail',
+        page: OrderDetailsPage,
         isShowHeader: true
     },
 

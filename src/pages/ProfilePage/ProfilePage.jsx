@@ -2,6 +2,8 @@ import React, { useState }  from 'react'
 import PasswordTab from '../ProfilePage/PasswordTab';
 import ProfileTab from '../ProfilePage/Profiletab';
 import AddressTab from './AddressTab';
+import ProductTab from './ProductTab';
+import OrderTab from './OrderTab';
 
 export const ProfilePage = () => {
     const [activeTab, setActiveTab] = useState("profileManagement");
@@ -85,7 +87,9 @@ export const ProfilePage = () => {
                 {activeTab === "profileManagement" && <ProfileTab/>} 
                     {activeTab === "passwordManagement" && <PasswordTab />} 
                     {activeTab === "addressManagement" && <AddressTab/>} 
-                   
+                    {activeTab === "productManagement" && <ProductTab/>} 
+                    {activeTab === "orderManagement" && <OrderTab/>} 
+
                 </div>
             </div>
         </div>
