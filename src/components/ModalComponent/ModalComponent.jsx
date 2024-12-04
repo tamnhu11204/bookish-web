@@ -13,7 +13,7 @@ const ModalComponent = ({ isOpen, title, body, onClick1, onClick2, textButton1 }
                     <h5 className="modal-title">{title}</h5>
                     <div style={{marginBottom:'5px'}}>
                     <ButtonComponent2  
-                    icon={<i class="bi bi-x"></i>}
+                    icon={<i className="bi bi-x"></i>}
                     onClick={onClick2}/>
                     </div>
                 </div>

@@ -55,7 +55,7 @@ const FormSelectComponent = ({ placeholder, label, options, event, values }) => 
                         pointerEvents: "none",
                     }}
                 >
-                    <i class="bi bi-caret-down"></i>
+                    <i className="bi bi-caret-down"></i>
                 </span>
             </div>
         </div>

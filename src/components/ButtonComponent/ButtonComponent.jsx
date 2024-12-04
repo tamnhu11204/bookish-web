@@ -1,12 +1,12 @@
 import React from "react";
 
-const ButtonComponent = ({ textButton, icon, onClick }) => {
+const ButtonComponent = (props) => {
   return (
-    <button type="button" class="btn btn-success" style={{ fontSize:'16px', height:'35px'}}
-    onClick={onClick}
+    <button type="button" className="btn btn-success" style={{ fontSize:'16px', height:'35px'}}
+    onClick={props.onClick}
     >
-      <span style={{color: '#FFFFFF'}}>{textButton}</span>
-      {icon && <span style={{ color:"#FFFFFF", fontSize:'16px', marginLeft:'5px' }}>{icon}</span>} 
+      <span style={{color: '#FFFFFF'}}>{props.textButton}</span>
+      {props.icon && <span style={{ color:"#FFFFFF", fontSize:'16px', marginLeft:'5px' }}>{props.icon}</span>} 
     </button>
   );
 };

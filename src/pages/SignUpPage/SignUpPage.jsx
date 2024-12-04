@@ -1,9 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
-import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as UserService from '../../services/UserService';
+import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
+import * as message from "../../components/MessageComponent/MessageComponent"
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [birthday, setBirth] = useState('');
+
+    const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
+    const mutation = useMutationHook(data => UserService.signupUser(data));
+    const { data, isLoading, isSuccess, isError } = mutation
+
+    useEffect(()=>{
+        if(isSuccess){
+            message.success()
+            navigate("/login")
+        } else if (isError){
+            message.error()
+        }
+    }, [isError, isSuccess])
+
+    const handleOnChangeEmail = (value) => setEmail(value);
+    const handleOnChangePassword = (value) => setPassword(value);
+    const handleOnChangeConfirmPassword = (value) => setConfirmPassword(value);
+    const handleOnChangeName = (value) => setName(value);
+    const handleOnChangePhone = (value) => setPhone(value);
+    const handleOnChangeBirth = (value) => setBirth(value);
+
+    const handleSignup = () => {
+        if (password !== confirmPassword) {
+            setErrorMessage('Xác nhận mật khẩu không khớp! Vui lòng nhập lại.');
+            return;
+        }
+        setErrorMessage('');
+        mutation.mutate({ email, password, name, phone, birthday })
+        console.log('signup', email, password, confirmPassword, name, phone, birthday);
+    };
+
     return (
         <div
             className="signup-container"
@@ -16,7 +58,7 @@ const SignUpPage = () => {
         >
             <div
                 style={{
-                    width: "auto",
+                    width: "600px",
                     padding: "20px",
                     border: "1px solid #198754",
                     borderRadius: "8px",
@@ -47,75 +89,72 @@ const SignUpPage = () => {
                         placeholder="Nhập email"
                         type="email"
                         label="Email"
-                    ></FormComponent>
+                        value={email}
+                        onChange={handleOnChangeEmail}
+                    />
 
                     <FormComponent
                         id="passwordInput"
                         label="Mật khẩu"
                         type="password"
                         placeholder="Nhập mật khẩu"
-                    ></FormComponent>
+                        value={password}
+                        onChange={handleOnChangePassword}
+                    />
 
                     <FormComponent
                         id="confirmPasswordInput"
                         label="Xác nhận mật khẩu"
                         type="password"
                         placeholder="Nhập lại mật khẩu ở trên"
-                    ></FormComponent>
+                        value={confirmPassword}
+                        onChange={handleOnChangeConfirmPassword}
+                    />
 
                     <FormComponent
                         id="nameInput"
                         label="Họ và tên"
                         type="text"
                         placeholder="Nhập họ và tên"
-                    ></FormComponent>
+                        value={name}
+                        onChange={handleOnChangeName}
+                    />
 
                     <FormComponent
                         id="phoneInput"
                         label="Số điện thoại"
                         type="tel"
                         placeholder="Nhập số điện thoại"
-                    ></FormComponent>
+                        value={phone}
+                        onChange={handleOnChangePhone}
+                    />
 
                     <FormComponent
                         id="birthInput"
                         label="Ngày sinh"
                         type="date"
                         placeholder="Chọn ngày sinh"
-                    ></FormComponent>
+                        value={birthday}
+                        onChange={handleOnChangeBirth}
+                    />
 
-                    {/* Địa chỉ được tách thành các trường riêng biệt */}
-                    <FormSelectComponent
-                        id="wardInput"
-                        label="Xã/Phường"
-                        type="text"
-                        placeholder="Nhập Xã/Phường"
-                    ></FormSelectComponent>
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                        {errorMessage && (
+                            <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                {errorMessage}
+                            </div>
+                        )}
+                        {data?.status === 'ERR' &&
+                            <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
 
-                    <FormSelectComponent
-                        id="districtInput"
-                        label="Quận/Huyện/TP"
-                        type="text"
-                        placeholder="Nhập Quận/Huyện/TP"
-                    ></FormSelectComponent>
-
-                    <FormSelectComponent
-                        id="provinceInput"
-                        label="Tỉnh"
-                        type="text"
-                        placeholder="Nhập Tỉnh"
-                    ></FormSelectComponent>
-
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            marginTop: "10px",
-                        }}
-                    >
-                        <ButtonComponent
-                            textButton="Đăng ký"
-                        />
+                        <LoadingComponent isLoading={isLoading}>
+                            <ButtonComponent
+                                onClick={handleSignup}
+                                textButton="Đăng ký"
+                            />
+                        </LoadingComponent>
                     </div>
                 </form>
                 <div

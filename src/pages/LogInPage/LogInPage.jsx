@@ -1,9 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
-// import Styles from "../../style";
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as UserService from '../../services/UserService';
+import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
 
 const LogInPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const mutation = useMutationHook(data => UserService.loginUser(data))
+  const { data, isLoading } = mutation
+
+  const handleOnChangeEmail = (value) => setEmail(value);
+  const handleOnChangePassword = (value) => setPassword(value);
+
+  const handleLogin = () => {
+    mutation.mutate({ email, password })
+    console.log('signup', email, password);
+  };
+
   return (
     <div
       className="login-container"
@@ -16,7 +32,7 @@ const LogInPage = () => {
     >
       <div
         style={{
-          width: "auto",
+          width: "600px",
           padding: "20px",
           border: "1px solid #ccc",
           borderRadius: "8px",
@@ -31,7 +47,7 @@ const LogInPage = () => {
             color: "#198754",
           }}
         >
-          ĐĂNG KÝ
+          ĐĂNG NHẬP
         </h1>
         <form
           className="login__form"
@@ -46,6 +62,8 @@ const LogInPage = () => {
             label="Email"
             type="email"
             placeholder="Nhập email"
+            value={email}
+            onChange={handleOnChangeEmail}
           ></FormComponent>
 
           <FormComponent
@@ -53,25 +71,27 @@ const LogInPage = () => {
             label="Mật khẩu"
             type="password"
             placeholder="Nhập mật khẩu"
+            value={password}
+            onChange={handleOnChangePassword}
           ></FormComponent>
-
           <a
             href="#"
             className="forgot-password"
-            style={{
-              textAlign: "right",
-              fontSize: "14px",
-              color: "#198754",
-              textDecoration: "none",
-            }}
-          >
+            style={{ textAlign: "right", fontSize: "14px", color: "#198754", textDecoration: "none", }}>
             Quên mật khẩu?
           </a>
 
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+            {data?.status === 'ERR' &&
+              <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-            <ButtonComponent
-              textButton="Đăng nhập"
-            />
+            <LoadingComponent isLoading={isLoading}>
+              <ButtonComponent
+                onClick={handleLogin}
+                textButton="Đăng nhập" />
+            </LoadingComponent>
           </div>
         </form>
         <div

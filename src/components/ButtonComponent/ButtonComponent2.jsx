@@ -1,11 +1,11 @@
 import React from "react";
 
-const ButtonComponent2 = ({ textButton, icon, onClick }) => {
+const ButtonComponent2 = (props) => {
   return (
-    <button type="button" class="btn btn-outline-success" style={{ fontSize:'16px'}}
-    onClick={onClick}>
-      <span >{textButton}</span>
-      {icon && <span style={{ fontSize:'20px' }}>{icon}</span>} 
+    <button type="button" className="btn btn-outline-success" style={{ fontSize:'16px'}}
+    onClick={props.onClick}>
+      <span >{props.textButton}</span>
+      {props.icon && <span style={{ fontSize:'20px' }}>{props.icon}</span>} 
 
     </button>
   );
