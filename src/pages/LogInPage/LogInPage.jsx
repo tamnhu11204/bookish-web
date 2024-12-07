@@ -1,16 +1,41 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as UserService from '../../services/UserService';
 import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
+import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { updateUser } from "../../redux/slides/UserSlide";
 
 const LogInPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch=useDispatch()
 
   const mutation = useMutationHook(data => UserService.loginUser(data))
-  const { data, isLoading } = mutation
+  const { data, isLoading, isSuccess } = mutation
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    if(isSuccess && data?.status !== 'ERR'){
+      navigate('/')
+      localStorage.setItem('access_token', JSON.stringify(data?.access_token))
+      if (data?.access_token){
+        const decoded=jwtDecode(data?.access_token)
+        console.log('decoded', decoded)
+        if(decoded?.id){
+          handleGetDetailUser(decoded?.id, data?.access_token)
+        }
+      }
+    }
+  },[data, isSuccess, navigate])
+
+  const handleGetDetailUser=async (id, token)=>{
+    const res=await UserService.getDetailUser(id, token)
+    dispatch(updateUser({...res?.data, access_token: token}))
+  }
 
   const handleOnChangeEmail = (value) => setEmail(value);
   const handleOnChangePassword = (value) => setPassword(value);
@@ -75,7 +100,7 @@ const LogInPage = () => {
             onChange={handleOnChangePassword}
           ></FormComponent>
           <a
-            href="#"
+            href="/"
             className="forgot-password"
             style={{ textAlign: "right", fontSize: "14px", color: "#198754", textDecoration: "none", }}>
             Quên mật khẩu?

@@ -91,7 +91,7 @@ const HomePage = () => {
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
       <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div class="container">
+        <div className="container">
           <div style={{ marginTop: '30px' }}>
             <SliderComponent arrImages={[img1, img2]} />
           </div>
@@ -100,7 +100,7 @@ const HomePage = () => {
 
       <div style={{ backgroundColor: '#198754', marginTop: '30px' }}>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
-        <div class="container" >
+        <div className="container" >
           <CardComponent
             title="Danh mục"
             bodyContent={catagoryInfo}
@@ -111,7 +111,7 @@ const HomePage = () => {
       </div>
 
       <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div class="container" style={{ marginTop: '30px' }}>
+        <div className="container" style={{ marginTop: '30px' }}>
           <CardComponent
             title="Xu hướng mua sách"
             bodyContent={bookPurchasingTrendInfo}
@@ -121,7 +121,7 @@ const HomePage = () => {
       </div>
 
       <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div class="container" style={{ marginTop: '30px' }}>
+        <div className="container" style={{ marginTop: '30px' }}>
           <CardComponent
             title="Sách mới"
             bodyContent={newBookInfo}
@@ -132,7 +132,7 @@ const HomePage = () => {
 
       <div style={{ backgroundColor: '#198754', marginTop: '30px' }}>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
-        <div class="container" >
+        <div className="container" >
           <CardComponent
             title="Nhà xuất bản"
             bodyContent={publisherInfo}
@@ -143,7 +143,7 @@ const HomePage = () => {
       </div>
 
       <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div class="container" style={{ marginTop: '30px' }}>
+        <div className="container" style={{ marginTop: '30px' }}>
           <CardComponent
             title="Sách bán chạy trong tháng"
             bodyContent={monthlyBestSellInfo}
