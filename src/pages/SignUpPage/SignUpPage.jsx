@@ -4,7 +4,7 @@ import FormComponent from "../../components/FormComponent/FormComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as UserService from '../../services/UserService';
 import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
-import * as message from "../../components/MessageComponent/MessageComponent"
+import * as message from "../../components/MessageComponent/MessageComponent";
 import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {

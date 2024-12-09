@@ -1,117 +1,118 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import FormComponent from '../../components/FormComponent/FormComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
 import './AdminPage.css';
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as LanguageService from '../../services/LanguageService';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useQuery } from '@tanstack/react-query';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 
 const LanguageSubTab = () => {
-    const languages = [
-        {
-            id: 103,
-            name: 'Tiếng Việt',
-            note: 'scdvzvzvzcz',
-        },
-        {
-            id: 104,
-            name: 'Tiếng Anh',
-            note: 'scdvzvzvzcz',
-        },
-    ];
-
     // State quản lý modal
-    const [showModal, setShowModal] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [modalBody, setModalBody] = useState(null);
-    const [textButton1, setTextButton1] = useState(''); // Nút Lưu/Cập nhật
-    const [onSave, setOnSave] = useState(() => () => {});
-    const [onCancel, setOnCancel] = useState(() => () => {});
+    const [name, setName] = useState('');
+    const [note, setNote] = useState('');
+    const handleOnChangeName = (value) => setName(value);
+    const handleOnChangeNote = (value) => setNote(value);
 
-    const handleCloseModal = () => {
+    const [showModal, setShowModal] = useState(false);
+
+    const resetForm = () => {
+        setName('');
+        setNote('');
+    };
+
+    const mutation = useMutationHook(data => LanguageService.addLanguage(data));
+
+    // Lấy danh sách ngôn ngữ từ API
+    const getAllLanguage = async () => {
+        const res = await LanguageService.getAllLanguage();
+        return res.data;
+    };
+
+    const { isLoading: isLoadingLanguage, data: languages } = useQuery({
+        queryKey: ['languages'],
+        queryFn: getAllLanguage,
+    });
+
+    const { data, isSuccess, isError } = mutation;
+
+    useEffect(() => {
+        if (isSuccess && data?.status !== 'ERR') {
+            message.success();
+            alert('Thêm ngôn ngữ mới thành công!');
+            resetForm();
+            setShowModal(false);
+        }
+        if (isError) {
+            message.error();
+        }
+    }, [isSuccess, isError, data?.status]);
+
+    const handleAddLanguage = () => {
+        setShowModal(true);
+    };
+
+    const onSave = async () => {
+        await mutation.mutateAsync({ name, note });
+
+    };
+
+    const onCancel = () => {
+        alert('Hủy thao tác!');
+        resetForm();
         setShowModal(false);
     };
- 
-    // Hàm mở modal thêm ngôn ngữ
-    const handleAddLanguage = () => {
-        setModalTitle('THÊM NGÔN NGỮ');
-        setModalBody(
-            <>
-                
-                <FormComponent
-                    id="nameInput"
-                    placeholder="Nhập tên ngôn ngữ"
-                    type="text"
-                    label="Tên ngôn ngữ"
-                ></FormComponent>
 
-                <FormComponent
-                    id="noteInput"
-                    label="Ghi chú"
-                    type="text"
-                    placeholder="Nhập ghi chú"
-                ></FormComponent>
+    // // Hàm mở modal sửa ngôn ngữ
+    // const handleEditLanguage = (language) => {
+    //     setModalTitle('CẬP NHẬT NGÔN NGỮ');
+    //     setModalBody(
+    //         <>
+    //         <FormComponent
+    //                 id="nameInput"
+    //                 type="text"
+    //                 label="Tên ngôn ngữ"
+    //                 defaultValue={language.name}
+    //             ></FormComponent>
 
-            </>
-        );
-        setTextButton1('Thêm'); // Đặt nút là "Thêm"
-        setOnSave(() => () => {
-            alert('Ngôn ngữ mới đã được thêm!');
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy thêm ngôn ngữ!');
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
+    //             <FormComponent
+    //                 id="noteInput"
+    //                 label="Ghi chú"
+    //                 type="text"
+    //                 defaultValue={language.note}
+    //             ></FormComponent>
+    //         </>
+    //     );
+    //     setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
+    //     setOnSave(() => () => {
+    //         alert(`Ngôn ngữ"${language.name}" đã được cập nhật!`);
+    //         setShowModal(false);
+    //     });
+    //     setOnCancel(() => () => {
+    //         alert('Hủy cập nhật ngôn ngữ!');
+    //         setShowModal(false);
+    //     });
+    //     setShowModal(true);
+    // };
 
-    // Hàm mở modal sửa ngôn ngữ
-    const handleEditLanguage = (language) => {
-        setModalTitle('CẬP NHẬT NGÔN NGỮ');
-        setModalBody(
-            <>
-            <FormComponent
-                    id="nameInput"
-                    type="text"
-                    label="Tên ngôn ngữ"
-                    defaultValue={language.name}
-                ></FormComponent>
-
-                <FormComponent
-                    id="noteInput"
-                    label="Ghi chú"
-                    type="text"
-                    defaultValue={language.note}
-                ></FormComponent>
-            </>
-        );
-        setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
-        setOnSave(() => () => {
-            alert(`Ngôn ngữ"${language.name}" đã được cập nhật!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy cập nhật ngôn ngữ!');
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
-
-    // Hàm mở modal xóa ngôn ngữ
-    const handleDeleteLanguage = (language) => {
-        setModalTitle('Xác nhận xóa');
-        setModalBody(
-            <p style={{fontSize:'16px'}}>Bạn có chắc chắn muốn xóa ngôn ngữ <strong>{language.name}</strong> không?</p>
-        );
-        setTextButton1('Xóa'); // Có thể tùy chỉnh nếu cần
-        setOnSave(() => () => {
-            alert(`Ngôn ngữ "${language.name}" đã được xóa!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
+    // // Hàm mở modal xóa ngôn ngữ
+    // const handleDeleteLanguage = (language) => {
+    //     setModalTitle('Xác nhận xóa');
+    //     setModalBody(
+    //         <p style={{fontSize:'16px'}}>Bạn có chắc chắn muốn xóa ngôn ngữ <strong>{language.name}</strong> không?</p>
+    //     );
+    //     setTextButton1('Xóa'); // Có thể tùy chỉnh nếu cần
+    //     setOnSave(() => () => {
+    //         alert(`Ngôn ngữ "${language.name}" đã được xóa!`);
+    //         setShowModal(false);
+    //     });
+    //     setOnCancel(() => () => {
+    //         setShowModal(false);
+    //     });
+    //     setShowModal(true);
+    // };
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -134,48 +135,77 @@ const LanguageSubTab = () => {
                     </div>
                 </div>
 
-                <table className="table custom-table" style={{marginTop:'30px'}}>
+                <table className="table custom-table" style={{ marginTop: '30px' }}>
                     <thead className="table-light">
                         <tr>
-                            <th scope="col" style={{ width: '10%' }}>Mã</th>
-                            <th scope="col" style={{ width: '30%' }}>Tên ngôn ngữ</th>
-                            <th scope="col" style={{ width: '50%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}></th>
+                            <th scope="col" style={{ width: '30%' }}>Mã</th>
+                            <th scope="col" style={{ width: '20%' }}>Tên đơn vị</th>
+                            <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
+                            <th scope="col" style={{ width: '10%' }}>Hành động</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
-                        {languages.map((language) => (
-                            <tr key={language.id}>
-                                <td>{language.id}</td>
-                                <td>{language.name}</td>
-                                <td>{language.note}</td>
-                                <td>
-                                    <button
-                                        className="btn btn-sm btn-primary me-2"
-                                        onClick={() => handleEditLanguage(language)}
-                                    >
-                                        <i className="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => handleDeleteLanguage(language)}
-                                    >
-                                        <i className="bi bi-trash"></i>
-                                    </button>
+                        {isLoadingLanguage ? (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    <LoadingComponent />
                                 </td>
                             </tr>
-                        ))}
+                        ) : languages && languages.length > 0 ? (
+                            languages.map((language) => (
+                                <tr key={language._id}>
+                                    <td>{language._id}</td>
+                                    <td>{language.name}</td>
+                                    <td>{language.note}</td>
+                                    <td>
+                                        <button className="btn btn-sm btn-primary me-2">
+                                            <i className="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button className="btn btn-sm btn-danger">
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    Không có dữ liệu để hiển thị.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
 
             <ModalComponent
                 isOpen={showModal}
-                title={modalTitle}
-                body={modalBody}
-                textButton1={textButton1} 
-                onClick1={onSave} 
-                onClick2={onCancel} 
+                title="THÊM NGÔN NGỮ"
+                body={
+                    <>
+                        <FormComponent
+                            id="nameLanguageInput"
+                            label="Tên ngôn ngữ"
+                            type="text"
+                            placeholder="Nhập tên ngôn ngữ"
+                            value={name}
+                            onChange={handleOnChangeName}
+                        />
+                        <FormComponent
+                            id="noteLanguageInput"
+                            label="Ghi chú"
+                            type="text"
+                            placeholder="Nhập ghi chú"
+                            value={note}
+                            onChange={handleOnChangeNote}
+                        />
+                        {data?.status === 'ERR' &&
+                            <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                    </>
+                }
+                textButton1="Thêm"
+                onClick1={onSave}
+                onClick2={onCancel}
             />
         </div>
     );

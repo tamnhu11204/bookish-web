@@ -1,12 +1,25 @@
-import React from 'react';
-import Styles from '../../style';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import logo from '../../assets/img/logo.png';
-import { useSelector } from 'react-redux';
+import * as UserService from '../../services/UserService';
+import Styles from '../../style';
+import { resetUser } from '../../redux/slides/UserSlide';
+import LoadingComponent from '../LoadingComponent/LoadingComponent';
 
 
 const HeaderComponent = () => {
   const user = useSelector((state) => state.user)
   console.log('user', user)
+
+  const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch()
+
+  const handleLogout = async () => {
+    setLoading(true)
+    await UserService.logoutUser()
+    dispatch(resetUser())
+    setLoading(false)
+  }
   return (
     <>
       <nav className="navbar" style={{ backgroundColor: '#198754', height: '60px' }} >
@@ -18,30 +31,58 @@ const HeaderComponent = () => {
           <input className="form-control" type="text" placeholder="Tìm" style={{ width: '500px', height: '35px', fontSize: '14px' }}></input>
 
           <div className="row" >
-            <div className="col-2" >
-            <i className="bi bi-person-circle" style={Styles.iconHeader}></i>
-            </div>
-            <div className="col-6" >
-              {user?.name ? (
-                <a className="nav-link" href="/profile">
-                  <p style={{ color: '#fff', fontSize: '16px' }}>Hello, {user.name}</p>
-                </a>
-              ) : (
-                <a className="nav-link" href="/login">
-                  <p style={{ color: '#fff', fontSize: '16px' }}>Đăng nhập/Đăng ký</p>
-                </a>
-              )}
-
-            </div>
-
-            <div className="col-2" >
+            <div className="col-3" >
               <a className="nav-link" href="/shoppingcart">
                 <i className="bi bi-cart3" style={Styles.iconHeader}></i>
               </a>
             </div>
 
-            <div className="col-2">
+            <div className="col-3">
               <i className="bi bi-bell" style={Styles.iconHeader}></i>
+            </div>
+
+            <div className="col-6" >
+              <LoadingComponent isLoading={loading}>
+                {user?.name ? (
+                  <div className="btn-group" role="group">
+                    <button
+                      type="button"
+                      className="btn dropdown-toggle"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      style={{ fontSize: '16px', color: '#fff' }}
+                    >
+                      Hello, {user.name}
+                    </button>
+                    <ul className="dropdown-menu" style={{ fontSize: '16px' }}>
+                      <li>
+                        <div className="row">
+                          <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-person-circle" style={{ marginLeft: '5px' }}></i></div>
+                          <div className="col-10">
+                            <a className="dropdown-item" href="/profile" >
+                              Hồ sơ
+                            </a>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div className="row">
+                          <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-box-arrow-right" style={{ marginLeft: '5px' }}></i></div>
+                          <div className="col-10">
+                            <btn className="dropdown-item" onClick={handleLogout} >
+                              Đăng xuất
+                            </btn>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                ) : (
+                  <a className="nav-link" href="/login">
+                    <p style={{ color: '#fff', fontSize: '16px' }}>Đăng nhập/Đăng ký</p>
+                  </a>
+                )}
+              </LoadingComponent>
             </div>
           </div>
         </div>
