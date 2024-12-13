@@ -60,6 +60,11 @@ const UnitSubTab = () => {
         setShowModal(false);
     };
 
+    //Cập nhật
+    const handleDetailUnit=()=>{
+        
+    }
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -106,7 +111,7 @@ const UnitSubTab = () => {
                                     <td>{unit.name}</td>
                                     <td>{unit.note}</td>
                                     <td>
-                                        <button className="btn btn-sm btn-primary me-2">
+                                        <button className="btn btn-sm btn-primary me-2" onClick={handleDetailUnit}>
                                             <i className="bi bi-pencil-square"></i>
                                         </button>
                                         <button className="btn btn-sm btn-danger">

@@ -1,185 +1,240 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import FormComponent from '../../components/FormComponent/FormComponent';
+import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import * as UserService from '../../services/UserService';
+import { useMutationHook } from '../../hooks/useMutationHook';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import { updateUser } from '../../redux/slides/UserSlide';
+import Compressor from 'compressorjs';
 
 const ProfileTab = () => {
-    const [activeTab, setActiveTab] = useState("language");
-    const [activeTab1, setActiveTab1] = useState("supplier");
-    const formStyle = {
-        fontSize: "16px", // Tăng cỡ chữ toàn bộ form
-      };
-      const [successMessage, setSuccessMessage] = useState(false); // Quản lý trạng thái thông báo
+  const user = useSelector((state) => state.user);
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [img, setImg] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [gender, setGender] = useState('');
 
-      // Hàm xử lý khi nhấn nút xác nhận
-      const handleSubmit = (e) => {
-        e.preventDefault(); // Ngăn trang reload khi submit form
-        setSuccessMessage(true); // Hiển thị thông báo
-    
-        // Ẩn thông báo sau 3 giây (nếu muốn)
-        setTimeout(() => {
-          setSuccessMessage(false);
-        }, 3000);
-      };
+  const mutation = useMutationHook(
+    async (data) => {
+      const { id, ...rests } = data;
+      const response = await UserService.updateUser(id, rests);
+      return response;
+    }
+  );
 
-    return (
-        <div style={{ padding: '0 20px' }}>
-            <div className="title-section" >
-                <h3 className="text mb-0">HỒ SƠ CỦA TÔI</h3>
-            </div>
-        <div className="container mt-5">
-      <form className="p-4 border rounded" style={formStyle}>
-        <div className="row">
-          {/* Form thông tin bên trái */}
-          <div className="col-md-8">
-            {/* Tên đăng nhập */}
-            <div className="mb-3">
-              <label htmlFor="username" className="form-label">
-                Tên đăng nhập
-              </label>
-              <input
-               style={formStyle}
-                type="text"
-                className="form-control"
-                id="username"
-                defaultValue="abc1234"
-              />
-            </div>
+  const dispatch = useDispatch();
+  const { data, isLoading, isSuccess, isError } = mutation;
 
-            {/* Tên tài khoản */}
-            <div className="mb-3">
-              <label htmlFor="accountName" className="form-label">
-                Tên tài khoản
-              </label>
-              <input
-               style={formStyle}
-                type="text"
-                className="form-control"
-                id="accountName"
-                defaultValue="TenTaiKhoan"
-              />
-            </div>
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email || '');
+      setName(user.name || '');
+      setPhone(user.phone || '');
+      setImg(user.img || '');
 
-            {/* Email */}
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-               style={formStyle}
-                type="email"
-                className="form-control"
-                id="email"
-                defaultValue="email"
-              />
-            </div>
+      if (user.birthday) {
+        const formattedBirthday = new Date(user.birthday).toISOString().split('T')[0];
+        setBirthday(formattedBirthday);
+      } else {
+        setBirthday('');
+      }
+      setGender(user.gender || '');
+    }
+  }, [user]);
 
-            {/* Số điện thoại */}
-            <div className="mb-3">
-              <label htmlFor="phoneNumber" className="form-label">
-                Số điện thoại
-              </label>
-              <input
-               style={formStyle}
-                type="text"
-                className="form-control"
-                id="phoneNumber"
-                defaultValue="0123456xxx"
-              />
-            </div>
+  useEffect(() => {
+    if (isSuccess && data?.status !== 'ERR') {
+      message.success();
+      handleGetDetailUser(user?.id, user?.access_token);
+      alert('Cập nhật thông tin thành công');
+    } else if (isError) {
+      message.error();
+    }
+  }, [data?.status, isError, isSuccess]);
 
-            {/* Giới tính */}
-            <div className="mb-3">
-              <label className="form-label">Giới tính</label>
-              <div>
-                <div className="form-check form-check-inline">
-                  <input
-                   style={formStyle}
-                    className="form-check-input"
-                    type="radio"
-                    name="gender"
-                    id="male"
-                  />
-                  <label className="form-check-label" htmlFor="male">
-                    Nam
-                  </label>
-                </div>
-                <div className="form-check form-check-inline">
-                  <input
-                   style={formStyle}
-                    className="form-check-input"
-                    type="radio"
-                    name="gender"
-                    id="female"
-                  />
-                  <label className="form-check-label" htmlFor="female">
-                    Nữ
-                  </label>
-                </div>
-                <div className="form-check form-check-inline">
-                  <input
-                   style={formStyle}
-                    className="form-check-input"
-                    type="radio"
-                    name="gender"
-                    id="other"
-                  />
-                  <label className="form-check-label" htmlFor="other">
-                    Khác
-                  </label>
-                </div>
+  const handleGetDetailUser = async (id, token) => {
+    const res = await UserService.getDetailUser(id, token);
+    dispatch(updateUser({ ...res?.data, access_token: token }));
+  };
+
+  const handleOnChangeEmail = (value) => setEmail(value);
+  const handleOnChangeName = (value) => setName(value);
+  const handleOnChangePhone = (value) => setPhone(value);
+  const handleOnChangeBirthday = (value) => setBirthday(value);
+  const handleOnChangeGender = (value) => setGender(value);
+
+  const handleOnChangeImg = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      new Compressor(file, {
+        quality: 0.6, // Chất lượng ảnh (0.6 là 60%)
+        maxWidth: 800, // Chiều rộng tối đa
+        maxHeight: 800, // Chiều cao tối đa
+        success(result) {
+          // Đọc file đã nén dưới dạng base64
+          const reader = new FileReader();
+          reader.onload = () => {
+            setImg(reader.result); // Cập nhật state img bằng base64 URL
+          };
+          reader.readAsDataURL(result); // Đọc file đã nén như là base64
+        },
+        error(err) {
+          console.error(err);
+        }
+      });
+    }
+  };
+
+  const handleUpdate = () => {
+    // Kiểm tra xem ảnh có phải là file hay base64 URL
+    const imgData = img instanceof File ? img : img;
+
+    mutation.mutate({ id: user?.id, email, name, phone, img: imgData, gender, birthday, access_token: user?.access_token });
+  };
+
+  return (
+    <div style={{ padding: '0 20px' }}>
+      <div className="title-section">
+        <h3 className="text mb-0">HỒ SƠ CỦA TÔI</h3>
+      </div>
+      <div className="container mt-5">
+        <form className="p-4 border rounded" style={{ fontSize: '16px' }}>
+          {/* Avatar */}
+          <div className="avatar-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px' }}>
+            {/* Hình đại diện */}
+            <img
+              src={img || 'https://via.placeholder.com/100'}
+              alt="Avatar"
+              className="avatar-img"
+              style={{
+                width: '100px',
+                height: '100px',
+                borderRadius: '50%',
+                border: '3px solid #ffffff',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                marginBottom: '10px',
+              }}
+            />
+
+            {/* Nút chọn ảnh */}
+            <ButtonComponent
+              textButton="Chọn ảnh"
+              onClick={() => document.getElementById('fileInput').click()}
+            />
+
+            {/* Input file ẩn */}
+            <input
+              id="fileInput"
+              type="file"
+              accept="image/*"
+              onChange={handleOnChangeImg}
+              style={{ display: 'none' }}
+            />
+          </div>
+
+          {/* Tên đăng nhập */}
+          <FormComponent
+            id="nameInput"
+            label="Họ và tên"
+            type="text"
+            placeholder="Nhập họ và tên"
+            value={name}
+            onChange={handleOnChangeName}
+          />
+
+          {/* Email */}
+          <FormComponent
+            id="emailInput"
+            label="Email"
+            type="email"
+            placeholder="Nhập email"
+            value={email}
+            onChange={handleOnChangeEmail}
+          />
+
+          {/* Số điện thoại */}
+          <FormComponent
+            id="phoneInput"
+            label="Số điện thoại"
+            type="tel"
+            placeholder="Nhập số điện thoại"
+            value={phone}
+            onChange={handleOnChangePhone}
+          />
+
+          {/* Giới tính */}
+          <div className="mb-3">
+            <label className="form-label">Giới tính</label>
+            <div>
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="gender"
+                  id="male"
+                  checked={gender === 'male'}
+                  onChange={() => handleOnChangeGender('male')}
+                />
+                <label className="form-check-label" htmlFor="male">
+                  Nam
+                </label>
               </div>
-            </div>
-
-            {/* Ngày sinh */}
-            <div className="mb-3" >
-              <label className="form-label">Ngày sinh</label>
-              <div className="d-flex gap-2" >
-                <select className="form-select" defaultValue="30" style={formStyle}>
-                  <option>1</option>
-                  <option>2</option>
-                  {/* Thêm các ngày khác */}
-                  <option>30</option>
-                </select>
-                <select className="form-select" defaultValue="Tháng 9"  style={formStyle}>
-                  <option>Tháng 1</option>
-                  <option>Tháng 2</option>
-                  {/* Thêm các tháng khác */}
-                  <option>Tháng 9</option>
-                </select>
-                <select className="form-select" defaultValue="2024" style={formStyle}>
-                  <option>2023</option>
-                  <option>2024</option>
-                  {/* Thêm các năm khác */}
-                </select>
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="gender"
+                  id="female"
+                  checked={gender === 'female'}
+                  onChange={() => handleOnChangeGender('female')}
+                />
+                <label className="form-check-label" htmlFor="female">
+                  Nữ
+                </label>
+              </div>
+              <div className="form-check form-check-inline">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="gender"
+                  id="other"
+                  checked={gender === 'other'}
+                  onChange={() => handleOnChangeGender('other')}
+                />
+                <label className="form-check-label" htmlFor="other">
+                  Khác
+                </label>
               </div>
             </div>
           </div>
 
-          {/* Ảnh đại diện và nút chọn ảnh */}
-          <div className="col-md-4 text-center d-flex flex-column justify-content-center">
-            <div className="mb-3">
-              <img
-                src="https://via.placeholder.com/100"
-                alt="avatar"
-                className="rounded-circle"
-              />
-            </div>
-            <button type="button" className="btn btn-success"  style={formStyle}>
-              Chọn ảnh
-            </button>
+          {/* Ngày sinh */}
+          <FormComponent
+            id="birthdayInput"
+            label="Ngày sinh"
+            type="date"
+            placeholder="Chọn ngày sinh"
+            value={birthday}
+            onChange={handleOnChangeBirthday}
+          />
+
+          {data?.status === 'ERR' &&
+            <span style={{ color: 'red', fontSize: '16px' }}>{data?.message}</span>}
+
+          {/* Nút lưu thay đổi */}
+          <div className="d-flex justify-content-end mt-3">
+            <LoadingComponent isLoading={isLoading}>
+              <ButtonComponent textButton="Cập nhật" onClick={handleUpdate} />
+            </LoadingComponent>
           </div>
-        </div>
-
-        {/* Nút lưu thay đổi */}
-        <div className="d-flex justify-content-end mt-3">
-          <button type="submit" className="btn btn-success" style={formStyle}>
-            Lưu thay đổi
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-    </div>
-    );
-
-    
+  );
 };
 
 export default ProfileTab;
