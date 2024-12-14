@@ -4,7 +4,7 @@ import FormComponent from '../../components/FormComponent/FormComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
 import './AdminPage.css';
 import { useMutationHook } from "../../hooks/useMutationHook";
-import * as LanguageService from '../../services/LanguageService';
+import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as message from "../../components/MessageComponent/MessageComponent";
 import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
