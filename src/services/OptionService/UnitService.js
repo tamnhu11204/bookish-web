@@ -9,3 +9,13 @@ export const getAllUnit=async(data)=>{
     const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/unit/get-all`, data)
     return res.data
 }
+
+export const updateUnit=async(id, data)=>{
+    const res =await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/unit/update/${id}`, data)
+    return res.data
+}
+
+export const deleteUnit=async(id)=>{
+    const res =await axios.delete(`${process.env.REACT_APP_API_URL_BACKEND}/unit/delete/${id}`)
+    return res.data
+}

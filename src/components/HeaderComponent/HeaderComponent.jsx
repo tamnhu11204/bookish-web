@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import logo from '../../assets/img/logo.png';
 import * as UserService from '../../services/UserService';
@@ -9,6 +9,7 @@ import LoadingComponent from '../LoadingComponent/LoadingComponent';
 
 const HeaderComponent = () => {
   const user = useSelector((state) => state.user)
+  const [name, setUserName]=useState('')
   console.log('user', user)
 
   const [loading, setLoading] = useState(false)
@@ -20,6 +21,13 @@ const HeaderComponent = () => {
     dispatch(resetUser())
     setLoading(false)
   }
+
+  useEffect(()=>{
+    setLoading(true)
+    setUserName(user?.name)
+    setLoading(false)
+  },[user?.name])
+
   return (
     <>
       <nav className="navbar" style={{ backgroundColor: '#198754', height: '60px' }} >

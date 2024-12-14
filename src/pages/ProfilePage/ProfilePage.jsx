@@ -1,11 +1,12 @@
-import React, { useState }  from 'react'
+import React, { useState } from 'react';
 import PasswordTab from '../ProfilePage/PasswordTab';
-import ProfileTab from '../ProfilePage/Profiletab';
 import AddressTab from './AddressTab';
-import ProductTab from './ProductTab';
 import OrderTab from './OrderTab';
+import ProductTab from './ProductTab';
+import ProfileTab from './Profiletab';
 
 export const ProfilePage = () => {
+
     const [activeTab, setActiveTab] = useState("profileManagement");
     const [successMessage, setSuccessMessage] = useState(false); // Quản lý trạng thái thông báo
 
@@ -76,10 +77,6 @@ export const ProfilePage = () => {
                         <div className="col"><p className="nav-title">Quản lý sản phẩm</p></div>
                     </div>
                 </button>
-
-                
-
-                
             </div>
 
             <div className="tab-content" style={{ flexGrow: 1 }}>
