@@ -10,9 +10,14 @@ export const getAllPublisher=async(data)=>{
     return res.data
 }
 
-export const updatePublisher=async(data)=>{
-    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/publisher/update`, data)
+export const updatePublisher=async(id, data)=>{
+    const res =await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/publisher/update/${id}`, data)
     return res.data
 }
 
+
+export const deletePublisher=async(id)=>{
+    const res =await axios.delete(`${process.env.REACT_APP_API_URL_BACKEND}/publisher/delete/${id}`)
+    return res.data
+}
 

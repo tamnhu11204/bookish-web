@@ -16,16 +16,16 @@ const PublisherSubTab = () => {
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
     const [img, setImage] = useState(null);
+    const [id,setID]= useState('');
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
-    const handleOnChangeImage = (value) => setImage(value);
+    //const handleOnChangeImage = (value) => setImage(value);
     const [editingPublisher, setEditingPublisher] = useState(null);
+    const [rowSelected, setRowSelected]= useState('');
 
 
     const [showModal, setShowModal] = useState(false);
-    const handleCloseModal = () => {
-        setShowModal(false);
-    };
+    const [editModal, setEditModal] = useState(false);
 
     const resetForm = () => {
         setName('');
@@ -36,7 +36,8 @@ const PublisherSubTab = () => {
     };
 
     const mutation = useMutationHook(data => PublisherService.addPublisher(data));
-    const mutationEdit = useMutationHook(data => PublisherService.updatePublisher(data));
+    const mutationEdit = useMutationHook(data => PublisherService.updatePublisher(id,data));
+    const mutationDelete = useMutationHook(data => PublisherService.deletePublisher(id));
 
 
     const handleImageChange = (event) => {
@@ -58,7 +59,11 @@ const PublisherSubTab = () => {
 
     const { data, isSuccess, isError } = mutation;
     const { data: editData, isSuccess: isEditSuccess, isError: isEditError } = mutationEdit;
+    const {data: deleteData,isSuccess: isDeleteSuccess,isError: isDeleteError}= mutationDelete;
 
+    
+
+    //useEffect khi thêm dữ liệu
 
     useEffect(() => {
         if (isSuccess && data?.status !== 'ERR') {
@@ -72,10 +77,68 @@ const PublisherSubTab = () => {
         }
     }, [isSuccess, isError, data?.status]);
 
+    //useEffect khi chỉnh sửa dữ liệu
+    useEffect(() => {
+        console.log("Edit Success:", isEditSuccess);
+        console.log("Edit Error:", isEditError);
+        console.log("Edit Data:", editData);
+    
+        if (isEditSuccess && editData?.status !== 'ERR') {
+            message.success();
+            alert('Chỉnh sửa nhà cung cấp thành công!');
+            resetForm();
+            setEditModal(false);
+        }
+        if (isEditError) {
+            message.error();
+        }
+    }, [isEditSuccess, isEditError, editData?.status]);
+
+    //useEffect khi xóa dữ liệu
+    useEffect(() => {
+        console.log("Delete Success:", isDeleteSuccess);
+        console.log("Delete Error:", isDeleteError);
+        console.log("Delete Data:", deleteData);
+    
+        if (isDeleteSuccess && deleteData?.status !== 'ERR') {
+            message.success();
+            alert('Xóa nhà cung cấp thành công!');
+            resetForm();
+        }
+        if (isEditError) {
+            message.error();
+        }
+    }, [isDeleteSuccess, isDeleteError, deleteData?.status]);
+
+
+    //Mở modal thêm dữ liệu
     const handleAddPublisher = () => {
         setShowModal(true);
     };
 
+    //Mở modal chỉnh sửa dữ liệu
+    const handleEditPublisher = (publisher) => {
+        setEditModal(true);
+        setRowSelected(publisher);
+         setID(publisher._id);
+         setName(publisher.name);
+         setNote(publisher.note);
+         setImage(publisher.img);
+    };
+
+    //Xác nhận xóa dữ liệu
+    const handleDeletePublisher = async (publisher) => {
+        setID(publisher._id);
+       // eslint-disable-next-line no-restricted-globals
+        const isConfirmed = confirm("Bạn có chắc chắn muốn xóa " + publisher.name + "?");
+        if (isConfirmed) {
+            onDelete();
+            getAllPublisher();
+        }
+        
+    };
+
+    // Lưu dữ liệu vừa thêm
     const onSave = async () => {
         //await mutation.mutateAsync({ name, note ,img});
         if (editingPublisher) {
@@ -83,8 +146,6 @@ const PublisherSubTab = () => {
         } else {
             await mutation.mutateAsync({ name, note, img });
         }
-
-
     };
 
     const onCancel = () => {
@@ -93,88 +154,25 @@ const PublisherSubTab = () => {
         setShowModal(false);
     };
 
-    // Hàm mở modal thêm nxb
-    /*const handleAddPublisher = () => {
-        setModalTitle('THÊM NHÀ XUẤT BẢN');
-        setModalBody(
-            <>
-                
-                <FormComponent
-                    id="nameInput"
-                    placeholder="Nhập tên nhà xuất bản"
-                    type="text"
-                    label="Tên nhà xuất bản"
-                ></FormComponent>
-
-                <FormComponent
-                    id="noteInput"
-                    label="Ghi chú"
-                    type="text"
-                    placeholder="Nhập ghi chú"
-                ></FormComponent>
-
-            </>
-        );
-        setTextButton1('Thêm'); // Đặt nút là "Thêm"
-        setOnSave(() => () => {
-            alert('Nhà xuất bản mới đã được thêm!');
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy thêm nhà xuất bản!');
-            setShowModal(false);
-        });
-        setShowModal(true);
+ // Lưu dữ liệu vừa chỉnh sửa
+    const onSave2 = async () => {
+        //await mutation.mutateAsync({ name, note ,img});
+          
+            await mutationEdit.mutateAsync({ id, name,note,img});
+            getAllPublisher();
+       
+    };
+    const onCancel2 = () => {
+        alert('Hủy thao tác!');
+        resetForm();
+        setEditModal(false);
     };
 
-    // Hàm mở modal sửa nxb
-    const handleEditPublisher = (publisher) => {
-        setModalTitle('CẬP NHẬT NHÀ XUẤT BẢN');
-        setModalBody(
-            <>
-            <FormComponent
-                    id="nameInput"
-                    type="text"
-                    label="Tên nhà xuất bản"
-                    defaultValue={publisher.name}
-                ></FormComponent>
-
-                <FormComponent
-                    id="noteInput"
-                    label="Ghi chú"
-                    type="text"
-                    defaultValue={publisher.note}
-                ></FormComponent>
-            </>
-        );
-        setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
-        setOnSave(() => () => {
-            alert(`Nhà xuất bản"${publisher.name}" đã được cập nhật!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy cập nhật nhà xuất bản!');
-            setShowModal(false);
-        });
-        setShowModal(true);
+     // Lưu dữ liệu vừa chỉnh sửa
+    const onDelete = async () => {
+  
+        await mutationDelete.mutateAsync({ id});
     };
-
-    // Hàm mở modal xóa nxb
-    const handleDeletePublisher = (publisher) => {
-        setModalTitle('Xác nhận xóa');
-        setModalBody(
-            <p style={{fontSize:'16px'}}>Bạn có chắc chắn muốn xóa nhà xuất bản <strong>{publisher.name}</strong> không?</p>
-        );
-        setTextButton1('Xóa'); // Có thể tùy chỉnh nếu cần
-        setOnSave(() => () => {
-            alert(`Nhà xuất bản "${publisher.name}" đã được xóa!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            setShowModal(false);
-        });
-        setShowModal(true);
-    }; */
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -197,7 +195,7 @@ const PublisherSubTab = () => {
                     </div>
                 </div>
 
-                <table className="table custom-table" style={{marginTop:'30px'}}>
+                <table className="table custom-table" style={{marginTop:'30px'}} >
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '10%' }}>Mã</th>
@@ -207,7 +205,7 @@ const PublisherSubTab = () => {
                             <th scope="col" style={{ width: '10%' }}></th>
                         </tr>
                     </thead>
-                    <tbody className="table-content">
+                    <tbody className="table-content" >
                         {isLoadingPublisher ? (
                             <tr>
                                 <td colSpan="4" className="text-center">
@@ -230,16 +228,17 @@ const PublisherSubTab = () => {
                                 <td>
                                     <button
                                         className="btn btn-sm btn-primary me-2"
-                                        //onClick={() => handleEditPublisher(publisher)}
+                                        onClick={() =>handleEditPublisher(publisher)}
                                     >
                                         <i className="bi bi-pencil-square"></i>
                                     </button>
                                     <button
                                         className="btn btn-sm btn-danger"
-                                       // onClick={() => handleDeletePublisher(publisher)}
+                                        onClick={() => handleDeletePublisher(publisher) }
                                     >
                                         <i className="bi bi-trash"></i>
                                     </button>
+                                    
                                 </td>
                             </tr>
                         ))
@@ -253,6 +252,7 @@ const PublisherSubTab = () => {
                     </tbody>
                 </table>
             </div>
+
 
             <ModalComponent
                 isOpen={showModal}
@@ -306,15 +306,15 @@ const PublisherSubTab = () => {
 
             
 <ModalComponent
-                isOpen={showModal}
-                title={editingPublisher ? "CHỈNH SỬA NHÀ CUNG CẤP" : "THÊM NHÀ CUNG CẤP"}
+                isOpen={editModal}
+                title={editingPublisher ? "CHỈNH SỬA NHÀ CUNG CẤP" : "CHỈNH SỬA NHÀ CUNG CẤP"}
                 body={
                     <>
                         <FormComponent
                             id="namePublisherInput"
                             label="Tên nhà xuất bản"
                             type="text"
-                            placeholder="Nhập tên nhà xuất bản"
+                            placeholder={rowSelected.name}
                             value={name}
                             onChange={handleOnChangeName}
                         />
@@ -322,8 +322,8 @@ const PublisherSubTab = () => {
                             id="notePublisherInput"
                             label="Ghi chú"
                             type="text"
-                            placeholder="Nhập ghi chú"
-                            value={note}
+                            placeholder={rowSelected.note}
+                            value= {note}
                             onChange={handleOnChangeNote}
                         />
                         <div className="mb-3">
@@ -349,9 +349,9 @@ const PublisherSubTab = () => {
                             <span style={{ color: "red", fontSize:"16px" }}>{data?.message}</span>}
                     </>
                 }
-                textButton1="Thêm"
-                onClick1={onSave}
-                onClick2={onCancel}
+                textButton1="Cập nhật"
+                onClick1={onSave2}
+                onClick2={onCancel2}
                 />
 
 
