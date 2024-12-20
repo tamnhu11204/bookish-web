@@ -9,11 +9,13 @@ import AccountTab from './AccountTab';
 import ImportTab from './ImportTab';
 import OrderTab from './OrderTab';
 import ProductTab from './ProductTab';
+import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("profile");
 
     return (
+        <><HeaderComponent isHiddenSearch isHiddenCart isHiddenNoti/>
         <div className="d-flex">
             {/* Tabs dọc */}
             <div className="nav flex-column nav-pills me-3" style={{ width: '200px', fontSize: '16px', fontWeight: 'bold' }}>
@@ -115,13 +117,13 @@ const AdminPage = () => {
                     {activeTab === "accountManagement" && <AccountManagementTab />}
                     {activeTab === "options" && <OptionTab />}
                     {activeTab === "statistics" && <StatisticTab />}
-                    {activeTab === "profile" && <AccountTab />} 
+                    {activeTab === "profile" && <AccountTab />}
                     {activeTab === "importManagement" && <ImportTab />}
                     {activeTab === "orderManagement" && <OrderTab />}
                     {activeTab === "productManagement" && <ProductTab />}
                 </div>
             </div>
-        </div>
+        </div></>
     )
 }
 

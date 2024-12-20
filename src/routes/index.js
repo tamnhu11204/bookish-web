@@ -95,12 +95,6 @@ export const routes =[
         page: OrderPage,
         isShowHeader: true
     },
-
-    {
-        path: '/admin',
-        page: AdminPage,
-        isShowHeader: true
-    },
     {
         path: '/profile',
         page: ProfilePage,
@@ -121,6 +115,15 @@ export const routes =[
         path: '/orderdetail',
         page: OrderDetailsPage,
         isShowHeader: true
+    },
+
+    //////////////////////admin//////////////////////
+
+    {
+        path: '/admin',
+        page: AdminPage,
+        //isShowHeader: true,
+        isPrivate: true
     },
 
 ]

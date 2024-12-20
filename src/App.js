@@ -8,7 +8,6 @@ import * as UserService from './../src/services/UserService'
 import DefaultComponent from './components/DefaultComponent/DefaultComponent'
 import { updateUser } from './redux/slides/UserSlide'
 import { routes } from './routes'
-import { isJsonString } from './utils'
 
 
 function App() {
@@ -18,30 +17,50 @@ function App() {
     if (decoded?.id) {
       handleGetDetailUser(decoded?.id, storageData)
     }
+    console.log('storageData', storageData)
   }, [])
 
   const handleDecoded = () => {
-    let storageData = localStorage.getItem('access_token')
-    console.log('check', isJsonString(storageData))
-    let decoded = {}
-    if (storageData && isJsonString(storageData)) {
-      storageData = JSON.parse(storageData)
-      decoded = jwtDecode(storageData)
-    }
-    return { decoded, storageData }
-  }
+    let storageData = localStorage.getItem("access_token");
+    // console.log("storageData", storageData);
 
-  UserService.axiosJWT.interceptors.request.use(async (config) => {
-    const currentTime=new Date()
-    const { decoded } = handleDecoded()
-    if(decoded?.exp<currentTime.getTime()/1000){
-      const data = await UserService.refreshToken()
-      config.headers['token']=`Bearer ${data?.access_token}`
+    let decoded = {};
+    if (storageData) {
+      try {
+        decoded = jwtDecode(storageData);
+        console.log("decoded", decoded);
+      } catch (error) {
+        console.error("Token không hợp lệ", error);
+      }
     }
-    return config;
-  },  (err) => {
-    return Promise.reject(err);
-  })
+    return { decoded, storageData };
+  };
+  
+
+   //token hết hạn
+   UserService.axiosJWT.interceptors.request.use(
+    async (config) => {
+      // Do something before request is sent
+      const currentTime = new Date();
+      const { decoded } = handleDecoded();
+      if (decoded?.exp < currentTime.getTime() / 1000) {
+        // console.log("decoded?.exp", decoded?.exp);
+
+        try {
+          const data = await UserService.refreshToken();
+          // localStorage.setItem("access_token", data?.access_token);
+          config.headers["token"] = `Bearer ${data?.access_token}`;
+        } catch (error) {
+          console.error("Lỗi khi làm mới token", error);
+        }
+      }
+      return config;
+    },
+    function (error) {
+      // Do something with request error
+      return Promise.reject(error);
+    }
+  );
 
   const handleGetDetailUser = async (id, token) => {
     const res = await UserService.getDetailUser(id, token)

@@ -7,9 +7,9 @@ import { resetUser } from '../../redux/slides/UserSlide';
 import LoadingComponent from '../LoadingComponent/LoadingComponent';
 
 
-const HeaderComponent = () => {
+const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHiddenNoti = false }) => {
   const user = useSelector((state) => state.user)
-  const [name, setUserName]=useState('')
+  const [name, setUserName] = useState('')
   console.log('user', user)
 
   const [loading, setLoading] = useState(false)
@@ -22,11 +22,11 @@ const HeaderComponent = () => {
     setLoading(false)
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     setLoading(true)
     setUserName(user?.name)
     setLoading(false)
-  },[user?.name])
+  }, [user?.name])
 
   return (
     <>
@@ -36,18 +36,25 @@ const HeaderComponent = () => {
             <img src={logo} alt="Logo" style={{ height: '40px', width: 'auto' }} />
           </a>
 
-          <input className="form-control" type="text" placeholder="Tìm" style={{ width: '500px', height: '35px', fontSize: '14px' }}></input>
+          {!isHiddenSearch && (
+            <input className="form-control" type="text" placeholder="Tìm" style={{ width: '500px', height: '35px', fontSize: '14px' }}></input>
+          )}
 
           <div className="row" >
-            <div className="col-3" >
-              <a className="nav-link" href="/shoppingcart">
-                <i className="bi bi-cart3" style={Styles.iconHeader}></i>
-              </a>
-            </div>
 
-            <div className="col-3">
-              <i className="bi bi-bell" style={Styles.iconHeader}></i>
-            </div>
+            {!isHiddenCart && (
+              <div className="col-3" >
+                <a className="nav-link" href="/shoppingcart">
+                  <i className="bi bi-cart3" style={Styles.iconHeader}></i>
+                </a>
+              </div>
+            )}
+
+            {!isHiddenNoti && (
+              <div className="col-3">
+                <i className="bi bi-bell" style={Styles.iconHeader}></i>
+              </div>
+            )}
 
             <div className="col-6" >
               <LoadingComponent isLoading={loading}>
@@ -73,6 +80,20 @@ const HeaderComponent = () => {
                           </div>
                         </div>
                       </li>
+
+                      {user?.isAdmin && (
+                        <li>
+                          <div className="row">
+                            <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-house-gear" style={{ marginLeft: '5px' }}></i></div>
+                            <div className="col-10">
+                              <a className="dropdown-item" href="/admin" >
+                                Hệ thống
+                              </a>
+                            </div>
+                          </div>
+                        </li>
+                      )}
+
                       <li>
                         <div className="row">
                           <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-box-arrow-right" style={{ marginLeft: '5px' }}></i></div>

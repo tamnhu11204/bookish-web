@@ -21,7 +21,7 @@ const LogInPage = () => {
   useEffect(()=>{
     if(isSuccess && data?.status !== 'ERR'){
       navigate('/')
-      localStorage.setItem('access_token', JSON.stringify(data?.access_token))
+      localStorage.setItem("access_token", data?.access_token)
       if (data?.access_token){
         const decoded=jwtDecode(data?.access_token)
         console.log('decoded', decoded)
