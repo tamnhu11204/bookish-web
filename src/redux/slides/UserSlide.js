@@ -9,7 +9,7 @@ const initialState = {
   birthday: '',
   gender: '',
   id:'',
-  isLoggedIn: false,
+  //isLoggedIn: false,
   isAdmin:false
 }
 
@@ -18,7 +18,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { name='', email='', access_token='', phone='',img='',birthday='',gender='', _id='', isAdmin } = action?.payload
+      const { name='', email='', access_token='', phone='',img='',birthday='',gender='', _id='', isAdmin } = action.payload
       state.id = _id;
       state.name = name;
       state.email = email;
@@ -27,7 +27,7 @@ export const userSlice = createSlice({
       state.birthday = birthday;
       state.gender = gender;
       state.access_token = access_token;
-      state.isLoggedIn = !!access_token;
+      //state.isLoggedIn = !!access_token;
       state.isAdmin = isAdmin
     },
     resetUser: (state) => {
@@ -40,7 +40,7 @@ export const userSlice = createSlice({
       state.gender= '';
       state.id = '';
       state.access_token = false;
-      state.isLoggedIn = false;
+      //state.isLoggedIn = false;
     }
   }
 })
