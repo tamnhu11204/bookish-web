@@ -5,24 +5,39 @@ import FormSelectComponent from "../../components/FormSelectComponent/FormSelect
 import ModalComponent from "../../components/ModalComponent/ModalComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as ListAddressService from "../../services/ListAddressService";
-import * as message from "../../components/MessageComponent/MessageComponent";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import * as message from "../../components/MessageComponent/MessageComponent";
+import * as UserService from '../../services/UserService';
 
-const AddressItem = ({ phone, address }) => {
+// Khung chứa các địa chỉ
+const AddressItem = ({ phone, province, district, commune, specificAddress, isDefault, onEdit, onDelete }) => {
   return (
     <div className="list-group-item d-flex justify-content-between align-items-center" style={formStyle}>
       <div>
-        {phone}
-        <p className="mb-0 text-muted">{address}</p>
+        {isDefault ? (
+          <p style={{ color: 'red' }}>Mặc định</p>
+        ) : (
+          <p></p>
+        )}
+        <p>{phone}</p>
+        <p className="mb-0 text-muted">{specificAddress}, {commune}, {district}, {province}</p>
       </div>
       <div>
-        <button className="btn btn-sm btn-primary me-2" style={{ marginBottom: "5px", fontSize: "16px" }}>
+        <button
+          className="btn btn-sm btn-primary me-2"
+          style={{ marginBottom: "5px", fontSize: "16px" }}
+          onClick={onEdit}
+        >
           <i className="bi bi-pencil-square"></i>
         </button>
-        <button className="btn btn-sm btn-danger" style={{ marginBottom: "5px", fontSize: "16px" }}>
+        <button
+          className="btn btn-sm btn-danger"
+          style={{ marginBottom: "5px", fontSize: "16px" }}
+          onClick={onDelete}
+        >
           <i className="bi bi-trash"></i>
         </button>
-        <ButtonComponent textButton="Đặt làm mặc định" />
       </div>
     </div>
   );
@@ -33,12 +48,63 @@ const formStyle = {
 };
 
 const AddressTab = () => {
+  // Lấy dữ liệu user từ Redux
+  const getUser = useSelector((state) => state.user);
+
+  const getAllListAddress = async (user, token) => {
+    const res = await UserService.getAllListAddress(user, token);  // Gọi API với user và token
+    return res.data;
+  };
+
+  const { isLoading: isLoadingListAddress, data: listAddressesData } = useQuery({
+    queryKey: ["listAddressesData", getUser.id, getUser.access_token],
+    queryFn: () => getAllListAddress(getUser?.id, getUser?.access_token),
+    enabled: !!getUser?.id && !!getUser?.access_token,
+  });
+
+  const [addressDetails, setAddressDetails] = useState([]);
+
+  useEffect(() => {
+    if (listAddressesData) {
+      const fetchDetails = async () => {
+        const updatedAddresses = await Promise.all(listAddressesData.map(async (address) => {
+          const { province, district, commune } = address;
+
+          if (!province || !district || !commune) {
+            return address;
+          }
+
+          try {
+            const provinceDetail = await ListAddressService.getProvinceDetail(province);
+            const districtDetail = await ListAddressService.getDistrictDetail(district);
+            const communeDetail = await ListAddressService.getCommuneDetail(commune);
+            return {
+              ...address,
+              provinceName: provinceDetail.data.data.name,
+              districtName: districtDetail.data.data.name,
+              communeName: communeDetail.data.data.name
+            };
+          } catch (error) {
+            console.error("Error fetching address details for:", address, error);
+            return address;
+          }
+        }));
+
+        setAddressDetails(updatedAddresses); // Update state with the detailed addresses
+      };
+
+      fetchDetails();
+    }
+  }, [listAddressesData]);
+
+  // Các state quản lý form
   const [phone, setPhone] = useState("");
   const [specificAddress, setSpecificAddress] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedCommune, setSelectedCommune] = useState("");
+  const [isDefault, setIsDefault] = useState(false);
 
   const resetForm = () => {
     setPhone("");
@@ -46,85 +112,95 @@ const AddressTab = () => {
     setSelectedProvince("");
     setSelectedDistrict("");
     setSelectedCommune("");
+    setIsDefault(false);
   };
 
-  // Lấy danh sách tỉnh/thành phố
   const getProvinces = async () => {
     const res = await ListAddressService.getProvinces();
-    return res?.data || []; // Trả về mảng rỗng nếu không có dữ liệu
+    return res?.data || [];
   };
 
-  const { isLoading: isLoadingProvince, data: provinces, error } = useQuery({
+  const { isLoading: isLoadingProvince, data: provinces } = useQuery({
     queryKey: ["provinces"],
     queryFn: getProvinces,
   });
 
-  // Lấy danh sách quận/huyện theo tỉnh
-  const getDistricts = async (provinceId) => {
-    if (!provinceId) return [];
-    const res = await ListAddressService.getDistricts(provinceId);
-    return res?.data || []; // Trả về mảng rỗng nếu không có dữ liệu
+  const getDistricts = async (province) => {
+    if (!province) return [];
+    const res = await ListAddressService.getDistricts(province);
+    return res?.data || [];
   };
-
-  
 
   const { isLoading: isLoadingDistrict, data: districts, refetch: refetchDistricts } = useQuery(
     ["districts", selectedProvince],
     () => getDistricts(selectedProvince),
-    { enabled: !!selectedProvince } // Chỉ gọi khi có tỉnh
+    { enabled: !!selectedProvince }
   );
 
-  console.log('Province ID:', selectedProvince);
-
-  // Lấy danh sách xã/phường theo quận
-  const getCommunes = async (districtId) => {
-    if (!districtId) return [];
-    const res = await ListAddressService.getCommunes(districtId);
-    return res?.data || []; // Trả về mảng rỗng nếu không có dữ liệu
+  const getCommunes = async (district) => {
+    if (!district) return [];
+    const res = await ListAddressService.getCommunes(district);
+    return res?.data || [];
   };
 
   const { isLoading: isLoadingCommune, data: communes, refetch: refetchCommunes } = useQuery(
     ["communes", selectedDistrict],
     () => getCommunes(selectedDistrict),
-    { enabled: !!selectedDistrict } // Chỉ gọi khi có quận
+    { enabled: !!selectedDistrict }
   );
 
-  // Kiểm tra lỗi nếu có
   useEffect(() => {
-    if (error) {
-      console.error("Error fetching provinces:", error);
+    if (selectedProvince) {
+      refetchDistricts();
     }
-  }, [error]);
+  }, [selectedProvince, refetchDistricts]);
 
-  // Chuyển đổi danh sách provinces thành mảng các options
+  useEffect(() => {
+    if (selectedDistrict) {
+      refetchCommunes();
+    }
+  }, [selectedDistrict, refetchCommunes]);
+
   const allProvinces = Array.isArray(provinces?.data)
     ? provinces.data.map((province) => ({
-        value: province._id,
-        label: province.name,
-      }))
+      value: province._id,
+      label: province.name,
+    }))
     : [];
 
-  // Chuyển đổi danh sách districts thành mảng các options
-  const allDistricts = Array.isArray(districts)
-    ? districts.map((district) => ({
-        value: district._id,
-        label: district.name,
-      }))
+  const allDistricts = Array.isArray(districts?.data)
+    ? districts.data.map((district) => ({
+      value: district._id,
+      label: district.name,
+    }))
     : [];
 
-  // Chuyển đổi danh sách communes thành mảng các options
-  const allCommunes = Array.isArray(communes)
-    ? communes.map((commune) => ({
-        value: commune._id,
-        label: commune.name,
-      }))
+  const allCommunes = Array.isArray(communes?.data)
+    ? communes.data.map((commune) => ({
+      value: commune._id,
+      label: commune.name,
+    }))
     : [];
+
+  const handleOnChangeIsDefault = (event) => setIsDefault(event.target.checked);
+  const handleOnChangePhone = (value) => setPhone(value);
+  const handleOnChangeCommune = (e) => setSelectedCommune(e.target.value);
+  const handleOnChangeDistrict = (e) => {
+    setSelectedDistrict(e.target.value);
+    setSelectedCommune(""); 
+  };
+  const handleOnChangeProvince = (e) => {
+    setSelectedProvince(e.target.value);
+    setSelectedDistrict(""); 
+    setSelectedCommune(""); 
+  };
+  const handleOnChangeSpecificAddress = (value) => setSpecificAddress(value);
 
   // Mutation để thêm address
   const mutation = useMutationHook((data) => ListAddressService.addListAddress(data));
 
   useEffect(() => {
-    if (mutation.isSuccess && mutation.data?.status !== "ERR") {
+    if (mutation.isSuccess && mutation.data?.status !== 'ERR') {
       message.success();
       alert("Thêm địa chỉ mới thành công!");
       resetForm();
@@ -139,14 +215,21 @@ const AddressTab = () => {
 
   const onSave = async () => {
     const addressData = {
+      user: getUser?.id,
       phone,
-      provinceId: selectedProvince,
-      districtId: selectedDistrict,
-      communeId: selectedCommune,
+      isDefault,
+      province: selectedProvince,
+      district: selectedDistrict,
+      commune: selectedCommune,
       specificAddress,
     };
 
-    await mutation.mutateAsync(addressData);
+    try {
+      await mutation.mutateAsync(addressData);
+    } catch (error) {
+      console.error("Error while adding address: ", error.response ? error.response.data : error);
+      alert("Đã xảy ra lỗi khi thêm địa chỉ, vui lòng thử lại sau.");
+    }
   };
 
   const onCancel = () => {
@@ -155,23 +238,78 @@ const AddressTab = () => {
     setShowModal(false);
   };
 
-  const addresses = [
-    {
-      name: "Kim Ngân",
-      phone: "0123456xxx",
-      address: "Tô Hiến Thành, Thị trấn Vạn Giã, Huyện Vạn Ninh, Tỉnh Khánh Hòa",
-    },
-    {
-      name: "Kim Ngân",
-      phone: "0123456xxx",
-      address: "Tô Hiến Thành, Thị trấn Vạn Giã, Huyện Vạn Ninh, Tỉnh Khánh Hòa",
-    },
-    {
-      name: "Kim Ngân",
-      phone: "0123456xxx",
-      address: "Tô Hiến Thành, Thị trấn Vạn Giã, Huyện Vạn Ninh, Tỉnh Khánh Hòa",
-    },
-  ];
+  // State quản lý chỉnh sửa
+  const [editModal, setEditModal] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [editPhone, setEditPhone] = useState("");
+  const [editSpecificAddress, setEditSpecificAddress] = useState("");
+  const [editIsDefault, setEditIsDefault] = useState(false);
+
+  const handleEditAddress = (address) => {
+    setEditModal(true);
+    setSelectedAddress(address);
+    setEditPhone(address.phone);
+    setEditSpecificAddress(address.specificAddress);
+    setEditIsDefault(address.isDefault);
+    setSelectedProvince(address.province);
+    setSelectedDistrict(address.district);
+    setSelectedCommune(address.commune);
+  };
+
+  const handleOnChangeIsDefaultEdit = (event) => setEditIsDefault(event.target.checked);
+  const handleOnChangePhoneEdit = (value) => setEditPhone(value);
+  const handleOnChangeSpecificAddressEdit = (value) => setEditSpecificAddress(value);
+
+  const handleSaveEdit = async () => {
+    const updatedAddress = {
+      phone: editPhone,
+      isDefault: editIsDefault,
+      province: selectedProvince,
+      district: selectedDistrict,
+      commune: selectedCommune,
+      specificAddress: editSpecificAddress,
+    };
+  
+    try {
+      const response = await UserService.updateListAddress(
+        getUser?.id,
+        selectedAddress._id,
+        updatedAddress,
+        getUser?.access_token
+      );
+      if (response.status === 'OK') {
+        alert("Cập nhật địa chỉ thành công!");
+        setEditModal(false);
+      } else {
+        alert("Lỗi khi cập nhật địa chỉ.");
+      }
+    } catch (error) {
+      console.error("Error updating address: ", error.response ? error.response.data : error);
+      alert("Đã xảy ra lỗi khi cập nhật địa chỉ.");
+    }
+    
+  };
+
+  const onCancel2 = () => {
+    alert("Hủy thao tác!");
+    resetForm();
+    setEditModal(false);
+  };
+
+  ///////xóa
+  const handleDeleteAddress = async (addressId) => {
+    try {
+      // eslint-disable-next-line no-restricted-globals
+      const isConfirmed = confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
+        if (isConfirmed) {
+          await UserService.deleteListAddress(getUser?.id,addressId._id,getUser?.access_token);
+          alert("Xóa địa chỉ thành công!");
+        }
+    } catch (error) {
+      console.error("Error deleting address: ", error);
+      alert("Đã xảy ra lỗi khi xóa địa chỉ.");
+    }
+  };
 
   return (
     <div className="container mt-4" style={formStyle}>
@@ -183,7 +321,6 @@ const AddressTab = () => {
           <div className="col-6">
             <FormComponent id="searchInput" type="text" placeholder="Tìm kiếm theo địa chỉ" />
           </div>
-
           <div className="col-6 text-end">
             <ButtonComponent textButton="Thêm địa chỉ" icon={<i className="bi bi-plus-circle"></i>} onClick={handleAddListAddress} />
           </div>
@@ -191,73 +328,148 @@ const AddressTab = () => {
       </div>
 
       <div className="list-group">
-        {addresses.map((item, index) => (
-          <AddressItem key={index} name={item.name} phone={item.phone} address={item.address} />
-        ))}
-
-        {/* Modal thêm đơn vị */}
-        <ModalComponent
-          isOpen={showModal}
-          title="THÊM ĐỊA CHỈ MỚI"
-          body={
-            <>
-              <FormComponent
-                id="phoneInput"
-                label="Số điện thoại"
-                type="tel"
-                placeholder="Nhập số điện thoại"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              <FormSelectComponent
-                label="Tỉnh/Thành phố"
-                placeholder={isLoadingProvince ? "Đang tải..." : "Chọn tỉnh/Thành phố"}
-                options={allProvinces} // Chỉ render khi provinces đã có dữ liệu
-                selectedValue={selectedProvince}
-                onChange={(e) => {
-                  setSelectedProvince(e.target.value);
-                  setSelectedDistrict(""); // Reset quận/huyện khi thay tỉnh
-                  setSelectedCommune(""); // Reset xã/phường khi thay tỉnh
-                }}
-              />
-              <FormSelectComponent
-                label="Quận/Huyện"
-                placeholder={isLoadingDistrict ? "Đang tải..." : "Chọn quận/huyện"}
-                options={allDistricts} // Cập nhật danh sách quận
-                selectedValue={selectedDistrict}
-                onChange={(e) => {
-                  setSelectedDistrict(e.target.value);
-                  setSelectedCommune(""); // Reset xã/phường khi thay quận
-                }}
-              />
-              <FormSelectComponent
-                label="Xã/Phường"
-                placeholder={isLoadingCommune ? "Đang tải..." : "Chọn xã/phường"}
-                options={allCommunes} // Cập nhật danh sách xã
-                selectedValue={selectedCommune}
-                onChange={(e) => setSelectedCommune(e.target.value)}
-              />
-              <FormComponent
-                id="specificAddressInput"
-                label="Địa chỉ cụ thể"
-                type="text"
-                placeholder="Nhập địa chỉ cụ thể"
-                value={specificAddress}
-                onChange={(e) => setSpecificAddress(e.target.value)}
-              />
-              <div className="form-check mb-3">
-                <input type="checkbox" className="form-check-input" id="defaultAddress" />
-                <label className="form-check-label" htmlFor="defaultAddress">
-                  Đặt làm địa chỉ mặc định
-                </label>
-              </div>
-            </>
-          }
-          textButton1="Thêm"
-          onClick1={onSave}
-          onClick2={onCancel}
-        />
+        {isLoadingListAddress ? (
+          <p>Đang tải...</p>
+        ) : addressDetails?.length === 0 ? (
+          <p>Chưa có địa chỉ nào.</p>
+        ) : (
+          addressDetails.map((item) => (
+            <AddressItem
+              key={item._id}
+              phone={item.phone}
+              province={item.provinceName || ""}
+              district={item.districtName || ""}
+              commune={item.communeName || ""}
+              specificAddress={item.specificAddress}
+              isDefault={item.isDefault}
+              onEdit={() => handleEditAddress(item)}
+              onDelete={() => handleDeleteAddress(item)}
+              //onDelete={() => handleDeleteAddress(item._id)}
+            />
+          ))
+        )}
       </div>
+
+      {/* Modal thêm địa chỉ */}
+      <ModalComponent
+        isOpen={showModal}
+        title="THÊM ĐỊA CHỈ MỚI"
+        body={
+          <>
+            <FormComponent
+              id="phoneInput"
+              label="Số điện thoại"
+              type="tel"
+              placeholder="Nhập số điện thoại"
+              value={phone}
+              onChange={handleOnChangePhone}
+            />
+            <FormSelectComponent
+              label="Tỉnh/Thành phố"
+              placeholder={isLoadingProvince ? "Đang tải..." : "Chọn tỉnh/Thành phố"}
+              options={allProvinces}
+              selectedValue={selectedProvince}
+              onChange={handleOnChangeProvince}
+            />
+            <FormSelectComponent
+              label="Quận/Huyện"
+              placeholder={isLoadingDistrict ? "Đang tải..." : "Chọn quận/Huyện"}
+              options={allDistricts}
+              selectedValue={selectedDistrict}
+              onChange={handleOnChangeDistrict}
+            />
+            <FormSelectComponent
+              label="Xã/Phường"
+              placeholder={isLoadingCommune ? "Đang tải..." : "Chọn xã/Phường"}
+              options={allCommunes}
+              selectedValue={selectedCommune}
+              onChange={handleOnChangeCommune}
+            />
+            <FormComponent
+              id="specificAddressInput"
+              label="Địa chỉ cụ thể"
+              type="text"
+              placeholder="Nhập địa chỉ cụ thể"
+              value={specificAddress}
+              onChange={handleOnChangeSpecificAddress}
+            />
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="defaultAddressCheck"
+                checked={isDefault}
+                onChange={handleOnChangeIsDefault}
+              />
+              <label className="form-check-label" htmlFor="defaultAddressCheck">
+                Đặt làm địa chỉ mặc định
+              </label>
+            </div>
+          </>
+        }
+        textButton1="Thêm"
+        onClick1={onSave}
+        onClick2={onCancel}
+      />
+
+      {/* Modal chỉnh sửa địa chỉ */}
+      <ModalComponent
+        isOpen={editModal}
+        title="CẬP NHẬT ĐỊA CHỈ"
+        body={
+          <>
+            <FormComponent
+              id="editPhoneInput"
+              label="Số điện thoại"
+              type="tel"
+              placeholder="Nhập số điện thoại"
+              value={editPhone}
+              onChange={handleOnChangePhoneEdit}
+            />
+            <FormSelectComponent
+              label="Tỉnh/Thành phố"
+              options={allProvinces}
+              selectedValue={selectedProvince}
+              onChange={handleOnChangeProvince}
+            />
+            <FormSelectComponent
+              label="Quận/Huyện"
+              options={allDistricts}
+              selectedValue={selectedDistrict}
+              onChange={handleOnChangeDistrict}
+            />
+            <FormSelectComponent
+              label="Xã/Phường"
+              options={allCommunes}
+              selectedValue={selectedCommune}
+              onChange={handleOnChangeCommune}
+            />
+            <FormComponent
+              id="editSpecificAddressInput"
+              label="Địa chỉ cụ thể"
+              type="text"
+              placeholder="Nhập địa chỉ cụ thể"
+              value={editSpecificAddress}
+              onChange={handleOnChangeSpecificAddressEdit}
+            />
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="editDefaultAddressCheck"
+                checked={editIsDefault}
+                onChange={handleOnChangeIsDefaultEdit}
+              />
+              <label className="form-check-label" htmlFor="editDefaultAddressCheck">
+                Đặt làm địa chỉ mặc định
+              </label>
+            </div>
+          </>
+        }
+        textButton1="Cập nhật"
+        onClick1={handleSaveEdit}
+        onClick2={onCancel2}
+      />
     </div>
   );
 };

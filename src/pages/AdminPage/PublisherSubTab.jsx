@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import FormComponent from '../../components/FormComponent/FormComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
@@ -8,22 +8,16 @@ import * as PublisherService from '../../services/OptionService/PublisherService
 import * as message from "../../components/MessageComponent/MessageComponent";
 import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import Compressor from 'compressorjs';
 
 const PublisherSubTab = () => {
-    
-
     // State quản lý modal
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
-    const [img, setImage] = useState(null);
-    const [id,setID]= useState('');
-    const handleOnChangeName = (value) => setName(value);
-    const handleOnChangeNote = (value) => setNote(value);
-    //const handleOnChangeImage = (value) => setImage(value);
+    const [img, setImage] = useState('');
+    const [id, setID] = useState('');
     const [editingPublisher, setEditingPublisher] = useState(null);
-    const [rowSelected, setRowSelected]= useState('');
-
-
+    const [rowSelected, setRowSelected] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
 
@@ -32,19 +26,11 @@ const PublisherSubTab = () => {
         setNote('');
         setImage('');
         setEditingPublisher(null);
-
     };
 
     const mutation = useMutationHook(data => PublisherService.addPublisher(data));
-    const mutationEdit = useMutationHook(data => PublisherService.updatePublisher(id,data));
+    const mutationEdit = useMutationHook(data => PublisherService.updatePublisher(id, data));
     const mutationDelete = useMutationHook(data => PublisherService.deletePublisher(id));
-
-
-    const handleImageChange = (event) => {
-        if (event.target.files && event.target.files[0]) {
-          setImage(URL.createObjectURL(event.target.files[0]));
-        }
-      };
 
     // Lấy danh sách nhà cung cấp từ API
     const getAllPublisher = async () => {
@@ -59,16 +45,34 @@ const PublisherSubTab = () => {
 
     const { data, isSuccess, isError } = mutation;
     const { data: editData, isSuccess: isEditSuccess, isError: isEditError } = mutationEdit;
-    const {data: deleteData,isSuccess: isDeleteSuccess,isError: isDeleteError}= mutationDelete;
+    const { data: deleteData, isSuccess: isDeleteSuccess, isError: isDeleteError } = mutationDelete;
 
-    
-
-    //useEffect khi thêm dữ liệu
+    // Xử lý chọn ảnh và nén ảnh
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            new Compressor(file, {
+                quality: 0.6,
+                maxWidth: 800,
+                maxHeight: 800,
+                success(result) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        setImage(reader.result); // Cập nhật ảnh đã nén dưới dạng base64
+                    };
+                    reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
+                },
+                error(err) {
+                    console.error(err);
+                }
+            });
+        }
+    };
 
     useEffect(() => {
         if (isSuccess && data?.status !== 'ERR') {
             message.success();
-            alert('Thêm nhà cung cấp mới thành công!');
+            alert('Thêm nhà xuất bản mới thành công!');
             resetForm();
             setShowModal(false);
         }
@@ -77,15 +81,10 @@ const PublisherSubTab = () => {
         }
     }, [isSuccess, isError, data?.status]);
 
-    //useEffect khi chỉnh sửa dữ liệu
     useEffect(() => {
-        console.log("Edit Success:", isEditSuccess);
-        console.log("Edit Error:", isEditError);
-        console.log("Edit Data:", editData);
-    
         if (isEditSuccess && editData?.status !== 'ERR') {
             message.success();
-            alert('Chỉnh sửa nhà cung cấp thành công!');
+            alert('Chỉnh sửa nhà xuất bản thành công!');
             resetForm();
             setEditModal(false);
         }
@@ -94,58 +93,55 @@ const PublisherSubTab = () => {
         }
     }, [isEditSuccess, isEditError, editData?.status]);
 
-    //useEffect khi xóa dữ liệu
     useEffect(() => {
-        console.log("Delete Success:", isDeleteSuccess);
-        console.log("Delete Error:", isDeleteError);
-        console.log("Delete Data:", deleteData);
-    
         if (isDeleteSuccess && deleteData?.status !== 'ERR') {
             message.success();
-            alert('Xóa nhà cung cấp thành công!');
+            alert('Xóa nhà xuất bản thành công!');
             resetForm();
         }
-        if (isEditError) {
+        if (isDeleteError) {
             message.error();
         }
     }, [isDeleteSuccess, isDeleteError, deleteData?.status]);
 
-
-    //Mở modal thêm dữ liệu
     const handleAddPublisher = () => {
         setShowModal(true);
     };
 
-    //Mở modal chỉnh sửa dữ liệu
     const handleEditPublisher = (publisher) => {
         setEditModal(true);
         setRowSelected(publisher);
-         setID(publisher._id);
-         setName(publisher.name);
-         setNote(publisher.note);
-         setImage(publisher.img);
+        setID(publisher._id);
+        setName(publisher.name);
+        setNote(publisher.note);
+        setImage(publisher.img);
     };
 
-    //Xác nhận xóa dữ liệu
     const handleDeletePublisher = async (publisher) => {
         setID(publisher._id);
-       // eslint-disable-next-line no-restricted-globals
+        // eslint-disable-next-line no-restricted-globals
         const isConfirmed = confirm("Bạn có chắc chắn muốn xóa " + publisher.name + "?");
         if (isConfirmed) {
             onDelete();
             getAllPublisher();
         }
-        
     };
 
-    // Lưu dữ liệu vừa thêm
     const onSave = async () => {
-        //await mutation.mutateAsync({ name, note ,img});
         if (editingPublisher) {
             await mutationEdit.mutateAsync({ id: editingPublisher._id, name, note, img });
         } else {
             await mutation.mutateAsync({ name, note, img });
         }
+    };
+
+    const onSave2 = async () => {
+        await mutationEdit.mutateAsync({ id, name, note, img });
+        getAllPublisher();
+    };
+
+    const onDelete = async () => {
+        await mutationDelete.mutateAsync({ id });
     };
 
     const onCancel = () => {
@@ -154,24 +150,10 @@ const PublisherSubTab = () => {
         setShowModal(false);
     };
 
- // Lưu dữ liệu vừa chỉnh sửa
-    const onSave2 = async () => {
-        //await mutation.mutateAsync({ name, note ,img});
-          
-            await mutationEdit.mutateAsync({ id, name,note,img});
-            getAllPublisher();
-       
-    };
     const onCancel2 = () => {
         alert('Hủy thao tác!');
         resetForm();
         setEditModal(false);
-    };
-
-     // Lưu dữ liệu vừa chỉnh sửa
-    const onDelete = async () => {
-  
-        await mutationDelete.mutateAsync({ id});
     };
 
     return (
@@ -185,7 +167,6 @@ const PublisherSubTab = () => {
                             placeholder="Tìm kiếm theo tên nhà xuất bản"
                         />
                     </div>
-
                     <div className="col-6 text-end">
                         <ButtonComponent
                             textButton="Thêm nhà xuất bản"
@@ -195,7 +176,7 @@ const PublisherSubTab = () => {
                     </div>
                 </div>
 
-                <table className="table custom-table" style={{marginTop:'30px'}} >
+                <table className="table custom-table" style={{ marginTop: '30px' }}>
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '10%' }}>Mã</th>
@@ -205,7 +186,7 @@ const PublisherSubTab = () => {
                             <th scope="col" style={{ width: '10%' }}></th>
                         </tr>
                     </thead>
-                    <tbody className="table-content" >
+                    <tbody className="table-content">
                         {isLoadingPublisher ? (
                             <tr>
                                 <td colSpan="4" className="text-center">
@@ -213,50 +194,48 @@ const PublisherSubTab = () => {
                                 </td>
                             </tr>
                         ) : publishers && publishers.length > 0 ? (
-                        publishers.map((publisher) => (
-                            <tr key={publisher._id}>
-                                <td>{publisher._id}</td>
-                                <td>
-                                    <img
-                                        src={publisher.img}
-                                        alt={publisher.name}
-                                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                    />
-                                </td>
-                                <td>{publisher.name}</td>
-                                <td>{publisher.note}</td>
-                                <td>
-                                    <button
-                                        className="btn btn-sm btn-primary me-2"
-                                        onClick={() =>handleEditPublisher(publisher)}
-                                    >
-                                        <i className="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => handleDeletePublisher(publisher) }
-                                    >
-                                        <i className="bi bi-trash"></i>
-                                    </button>
-                                    
+                            publishers.map((publisher) => (
+                                <tr key={publisher._id}>
+                                    <td>{publisher._id}</td>
+                                    <td>
+                                        <img
+                                            src={publisher.img}
+                                            alt={publisher.name}
+                                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                        />
+                                    </td>
+                                    <td>{publisher.name}</td>
+                                    <td>{publisher.note}</td>
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-primary me-2"
+                                            onClick={() => handleEditPublisher(publisher)}
+                                        >
+                                            <i className="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => handleDeletePublisher(publisher)}
+                                        >
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    Không có dữ liệu để hiển thị.
                                 </td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="4" className="text-center">
-                                Không có dữ liệu để hiển thị.
-                            </td>
-                        </tr>
-                    )}
+                        )}
                     </tbody>
                 </table>
             </div>
 
-
             <ModalComponent
                 isOpen={showModal}
-                title="THÊM NHÀ CUNG CẤP"
+                title="THÊM NHÀ XUẤT BẢN"
                 body={
                     <>
                         <FormComponent
@@ -265,7 +244,7 @@ const PublisherSubTab = () => {
                             type="text"
                             placeholder="Nhập tên nhà xuất bản"
                             value={name}
-                            onChange={handleOnChangeName}
+                            onChange={setName}
                         />
                         <FormComponent
                             id="notePublisherInput"
@@ -273,63 +252,10 @@ const PublisherSubTab = () => {
                             type="text"
                             placeholder="Nhập ghi chú"
                             value={note}
-                            onChange={handleOnChangeNote}
-                        />
-
-<div className="mb-3">
-        <label htmlFor="image" className="form-label">
-          Hình ảnh
-        </label>
-        <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
-          {img ? (
-            <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
-          ) : (
-            <span className="text-muted">Chọn hình ảnh</span>
-          )}
-        </div>
-        <input
-          type="file"
-          id="image"
-          className="form-control mt-2"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-      </div>
-                        {data?.status === 'ERR' &&
-                            <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
-                    </>
-                }
-                textButton1="Thêm"
-                onClick1={onSave}
-                onClick2={onCancel}
-            />
-
-            
-<ModalComponent
-                isOpen={editModal}
-                title={editingPublisher ? "CHỈNH SỬA NHÀ CUNG CẤP" : "CHỈNH SỬA NHÀ CUNG CẤP"}
-                body={
-                    <>
-                        <FormComponent
-                            id="namePublisherInput"
-                            label="Tên nhà xuất bản"
-                            type="text"
-                            placeholder={rowSelected.name}
-                            value={name}
-                            onChange={handleOnChangeName}
-                        />
-                        <FormComponent
-                            id="notePublisherInput"
-                            label="Ghi chú"
-                            type="text"
-                            placeholder={rowSelected.note}
-                            value= {note}
-                            onChange={handleOnChangeNote}
+                            onChange={setNote}
                         />
                         <div className="mb-3">
-                            <label htmlFor="image" className="form-label">
-                                Hình ảnh
-                            </label>
+                            <label htmlFor="image" className="form-label">Hình ảnh</label>
                             <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
                                 {img ? (
                                     <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
@@ -345,17 +271,59 @@ const PublisherSubTab = () => {
                                 onChange={handleImageChange}
                             />
                         </div>
-                        {data?.status === 'ERR' && 
-                            <span style={{ color: "red", fontSize:"16px" }}>{data?.message}</span>}
+                        {data?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
                     </>
                 }
-                textButton1="Cập nhật"
+                textButton1="Thêm"
+                onClick1={onSave}
+                onClick2={onCancel}
+            />
+
+            <ModalComponent
+                isOpen={editModal}
+                title={editingPublisher ? "CHỈNH SỬA NHÀ XUẤT BẢN" : "CHỈNH SỬA NHÀ XUẤT BẢN"}
+                body={
+                    <>
+                        <FormComponent
+                            id="namePublisherInput"
+                            label="Tên nhà xuất bản"
+                            type="text"
+                            placeholder={rowSelected.name}
+                            value={name}
+                            onChange={setName}
+                        />
+                        <FormComponent
+                            id="notePublisherInput"
+                            label="Ghi chú"
+                            type="text"
+                            placeholder={rowSelected.note}
+                            value={note}
+                            onChange={setNote}
+                        />
+                        <div className="mb-3">
+                            <label htmlFor="image" className="form-label">Hình ảnh</label>
+                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
+                                {img ? (
+                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
+                                ) : (
+                                    <span className="text-muted">Chọn hình ảnh</span>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                id="image"
+                                className="form-control mt-2"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                            />
+                        </div>
+                        {editData?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{editData?.message}</span>}
+                    </>
+                }
+                textButton1="Lưu"
                 onClick1={onSave2}
                 onClick2={onCancel2}
-                />
-
-
-
+            />
         </div>
     );
 };

@@ -70,17 +70,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                       Hello, {user.name}
                     </button>
                     <ul className="dropdown-menu" style={{ fontSize: '16px' }}>
-                      <li>
-                        <div className="row">
-                          <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-person-circle" style={{ marginLeft: '5px' }}></i></div>
-                          <div className="col-10">
-                            <a className="dropdown-item" href="/profile" >
-                              Hồ sơ
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-
+                      {/* Nếu là người dùng admin */}
                       {user?.isAdmin && (
                         <li>
                           <div className="row">
@@ -94,6 +84,21 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                         </li>
                       )}
 
+                      {/* Nếu là người dùng thường */}
+                      {!user?.isAdmin && (
+                        <li>
+                          <div className="row">
+                            <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-person-circle" style={{ marginLeft: '5px' }}></i></div>
+                            <div className="col-10">
+                              <a className="dropdown-item" href="/profile" >
+                                Hồ sơ
+                              </a>
+                            </div>
+                          </div>
+                        </li>
+                      )}
+
+                      {/* Đăng xuất */}
                       <li>
                         <div className="row">
                           <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-box-arrow-right" style={{ marginLeft: '5px' }}></i></div>

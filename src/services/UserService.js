@@ -41,3 +41,51 @@ export const updateUser=async(id, data, access_token)=>{
     })
     return res.data
 }
+
+export const resetPassword = async (id, data, access_token) => {
+    try {
+        const response = await axios.put(
+            `${process.env.REACT_APP_API_URL_BACKEND}/user/reset-password/${id}`,
+            data,
+            {
+                headers: {
+                    Authorization: `Bearer ${access_token}`, // Token gửi trong header
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error during password reset:", error.response?.data || error.message);
+        throw error;
+    }
+};
+
+export const getAllListAddress = async (user, access_token) => {
+    const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/get-all/${user}`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,  // Đảm bảo sử dụng "Bearer" đúng cách
+      }
+    });
+    return res.data;
+  };
+
+  export const updateListAddress = async (user,id,data, access_token) => {
+    const res = await axiosJWT.put(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/update/${user}/${id}`, data,{
+      headers: {
+        Authorization: `Bearer ${access_token}`,  // Đảm bảo sử dụng "Bearer" đúng cách
+      }
+    });
+    return res.data;
+  };
+
+  export const deleteListAddress = async (user,id, access_token) => {
+    const res = await axiosJWT.delete(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/delete/${user}/${id}`,{
+      headers: {
+        Authorization: `Bearer ${access_token}`,  // Đảm bảo sử dụng "Bearer" đúng cách
+      }
+    });
+    return res.data;
+  };
+
+
+
