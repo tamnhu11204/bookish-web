@@ -1,254 +1,154 @@
-import React, { useState } from 'react';
-import './AdminPage.css';
-import FormComponent from '../../components/FormComponent/FormComponent';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import FormComponent from '../../components/FormComponent/FormComponent';
+import * as message from "../../components/MessageComponent/MessageComponent";
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
-import FormSelectComponent from '../../components/FormSelectComponent/FormSelectComponent';
+import { useMutationHook } from '../../hooks/useMutationHook';
+import * as UserService from '../../services/UserService';
+import './AdminPage.css';
+import { useSelector } from 'react-redux';
+import { useQuery } from '@tanstack/react-query';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 
 const AccountManagementTab = () => {
 
     const [activeTab, setActiveTab] = useState("customer");
-    const accounts = [
-        {
-            id: 103,
-            image: 'https://via.placeholder.com/50',
-            name: 'Nguyễn Văn A',
-            email: 'nguyenvan@gmail.com',
-            numPhone: '2124354425'
-        },
-        {
-            id: 104,
-            image: 'https://via.placeholder.com/50',
-            name: 'Nguyễn Văn A',
-            email: 'nguyenvan@gmail.com',
-            numPhone: '2124354425'
-        },
-    ];
 
-    // State quản lý modal
+    //////////////--------Hien thi danh sach user-------//////////
+
+    const getUser = useSelector((state) => state.user);
+
+    const getAllUserIsUser = async (isAdmin, token) => {
+        const res = await UserService.getAllUserByAdmin(isAdmin, token);
+        return res.data;
+    };
+
+    const isAdminFalse = false
+
+    const { isLoading: isLoadingAccountUser, data: accountsUser } = useQuery({
+        queryKey: ["accountsUser_customer", isAdminFalse, getUser.access_token],
+        queryFn: () => getAllUserIsUser(isAdminFalse, getUser?.access_token),
+    });
+
+    //////////////--------Hien thi danh sach admin-------//////////
+
+    const getAllUserIsAdmin = async (isAdmin, token) => {
+        const res = await UserService.getAllUserByAdmin(isAdmin, token);
+        return res.data;
+    };
+
+    const isAdminTrue = true
+
+    const { isLoading: isLoadingAccountAdmin, data: accountsAdmin } = useQuery({
+        queryKey: ["accountsUser_admin", isAdminTrue, getUser.access_token],
+        queryFn: () => getAllUserIsAdmin(isAdminTrue, getUser?.access_token),
+    });
+
+
+    //////////////--------Them admin----------////////////////
+
     const [showModal, setShowModal] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [modalBody, setModalBody] = useState(null);
-    const [textButton1, setTextButton1] = useState('');
-    const [onSave, setOnSave] = useState(() => () => { });
-    const [onCancel, setOnCancel] = useState(() => () => { });
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [birthday, setBirth] = useState('');
 
-    const handleCloseModal = () => {
+    const resetForm = () => {
+        setName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setPhone('');
+        setBirth('');
+    };
+
+    const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
+    const mutation = useMutationHook(data => UserService.signupUser(data));
+    const { data, isLoading, isSuccess, isError } = mutation
+
+    useEffect(() => {
+        if (isSuccess && data?.status !== 'ERR') {
+            message.success()
+            alert("Thêm tài khoản admin thành công!")
+            setShowModal(false);
+        } else if (isError) {
+            message.error()
+        }
+    }, [data?.status, isError, isSuccess, navigate])
+
+    const handleAddAccount = () => { setShowModal(true) }
+
+    const handleOnChangeEmail = (value) => setEmail(value);
+    const handleOnChangePassword = (value) => setPassword(value);
+    const handleOnChangeConfirmPassword = (value) => setConfirmPassword(value);
+    const handleOnChangeName = (value) => setName(value);
+    const handleOnChangePhone = (value) => setPhone(value);
+    const handleOnChangeBirth = (value) => setBirth(value);
+
+    const onSave = () => {
+        if (password !== confirmPassword) {
+            setErrorMessage('Xác nhận mật khẩu không khớp! Vui lòng nhập lại.');
+            return;
+        }
+        // Đảm bảo isAdmin luôn là 'true'
+        const isAdmin = 'true';
+        setErrorMessage('');
+        mutation.mutate({ email, password, name, phone, birthday, isAdmin });
+
+        console.log('signup', email, password, confirmPassword, name, phone, birthday, isAdmin);
+    };
+
+
+    const onCancel = () => {
+        alert('Hủy thao tác!');
+        resetForm();
         setShowModal(false);
+    }
+
+    ///////xóa
+    const handleDeleteAccount = async (userId) => {
+        try {
+            // eslint-disable-next-line no-restricted-globals
+            const isConfirmed = confirm("Bạn có chắc chắn muốn xóa admin này?");
+            if (isConfirmed) {
+                await UserService.deleteUser(userId, getUser?.access_token);
+                alert("Xóa admin thành công!");
+            }
+        } catch (error) {
+            console.error("Error deleting admin: ", error);
+            alert("Đã xảy ra lỗi khi xóa admin.");
+        }
     };
 
-    // Hàm mở modal thêm account
-    const [selectedOption, setSelectedOption] = useState('default');
-    const handleAddAccount = () => {
-        setModalTitle('THÊM TÀI KHOẢN ADMIN');
-        setModalBody(
-            <>
-                <FormComponent
-                    id="emailInput"
-                    placeholder="Nhập email"
-                    type="email"
-                    label="Email"
-                ></FormComponent>
-
-                <FormComponent
-                    id="passwordInput"
-                    label="Mật khẩu"
-                    type="password"
-                    placeholder="Nhập mật khẩu"
-                ></FormComponent>
-
-                <FormComponent
-                    id="confirmPasswordInput"
-                    label="Xác nhận mật khẩu"
-                    type="password"
-                    placeholder="Nhập lại mật khẩu ở trên"
-                ></FormComponent>
-
-                <FormComponent
-                    id="nameInput"
-                    label="Họ và tên"
-                    type="text"
-                    placeholder="Nhập họ và tên"
-                ></FormComponent>
-
-                <FormComponent
-                    id="phoneInput"
-                    label="Số điện thoại"
-                    type="tel"
-                    placeholder="Nhập số điện thoại"
-                ></FormComponent>
-
-                <FormComponent
-                    id="birthInput"
-                    label="Ngày sinh"
-                    type="date"
-                    placeholder="Chọn ngày sinh"
-                ></FormComponent>
-
-                {/* Địa chỉ được tách thành các trường riêng biệt */}
-                <FormSelectComponent
-                    id="wardInput"
-                    label="Xã/Phường"
-                    type="text"
-                    placeholder="Nhập Xã/Phường"
-                ></FormSelectComponent>
-
-                <FormSelectComponent
-                    id="districtInput"
-                    label="Quận/Huyện/TP"
-                    type="text"
-                    placeholder="Nhập Quận/Huyện/TP"
-                ></FormSelectComponent>
-
-                <FormSelectComponent
-                    id="provinceInput"
-                    label="Tỉnh"
-                    type="text"
-                    placeholder="Nhập Tỉnh"
-                ></FormSelectComponent>
-                
-                <div className="col-6">
-                    <div className="form-check ">
-                        <input
-                            className="form-check-input"
-                            type="radio"
-                            name="adminOption"
-                            id="admin"
-                            checked={selectedOption === 'default'}
-                            onChange={() => setSelectedOption('default')}
-                        />
-                        <label className="form-check-label" htmlFor="admin">
-                            Admin
-                        </label>
-                    </div>
-                </div>
-            </>
-        );
-        setTextButton1('Thêm');
-        setOnSave(() => () => {
-            alert('Admin mới đã được thêm!');
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy thêm admin!');
-            setShowModal(false);
-        });
-        setShowModal(true);
+    // Toggle Active State
+    const handleToggleActive = async (user) => {
+        try {
+            const message = user?.active
+                ? "Bạn có chắc chắn muốn chặn trạng thái hoạt động của tài khoản này?"
+                : "Bạn có chắc chắn muốn khôi phục trạng thái hoạt động của tài khoản này?";
+    
+            // eslint-disable-next-line no-restricted-globals
+            const isConfirmed = confirm(message);
+    
+            if (isConfirmed) {
+                // Gọi service để chuyển đổi trạng thái active
+                await UserService.toggleActiveUser(user._id, getUser?.access_token);
+    
+                const successMessage = user?.active
+                    ? "Tài khoản đã bị chặn thành công!"
+                    : "Tài khoản đã được khôi phục thành công!";
+                alert(successMessage);
+            }
+        } catch (error) {
+            console.error("Error toggling active state: ", error);
+            alert("Đã xảy ra lỗi khi thay đổi trạng thái tài khoản.");
+        }
     };
-
-    // Hàm mở modal sửa acount
-    // const handleEditAccount = (account) => {
-    //     setModalTitle('CẬP NHẬT tài khoản');
-    //     setModalBody(
-    //         <>
-    //             <p style={{ fontSize: '16px' }}>Chọn loại tài khoản</p>
-    //             <div className="row">
-    //                 <div className="col-6">
-    //                     <div className="form-check ">
-    //                         <input
-    //                             className="form-check-input"
-    //                             type="radio"
-    //                             name="saleOption"
-    //                             id="defaultAddress"
-    //                             checked={selectedOption === 'default'}
-    //                             onChange={() => setSelectedOption('default')}
-    //                         />
-    //                         <label className="form-check-label" htmlFor="defaultAddress">
-    //                             Mã giảm giá
-    //                         </label>
-    //                     </div>
-
-
-    //                 </div>
-
-    //                 <div className="col-6">
-    //                     <div className="form-check ">
-    //                         <input
-    //                             className="form-check-input"
-    //                             type="radio"
-    //                             name="freeShipOption"
-    //                             id="otherAddress"
-    //                             checked={selectedOption === 'other'}
-    //                             onChange={() => setSelectedOption('other')}
-    //                         />
-    //                         <label className="form-check-label" htmlFor="otherAddress">
-    //                             Miễn phí vận chuyển
-    //                         </label>
-    //                     </div>
-    //                 </div>
-    //             </div>
-
-    //             <FormComponent
-    //                 id="valueInput"
-    //                 label="Mô tả"
-    //                 type="number"
-    //                 defaultValue={account.value}
-    //             />
-
-    //             <FormComponent
-    //                 id="startAtInput"
-    //                 label="Ngày bắt đầu"
-    //                 type="date"
-    //                 defaultValue={account.startAt}
-    //             />
-
-    //             <FormComponent
-    //                 id="endAtInput"
-    //                 label="Ngày kết thúc"
-    //                 type="date"
-    //                 defaultValue={account.endAt}
-    //             />
-
-    //             <FormComponent
-    //                 id="applyForInput"
-    //                 label="Áp dụng cho"
-    //                 type="number"
-    //                 defaultValue={account.applyFor}
-    //             />
-
-    //             <FormComponent
-    //                 id="quantityInput"
-    //                 label="Số lượng"
-    //                 type="number"
-    //                 defaultValue={account.quantity}
-    //             />
-
-    //             <FormComponent
-    //                 id="usedInput"
-    //                 label="Đã sử dụng"
-    //                 type="number"
-    //                 defaultValue={account.used}
-    //             />
-    //         </>
-    //     );
-    //     setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
-    //     setOnSave(() => () => {
-    //         alert(`tài khoản "${account.id}" đã được cập nhật!`);
-    //         setShowModal(false);
-    //     });
-    //     setOnCancel(() => () => {
-    //         alert('Hủy cập nhật tài khoản!');
-    //         setShowModal(false);
-    //     });
-    //     setShowModal(true);
-    // };
-
-    // Hàm mở modal xóa tài khoản
-    const handleDeleteAccount = (account) => {
-        setModalTitle('Xác nhận xóa');
-        setModalBody(
-            <p style={{ fontSize: '16px' }}>Bạn có chắc chắn muốn xóa tài khoản <strong>{account.name}</strong> không?</p>
-        );
-        setTextButton1('Xóa');
-        setOnSave(() => () => {
-            alert(`tài khoản "${account.name}" đã được xóa!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
+    
 
     //Nội dung ở tab tài khoản khách hàng
     const customerContent = (
@@ -273,35 +173,56 @@ const AccountManagementTab = () => {
                     </tr>
                 </thead>
                 <tbody className="table-content">
-                    {accounts.map((account) => (
-                        <tr key={account.id}>
-                            <td>{account.id}</td>
-                            <td>
-                                <img
-                                    src={account.image}
-                                    alt={account.name}
-                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                />
-                            </td>
-                            <td>{account.name}</td>
-                            <td>{account.email}</td>
-                            <td>{account.numPhone}</td>
-                            <td>
-                                {/* <button
-                                    className="btn btn-sm btn-primary me-2"
-                                    onClick={() => handleEditaccount(account)}
-                                >
-                                    <i className="bi bi-pencil-square"></i>
-                                </button> */}
-                                <button
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => handleDeleteAccount(account)}
-                                >
-                                    <i className="bi bi-trash"></i>
-                                </button>
+                    {isLoadingAccountUser ? (
+                        <tr>
+                            <td colSpan="4" className="text-center">
+                                <LoadingComponent />
                             </td>
                         </tr>
-                    ))}
+                    ) : accountsUser && accountsUser.length > 0 ? (
+                        accountsUser.map((accountUser) => (
+                            <tr key={accountUser._id}>
+                                <td>{accountUser._id}</td>
+                                <td>            {/* Hình đại diện */}
+                                    <img
+                                        src={accountUser.img || 'https://via.placeholder.com/100'}
+                                        alt="Avatar"
+                                        className="avatar-img"
+                                        style={{
+                                            width: '100px',
+                                            height: '100px',
+                                            borderRadius: '50%',
+                                            border: '3px solid #ffffff',
+                                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                            marginBottom: '10px',
+                                        }}
+                                    />
+                                </td>
+                                <td>{accountUser.name}</td>
+                                <td>{accountUser.email}</td>
+                                <td>{accountUser.phone}</td>
+                                <td>
+                                <button
+                                        className={`btn btn-sm ${
+                                            accountUser.active ? "btn-danger" : "btn-primary"
+                                        }`}
+                                        onClick={() => handleToggleActive(accountUser)}
+                                    >
+                                        {accountUser.active ? 
+                                        <i class="bi bi-exclamation-lg"></i> 
+                                        : 
+                                        <i class="bi bi-arrow-clockwise"></i>}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4" className="text-center">
+                                Không có dữ liệu để hiển thị.
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </>
@@ -338,35 +259,48 @@ const AccountManagementTab = () => {
                     </tr>
                 </thead>
                 <tbody className="table-content">
-                    {accounts.map((account) => (
-                        <tr key={account.id}>
-                            <td>{account.id}</td>
-                            <td>
-                                <img
-                                    src={account.image}
-                                    alt={account.name}
-                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                />
-                            </td>
-                            <td>{account.name}</td>
-                            <td>{account.email}</td>
-                            <td>{account.numPhone}</td>
-                            <td>
-                                {/* <button
-                                    className="btn btn-sm btn-primary me-2"
-                                    onClick={() => handleEditaccount(account)}
-                                >
-                                    <i className="bi bi-pencil-square"></i>
-                                </button> */}
-                                <button
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => handleDeleteAccount(account)}
-                                >
-                                    <i className="bi bi-trash"></i>
-                                </button>
+                    {isLoadingAccountAdmin ? (
+                        <tr>
+                            <td colSpan="4" className="text-center">
+                                <LoadingComponent />
                             </td>
                         </tr>
-                    ))}
+                    ) : accountsAdmin && accountsAdmin.length > 0 ? (
+                        accountsAdmin.map((accountAdmin) => (
+                            <tr key={accountAdmin._id}>
+                                <td>{accountAdmin._id}</td>
+                                <td><img
+                                    src={accountAdmin.img || 'https://via.placeholder.com/100'}
+                                    alt="Avatar"
+                                    className="avatar-img"
+                                    style={{
+                                        width: '100px',
+                                        height: '100px',
+                                        borderRadius: '50%',
+                                        border: '3px solid #ffffff',
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                        marginBottom: '10px',
+                                    }}
+                                />
+                                </td>
+                                <td>{accountAdmin.name}</td>
+                                <td>{accountAdmin.email}</td>
+                                <td>{accountAdmin.phone}</td>
+                                <td>
+                                    <button className="btn btn-sm btn-danger"
+                                        onClick={() => handleDeleteAccount(accountAdmin._id)}>
+                                        <i className="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4" className="text-center">
+                                Không có dữ liệu để hiển thị.
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </>
@@ -417,9 +351,81 @@ const AccountManagementTab = () => {
 
             <ModalComponent
                 isOpen={showModal}
-                title={modalTitle}
-                body={modalBody}
-                textButton1={textButton1}
+                title="THÊM TÀI KHOẢN ADMIN"
+                body={
+                    <>
+                        <FormComponent
+                            id="emailInput"
+                            placeholder="Nhập email"
+                            type="email"
+                            label="Email"
+                            value={email}
+                            onChange={handleOnChangeEmail}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="passwordInput"
+                            label="Mật khẩu"
+                            type="password"
+                            placeholder="Nhập mật khẩu"
+                            value={password}
+                            onChange={handleOnChangePassword}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="confirmPasswordInput"
+                            label="Xác nhận mật khẩu"
+                            type="password"
+                            placeholder="Nhập lại mật khẩu ở trên"
+                            value={confirmPassword}
+                            onChange={handleOnChangeConfirmPassword}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="nameInput"
+                            label="Họ và tên"
+                            type="text"
+                            placeholder="Nhập họ và tên"
+                            value={name}
+                            onChange={handleOnChangeName}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="phoneInput"
+                            label="Số điện thoại"
+                            type="tel"
+                            placeholder="Nhập số điện thoại"
+                            value={phone}
+                            onChange={handleOnChangePhone}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="birthInput"
+                            label="Ngày sinh"
+                            type="date"
+                            placeholder="Chọn ngày sinh"
+                            value={birthday}
+                            onChange={handleOnChangeBirth}
+                            required={true}
+                        />
+
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                            {errorMessage && (
+                                <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                    {errorMessage}
+                                </div>
+                            )}
+                            {data?.status === 'ERR' &&
+                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                        </div>
+                    </>
+                }
+                textButton1="Thêm"
                 onClick1={onSave}
                 onClick2={onCancel}
             />

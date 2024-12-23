@@ -60,6 +60,46 @@ export const resetPassword = async (id, data, access_token) => {
     }
 };
 
+export const getAllUserByAdmin = async (isAdmin, access_token) => {
+  try {
+      const isAdminString = isAdmin ? 'true' : 'false';
+      //console.log('adsasf', isAdminString)
+
+      const res = await axiosJWT.get(
+          `${process.env.REACT_APP_API_URL_BACKEND}/user/get-all?isAdmin=${isAdminString}`, 
+          {
+              headers: {
+                  token: `Bearer ${access_token}`,
+              }
+          }
+      );
+
+      return res.data;
+  } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error('Error fetching user data:', error);
+      throw error; // Hoặc bạn có thể trả về một giá trị mặc định nếu cần
+  }
+}
+
+export const deleteUser=async(id, access_token)=>{
+  const res =await axiosJWT.delete(`${process.env.REACT_APP_API_URL_BACKEND}/user/delete-user/${id}`,{
+      headers:{
+          token: `Bearer ${access_token}`,
+      }
+  })
+  return res.data
+}
+
+export const toggleActiveUser=async(id, access_token)=>{
+  const res =await axiosJWT.put(`${process.env.REACT_APP_API_URL_BACKEND}/user/toggle-active/${id}`,{
+      headers:{
+          token: `Bearer ${access_token}`,
+      }
+  })
+  return res.data
+}
+
 
 ///////////--------có phân quyền------------/////////////////////
 
