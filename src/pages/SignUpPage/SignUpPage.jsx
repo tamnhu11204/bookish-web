@@ -43,7 +43,7 @@ const SignUpPage = () => {
         }
         setErrorMessage('');
         mutation.mutate({ email, password, name, phone, birthday })
-        console.log('signup', email, password, confirmPassword, name, phone, birthday);
+        //console.log('signup', email, password, confirmPassword, name, phone, birthday);
     };
 
     return (
@@ -91,6 +91,7 @@ const SignUpPage = () => {
                         label="Email"
                         value={email}
                         onChange={handleOnChangeEmail}
+                        required={true}
                     />
 
                     <FormComponent
@@ -100,6 +101,7 @@ const SignUpPage = () => {
                         placeholder="Nhập mật khẩu"
                         value={password}
                         onChange={handleOnChangePassword}
+                        required={true}
                     />
 
                     <FormComponent
@@ -109,6 +111,7 @@ const SignUpPage = () => {
                         placeholder="Nhập lại mật khẩu ở trên"
                         value={confirmPassword}
                         onChange={handleOnChangeConfirmPassword}
+                        required={true}
                     />
 
                     <FormComponent
@@ -118,6 +121,7 @@ const SignUpPage = () => {
                         placeholder="Nhập họ và tên"
                         value={name}
                         onChange={handleOnChangeName}
+                        required={true}
                     />
 
                     <FormComponent
@@ -127,6 +131,7 @@ const SignUpPage = () => {
                         placeholder="Nhập số điện thoại"
                         value={phone}
                         onChange={handleOnChangePhone}
+                        required={true}
                     />
 
                     <FormComponent
@@ -136,6 +141,7 @@ const SignUpPage = () => {
                         placeholder="Chọn ngày sinh"
                         value={birthday}
                         onChange={handleOnChangeBirth}
+                        required={true}
                     />
 
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>

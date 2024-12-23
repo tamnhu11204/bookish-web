@@ -1,361 +1,192 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './AdminPage.css';
 import FormComponent from '../../components/FormComponent/FormComponent';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
+import * as PromotionService from '../../services/PromotionService';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useMutationHook } from '../../hooks/useMutationHook';
+import { useQuery } from '@tanstack/react-query';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 
 const PromotionTab = () => {
 
-    const [activeTab, setActiveTab] = useState("sale");
-    const promotions = [
-        {
-            id: 103,
-            value: '100.000đ',
-            startAt: '01/01/2023',
-            endAt: '01/02/2023',
-            applyFor: '20.000đ',
-            quantity: 10,
-            used: 5
-        },
-        {
-            id: 104,
-            value: '100.000đ',
-            startAt: '01/01/2023',
-            endAt: '01/02/2023',
-            applyFor: '20.000đ',
-            quantity: 10,
-            used: 5
-        },
-    ];
+    // Lấy danh sách ưu đãi từ API
+    const getAllPromotion = async () => {
+        const res = await PromotionService.getAllPromotion();
+        console.log('data', res)
+        return res.data;
+    };
 
-    // State quản lý modal
+    const { isLoading: isLoadingPromotion, data: promotions } = useQuery({
+        queryKey: ['promotions'],
+        queryFn: getAllPromotion,
+    });
+
+    ////////////////----------Thêm-------------///////////////////
+
+    // State cho form và modal
+    const [value, setValue] = useState('');
+    const [start, setStart] = useState('');
+    const [finish, setFinish] = useState('');
+    const [quantity, setQuantity] = useState('');
+    const [condition, setCondition] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [modalBody, setModalBody] = useState(null);
-    const [textButton1, setTextButton1] = useState('');
-    const [onSave, setOnSave] = useState(() => () => { });
-    const [onCancel, setOnCancel] = useState(() => () => { });
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleCloseModal = () => {
+    // Hàm reset form
+    const resetForm = () => {
+        setValue('');
+        setStart('');
+        setFinish('');
+        setQuantity('');
+        setCondition('');
+        setErrorMessage('');
+
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+    };
+
+
+    const validateForm = () => {
+        if (!value || !start || !finish || !quantity || !condition) {
+            setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
+            return false;
+        }
+        setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
+        return true;
+    };
+
+    // Mutation để thêm ưu đãi
+    const mutation = useMutationHook(data => PromotionService.addPromotion(data));
+    const { data, isSuccess, isError } = mutation;
+
+    // Thêm ưu đãi
+    useEffect(() => {
+        if (isSuccess && data?.status !== 'ERR') {
+            message.success();
+            alert('Thêm ưu đãi mới thành công!');
+            resetForm();
+            setShowModal(false);
+        }
+        if (isError && data?.status === 'ERR') {
+            message.error();
+
+        }
+    }, [isSuccess, isError, data]);
+
+
+    const handleAddPromotion = () => setShowModal(true);
+    const handleOnChangeValue = (value) => setValue(value);
+    const handleOnChangeStart = (value) => setStart(value);
+    const handleOnChangeFinish = (value) => setFinish(value);
+    const handleOnChangeCondition = (value) => setCondition(value);
+    const handleOnChangeQuantity = (value) => setQuantity(value);
+
+    const onSave = async () => {
+        if (validateForm()) {
+            await mutation.mutateAsync({ value, start, finish, quantity, condition });
+        }
+    };
+
+    const onCancel = () => {
+        alert('Hủy thao tác!');
+        resetForm();
         setShowModal(false);
     };
 
-    // Hàm mở modal thêm ưu đãi
-    const [selectedOption, setSelectedOption] = useState('default');
-    const handleAddPromotion = () => {
-        setModalTitle('THÊM ƯU ĐÃI');
-        setModalBody(
-            <>
-                <p style={{ fontSize: '16px' }}>Chọn loại ưu đãi</p>
-                <div className="row">
-                    <div className="col-6">
-                        <div className="form-check ">
-                            <input
-                                className="form-check-input"
-                                type="radio"
-                                name="saleOption"
-                                id="defaultAddress"
-                                checked={selectedOption === 'default'}
-                                onChange={() => setSelectedOption('default')}
-                            />
-                            <label className="form-check-label" htmlFor="defaultAddress">
-                                Mã giảm giá
-                            </label>
-                        </div>
+    ////////////////----------Sửa-------------///////////////////
 
+    const [selectedPromotion, setSelectedPromotion] = useState('');
+    const [valueEdit, setValueEdit] = useState('');
+    const [startEdit, setStartEdit] = useState('');
+    const [finishEdit, setFinishEdit] = useState('');
+    const [quantityEdit, setQuantityEdit] = useState('');
+    const [conditionEdit, setConditionEdit] = useState('');
+    const [errorMessageEdit, setErrorMessageEdit] = useState('');
+    const [editModal, setShowModalEdit] = useState(false);
 
-                    </div>
-
-                    <div className="col-6">
-                        <div className="form-check ">
-                            <input
-                                className="form-check-input"
-                                type="radio"
-                                name="freeShipOption"
-                                id="otherAddress"
-                                checked={selectedOption === 'other'}
-                                onChange={() => setSelectedOption('other')}
-                            />
-                            <label className="form-check-label" htmlFor="otherAddress">
-                                Miễn phí vận chuyển
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <FormComponent
-                    id="valueInput"
-                    label="Mô tả"
-                    type="number"
-                    placeholder="Nhập giá trị"
-                />
-
-                <FormComponent
-                    id="startAtInput"
-                    label="Ngày bắt đầu"
-                    type="date"
-                    placeholder="Chọn ngày bắt đầu"
-                />
-
-                <FormComponent
-                    id="endAtInput"
-                    label="Ngày kết thúc"
-                    type="date"
-                    placeholder="Chọn ngày kết thúc"
-                />
-
-                <FormComponent
-                    id="applyForInput"
-                    label="Áp dụng cho"
-                    type="number"
-                    placeholder="Nhập giá trị đơn hàng tối thiểu có thể áp dụng mã"
-                />
-
-                <FormComponent
-                    id="quantityInput"
-                    label="Số lượng"
-                    type="number"
-                    placeholder="Nhập số lượng"
-                />
-            </>
-        );
-        setTextButton1('Thêm'); // Đặt nút là "Thêm"
-        setOnSave(() => () => {
-            alert('Ưu đãi mới đã được thêm!');
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy thêm ưu đãi!');
-            setShowModal(false);
-        });
-        setShowModal(true);
+    const validateFormEdit = () => {
+        if (!value || !start || !finish || !quantity || !condition) {
+            setErrorMessageEdit("Vui lòng nhập thông tin được yêu cầu!");
+            return false;
+        }
+        setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
+        return true;
     };
 
-    // Hàm mở modal sửa ưu đãi
     const handleEditPromotion = (promotion) => {
-        setModalTitle('CẬP NHẬT ƯU ĐÃI');
-        setModalBody(
-            <>
-                <p style={{ fontSize: '16px' }}>Chọn loại ưu đãi</p>
-                <div className="row">
-                    <div className="col-6">
-                        <div className="form-check ">
-                            <input
-                                className="form-check-input"
-                                type="radio"
-                                name="saleOption"
-                                id="defaultAddress"
-                                checked={selectedOption === 'default'}
-                                onChange={() => setSelectedOption('default')}
-                            />
-                            <label className="form-check-label" htmlFor="defaultAddress">
-                                Mã giảm giá
-                            </label>
-                        </div>
+        setShowModalEdit(true);
+        setSelectedPromotion(promotion);
+        
+        // Chuyển đổi ngày thành định dạng 'YYYY-MM-DD'
+        const startDate = new Date(promotion.start).toISOString().split('T')[0];  // Lấy phần ngày của ISO string
+        const finishDate = new Date(promotion.finish).toISOString().split('T')[0];
+    
+        setValueEdit(promotion.value);
+        setStartEdit(startDate);  // Đặt giá trị vào state startEdit
+        setFinishEdit(finishDate);  // Đặt giá trị vào state finishEdit
+        setQuantityEdit(promotion.quantity);
+        setConditionEdit(promotion.condition);
+    };
+    
+   
 
+    const handleOnChangeValueEdit = (value) => setValueEdit(value);
+    const handleOnChangeStartEdit = (value) => setStartEdit(value);
+    const handleOnChangeFinishEdit = (value) => setFinishEdit(value);
+    const handleOnChangeQuantityEdit = (value) => setQuantityEdit(value);
+    const handleOnChangeConditionEdit = (value) => setConditionEdit(value);
 
-                    </div>
-
-                    <div className="col-6">
-                        <div className="form-check ">
-                            <input
-                                className="form-check-input"
-                                type="radio"
-                                name="freeShipOption"
-                                id="otherAddress"
-                                checked={selectedOption === 'other'}
-                                onChange={() => setSelectedOption('other')}
-                            />
-                            <label className="form-check-label" htmlFor="otherAddress">
-                                Miễn phí vận chuyển
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <FormComponent
-                    id="valueInput"
-                    label="Mô tả"
-                    type="number"
-                    defaultValue={promotion.value}
-                />
-
-                <FormComponent
-                    id="startAtInput"
-                    label="Ngày bắt đầu"
-                    type="date"
-                    defaultValue={promotion.startAt}
-                />
-
-                <FormComponent
-                    id="endAtInput"
-                    label="Ngày kết thúc"
-                    type="date"
-                    defaultValue={promotion.endAt}
-                />
-
-                <FormComponent
-                    id="applyForInput"
-                    label="Áp dụng cho"
-                    type="number"
-                    defaultValue={promotion.applyFor}
-                />
-
-                <FormComponent
-                    id="quantityInput"
-                    label="Số lượng"
-                    type="number"
-                    defaultValue={promotion.quantity}
-                />
-
-                <FormComponent
-                    id="usedInput"
-                    label="Đã sử dụng"
-                    type="number"
-                    defaultValue={promotion.used}
-                />
-            </>
-        );
-        setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
-        setOnSave(() => () => {
-            alert(`ưu đãi "${promotion.id}" đã được cập nhật!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy cập nhật ưu đãi!');
-            setShowModal(false);
-        });
-        setShowModal(true);
+    const onSaveEdit = async () => {
+        const updatedPromotion = {
+            value: setValueEdit,
+            start: setStartEdit,
+            finish: setFinishEdit,
+            condition: setQuantityEdit,
+            quantity: setConditionEdit,
+        };
+        if (validateFormEdit()) {
+            try {
+                const response = await PromotionService.updatePromotion(selectedPromotion._id, updatedPromotion);
+                if (response.status === 'OK') {
+                    alert("Cập nhật ưu đãi thành công!");
+                    setShowModalEdit(false);
+                } else {
+                    alert("Lỗi khi cập nhật ưu đãi.");
+                }
+            } catch (error) {
+                console.error("Error updating promotion: ", error.response ? error.response.data : error);
+                alert("Đã xảy ra lỗi khi cập nhật ưu đãi.");
+            }
+        }
     };
 
-    // Hàm mở modal xóa ưu đãi
-    const handleDeletePromotion = (promotion) => {
-        setModalTitle('Xác nhận xóa');
-        setModalBody(
-            <p style={{ fontSize: '16px' }}>Bạn có chắc chắn muốn xóa ưu đãi <strong>{promotion.name}</strong> không?</p>
-        );
-        setTextButton1('Xóa'); 
-        setOnSave(() => () => {
-            alert(`ưu đãi "${promotion.id}" đã được xóa!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            setShowModal(false);
-        });
-        setShowModal(true);
+    const onCancelEdit = () => {
+        alert("Hủy thao tác!");
+        setShowModalEdit(false);
     };
 
-    //Nội dung ở tab mã giảm giá
-    const saleContent = (
-        <>
-            <div className="col-6">
-                <FormComponent
-                    id="searchInput"
-                    type="text"
-                    placeholder="Tìm kiếm theo tên ưu đãi"
-                />
-            </div>
+      //////////------------xóa-----------------////////////
 
-            <table className="table custom-table" >
-                <thead className="table-light">
-                    <tr>
-                        <th scope="col" style={{ width: '10%' }}>Mã</th>
-                        <th scope="col" style={{ width: '10%' }}>Giá trị</th>
-                        <th scope="col" style={{ width: '15%' }}>Ngày bắt đầu</th>
-                        <th scope="col" style={{ width: '15%' }}>Ngày kết thúc</th>
-                        <th scope="col" style={{ width: '20%' }}>Áp dụng cho</th>
-                        <th scope="col" style={{ width: '10%' }}>Số lượng</th>
-                        <th scope="col" style={{ width: '10%' }}>Đã sử dụng</th>
-                        <th scope="col" style={{ width: '10%' }}></th>
-                    </tr>
-                </thead>
-                <tbody className="table-content">
-                    {promotions.map((promotion) => (
-                        <tr key={promotion.id}>
-                            <td>{promotion.id}</td>
-                            <td>{promotion.value}</td>
-                            <td>{promotion.startAt}</td>
-                            <td>{promotion.endAt}</td>
-                            <td>Đơn hàng tối thiểu {promotion.applyFor}</td>
-                            <td>{promotion.quantity}</td>
-                            <td>{promotion.used}</td>
-                            <td>
-                                <button
-                                    className="btn btn-sm btn-primary me-2"
-                                    onClick={() => handleEditPromotion(promotion)}
-                                >
-                                    <i className="bi bi-pencil-square"></i>
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => handleDeletePromotion(promotion)}
-                                >
-                                    <i className="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </>
-    )
+      const handleDeletePromotion = async (promotionId) => {
+        try {
+          // eslint-disable-next-line no-restricted-globals
+          const isConfirmed = confirm("Bạn có chắc chắn muốn xóa ưu đãi này?");
+            if (isConfirmed) {
+              await PromotionService.deletePromotion(promotionId);
+              alert("Xóa ưu đãi thành công!");
+            }
+        } catch (error) {
+          console.error("Error deleting Promotion: ", error);
+          alert("Đã xảy ra lỗi khi xóa ưu đãi.");
+        }
+      };
 
-    //Nội dung ở tab miễn phí vận chuyển
-    const freeShipContent = (
-        <>
-            <div className="col-6">
-                <FormComponent
-                    id="searchInput"
-                    type="text"
-                    placeholder="Tìm kiếm theo tên ưu đãi"
-                />
-            </div>
-
-            <table className="table custom-table" >
-                <thead className="table-light">
-                    <tr>
-                        <th scope="col" style={{ width: '10%' }}>Mã</th>
-                        <th scope="col" style={{ width: '10%' }}>Giá trị</th>
-                        <th scope="col" style={{ width: '15%' }}>Ngày bắt đầu</th>
-                        <th scope="col" style={{ width: '15%' }}>Ngày kết thúc</th>
-                        <th scope="col" style={{ width: '20%' }}>Áp dụng cho</th>
-                        <th scope="col" style={{ width: '10%' }}>Số lượng</th>
-                        <th scope="col" style={{ width: '10%' }}>Đã sử dụng</th>
-                        <th scope="col" style={{ width: '10%' }}></th>
-                    </tr>
-                </thead>
-                <tbody className="table-content">
-                    {promotions.map((promotion) => (
-                        <tr key={promotion.id}>
-                            <td>{promotion.id}</td>
-                            <td>{promotion.value}</td>
-                            <td>{promotion.startAt}</td>
-                            <td>{promotion.endAt}</td>
-                            <td>Đơn hàng tối thiểu {promotion.applyFor}</td>
-                            <td>{promotion.quantity}</td>
-                            <td>{promotion.used}</td>
-                            <td>
-                                <button
-                                    className="btn btn-sm btn-primary me-2"
-                                    onClick={() => handleEditPromotion(promotion)}
-                                >
-                                    <i className="bi bi-pencil-square"></i>
-                                </button>
-                                <button
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => handleDeletePromotion(promotion)}
-                                >
-                                    <i className="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </>
-    )
-
-    //
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="title-section">
@@ -371,48 +202,216 @@ const PromotionTab = () => {
                             onClick={handleAddPromotion}
                         />
                     </div>
-
-                    {/* Tabs */}
-                    <div className="row mt-4" >
-                        <div className="col-12">
-                            <ul className="nav nav-tabs" style={{ marginTop: '20px' }}>
-                                <li className="nav-item">
-                                    <button
-                                        className={`nav-link ${activeTab === "sale" ? "active" : ""}`}
-                                        onClick={() => setActiveTab("sale")}
-                                    >
-                                        Mã giảm giá
-                                    </button>
-                                </li>
-                                <li className="nav-item">
-                                    <button
-                                        className={`nav-link ${activeTab === "freeShip" ? "active" : ""}`}
-                                        onClick={() => setActiveTab("freeShip")}
-                                    >
-                                        Miễn phí vận chuyển
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Nội dung Tab */}
-                <div className="tab-content" style={{ flexGrow: 1 }}>
-                    <div className="tab-pane fade show active">
-                        {activeTab === "sale" && <div>{saleContent}</div>}
-                        {activeTab === "freeShip" && <div>{freeShipContent}</div>}
-                    </div>
                 </div>
             </div>
+            <>
+                <div className="col-6">
+                    <FormComponent
+                        id="searchInput"
+                        type="text"
+                        placeholder="Tìm kiếm theo tên ưu đãi"
+                    />
+                </div>
 
+                <table className="table custom-table" >
+                    <thead className="table-light">
+                        <tr>
+                            <th scope="col" style={{ width: '10%' }}>Mã</th>
+                            <th scope="col" style={{ width: '10%' }}>Giá trị</th>
+                            <th scope="col" style={{ width: '15%' }}>Ngày bắt đầu</th>
+                            <th scope="col" style={{ width: '15%' }}>Ngày kết thúc</th>
+                            <th scope="col" style={{ width: '20%' }}>Áp dụng cho</th>
+                            <th scope="col" style={{ width: '10%' }}>Số lượng</th>
+                            <th scope="col" style={{ width: '10%' }}>Đã sử dụng</th>
+                            <th scope="col" style={{ width: '10%' }}></th>
+                        </tr>
+                    </thead>
+                    <tbody className="table-content">
+                        {isLoadingPromotion ? (
+                            <tr>
+                                <td colSpan="8" className="text-center">
+                                    <LoadingComponent />
+                                </td>
+                            </tr>
+                        ) : promotions && promotions.length > 0 ? (
+                            promotions.map((promotion) => (
+                                <tr key={promotion._id}>
+                                    <td>{promotion._id}</td>
+                                    <td>{promotion.value}</td>
+                                    <td>{formatDate(promotion.start)}</td>
+                                    <td>{formatDate(promotion.finish)}</td>
+                                    <td>Đơn hàng tối thiểu {promotion.condition}</td>
+                                    <td>{promotion.quantity}</td>
+                                    <td>{promotion.used}</td>
+                                    <td>
+                                        <button className="btn btn-sm btn-primary me-2"
+                                        onClick={() => handleEditPromotion(promotion)}>
+                                            <i className="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button className="btn btn-sm btn-danger"
+                                        onClick={() => handleDeletePromotion(promotion._id)}>
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="8" className="text-center">
+                                    Không có dữ liệu để hiển thị.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+
+                </table>
+            </>
+
+
+            {/* Modal thêm đơn vị */}
             <ModalComponent
                 isOpen={showModal}
-                title={modalTitle}
-                body={modalBody}
-                textButton1={textButton1}
+                title="CẬP NHẬT ĐƠN VỊ"
+                body={
+                    <>
+                        <FormComponent
+                            id="valueInput"
+                            label="Giá trị"
+                            type="number"
+                            placeholder="Nhập giá trị (VND)"
+                            value={value}
+                            onChange={handleOnChangeValue}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="startAtInput"
+                            label="Ngày bắt đầu"
+                            type="date"
+                            placeholder="Nhập ngày bắt đầu"
+                            value={start}
+                            onChange={handleOnChangeStart}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="endAtInput"
+                            label="Ngày kết thúc"
+                            type="date"
+                            placeholder="Nhập ngày kết thúc"
+                            value={finish}
+                            onChange={handleOnChangeFinish}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="applyForInput"
+                            label="Áp dụng cho đơn hàng tối thiểu"
+                            type="number"
+                            placeholder="Nhập giá trị đơn hàng tối thiểu (VND)"
+                            value={condition}
+                            onChange={handleOnChangeCondition}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="quantityInput"
+                            label="Số lượng"
+                            type="number"
+                            placeholder="Nhập số lượng"
+                            value={quantity}
+                            onChange={handleOnChangeQuantity}
+                            required={true}
+                        />
+
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                            {errorMessage && (
+                                <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                    {errorMessage}
+                                </div>
+                            )}
+                            {data?.status === 'ERR' &&
+                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                        </div>
+
+                    </>
+                }
+                textButton1="Thêm"
                 onClick1={onSave}
                 onClick2={onCancel}
+            />
+
+            {/* Modal chỉnh sửa ưu đãi */}
+            <ModalComponent
+                isOpen={editModal}
+                title="THÊM ĐƠN VỊ"
+                body={
+                    <>
+                        <FormComponent
+                            id="valueInput"
+                            label="Giá trị"
+                            type="number"
+                            placeholder="Nhập giá trị (VND)"
+                            value={valueEdit}
+                            onChange={handleOnChangeValueEdit}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="startAtInput"
+                            label="Ngày bắt đầu"
+                            type="date"
+                            placeholder="Nhập ngày bắt đầu"
+                            value={startEdit}
+                            onChange={handleOnChangeStartEdit}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="endAtInput"
+                            label="Ngày kết thúc"
+                            type="date"
+                            placeholder="Nhập ngày kết thúc"
+                            value={finishEdit}
+                            onChange={handleOnChangeFinishEdit}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="applyForInput"
+                            label="Áp dụng cho đơn hàng tối thiểu"
+                            type="number"
+                            placeholder="Nhập giá trị đơn hàng tối thiểu (VND)"
+                            value={conditionEdit}
+                            onChange={handleOnChangeConditionEdit}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="quantityInput"
+                            label="Số lượng"
+                            type="number"
+                            placeholder="Nhập số lượng"
+                            value={quantityEdit}
+                            onChange={handleOnChangeQuantityEdit}
+                            required={true}
+                        />
+
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                            {errorMessageEdit && (
+                                <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                    {errorMessageEdit}
+                                </div>
+                            )}
+                            {data?.status === 'ERR' &&
+                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                        </div>
+
+                    </>
+                }
+                textButton1="Thêm"
+                onClick1={onSaveEdit}
+                onClick2={onCancelEdit}
             />
         </div>
     );

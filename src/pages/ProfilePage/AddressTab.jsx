@@ -363,6 +363,7 @@ const AddressTab = () => {
               placeholder="Nhập số điện thoại"
               value={phone}
               onChange={handleOnChangePhone}
+              required={true}
             />
             <FormSelectComponent
               label="Tỉnh/Thành phố"
@@ -370,6 +371,7 @@ const AddressTab = () => {
               options={allProvinces}
               selectedValue={selectedProvince}
               onChange={handleOnChangeProvince}
+              required={true}
             />
             <FormSelectComponent
               label="Quận/Huyện"
@@ -377,6 +379,7 @@ const AddressTab = () => {
               options={allDistricts}
               selectedValue={selectedDistrict}
               onChange={handleOnChangeDistrict}
+              required={true}
             />
             <FormSelectComponent
               label="Xã/Phường"
@@ -384,6 +387,7 @@ const AddressTab = () => {
               options={allCommunes}
               selectedValue={selectedCommune}
               onChange={handleOnChangeCommune}
+              required={true}
             />
             <FormComponent
               id="specificAddressInput"

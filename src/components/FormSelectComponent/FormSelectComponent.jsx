@@ -1,9 +1,13 @@
 import React from "react";
 
-const FormSelectComponent = ({ label, placeholder, options, selectedValue, onChange }) => {
+const FormSelectComponent = ({ required,label, placeholder, options, selectedValue, onChange }) => {
     return (
         <div className="mb-3">
-            {label && <label className="form-label">{label}</label>}
+            <label className="form-label" style={{ display: 'block', marginBottom: '5px', fontSize: '16px' }}>
+                
+                {required && <span style={{ color: 'red' }}>*</span>} 
+                {label} {/* Thêm dấu * nếu trường bắt buộc */}
+            </label>
             <select className="form-select" value={selectedValue} onChange={onChange}
                 style={{
                     padding: "0 20px",

@@ -17,6 +17,16 @@ const FormSubTab = () => {
 
     const [showModal, setShowModal] = useState(false);
 
+    const [errorMessage, setErrorMessage] = useState('');
+    const validateForm = () => {
+        if (!name) {
+            setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
+            return false;
+        }
+        setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
+        return true;
+    };
+
     const mutation = useMutationHook(data => FormatService.addFormat(data));
 
     // Lấy danh sách hình thức từ API
@@ -54,7 +64,7 @@ const FormSubTab = () => {
     };
 
     const onSave = async () => {
-        await mutation.mutateAsync({ name, note });
+       if(validateForm()) await mutation.mutateAsync({ name, note });
     };
 
     const onCancel = () => {
@@ -188,6 +198,7 @@ const FormSubTab = () => {
                             placeholder="Nhập tên hình thức"
                             value={name}
                             onChange={handleOnChangeName}
+                            required={true}
                         />
                         <FormComponent
                             id="noteUnitInput"
@@ -197,8 +208,15 @@ const FormSubTab = () => {
                             value={note}
                             onChange={handleOnChangeNote}
                         />
-                        {data?.status === 'ERR' &&
-                            <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                            {errorMessage && (
+                                <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                    {errorMessage}
+                                </div>
+                            )}
+                            {data?.status === 'ERR' &&
+                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                        </div>
                     </>
                 }
                 textButton1="Thêm"

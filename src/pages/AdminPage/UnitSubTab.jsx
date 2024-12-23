@@ -1,30 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
-import FormComponent from '../../components/FormComponent/FormComponent';
-import ModalComponent from '../../components/ModalComponent/ModalComponent';
-import './AdminPage.css';
+import { useEffect, useState } from "react";
+import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
+import FormComponent from "../../components/FormComponent/FormComponent";
+import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
+import ModalComponent from "../../components/ModalComponent/ModalComponent";
+import { useQuery } from "@tanstack/react-query";
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as UnitService from '../../services/OptionService/UnitService';
 import * as message from "../../components/MessageComponent/MessageComponent";
-import { useQuery } from '@tanstack/react-query';
-import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 
 const UnitSubTab = () => {
-    // State cho form và modal
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
     const [showModal, setShowModal] = useState(false);
 
-    // Hàm reset form
     const resetForm = () => {
         setName('');
         setNote('');
     };
 
-    // Mutation để thêm đơn vị
-    const mutation = useMutationHook(data => UnitService.addUnit(data));
+    const [errorMessage, setErrorMessage] = useState('');
+    const validateForm = () => {
+        if (!name) {
+            setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
+            return false;
+        }
+        setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
+        return true;
+    };
 
-    // Lấy danh sách đơn vị từ API
+    const mutation = useMutationHook(data => UnitService.addUnit(data));
+    const { data, isLoading, isSuccess, isError } = mutation;
+
     const getAllUnit = async () => {
         const res = await UnitService.getAllUnit();
         return res.data;
@@ -35,23 +41,25 @@ const UnitSubTab = () => {
         queryFn: getAllUnit,
     });
 
-    // Thêm đơn vị
     useEffect(() => {
-        if (mutation.isSuccess && mutation.data?.status !== 'ERR') {
-            message.success();
+        if (isSuccess && data?.status !== 'ERR') {
+            message.success()
             alert('Thêm đơn vị mới thành công!');
             resetForm();
             setShowModal(false);
+        } else if (isError) {
+            message.error()
         }
-        if (mutation.isError) {
-            message.error();
-        }
-    }, [mutation.isSuccess, mutation.isError, mutation.data?.status]);
+    }, [data?.status, isError, isSuccess])
 
     const handleAddUnit = () => setShowModal(true);
+    const handleOnChangeName = (value) => setName(value);
+    const handleOnChangeNote = (value) => setNote(value);
 
     const onSave = async () => {
-        await mutation.mutateAsync({ name, note });
+        if (validateForm()) {
+            await mutation.mutateAsync({ name, note });
+        }
     };
 
     const onCancel = () => {
@@ -60,15 +68,9 @@ const UnitSubTab = () => {
         setShowModal(false);
     };
 
-    //Cập nhật
-    const handleDetailUnit=()=>{
-        
-    }
-
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
-                {/* Thanh tìm kiếm và nút thêm */}
                 <div className="row align-items-center mb-3">
                     <div className="col-6">
                         <FormComponent
@@ -77,7 +79,6 @@ const UnitSubTab = () => {
                             placeholder="Tìm kiếm theo tên đơn vị"
                         />
                     </div>
-
                     <div className="col-6 text-end">
                         <ButtonComponent
                             textButton="Thêm đơn vị"
@@ -86,8 +87,6 @@ const UnitSubTab = () => {
                         />
                     </div>
                 </div>
-
-                {/* Bảng hiển thị danh sách đơn vị */}
                 <table className="table custom-table" style={{ marginTop: '30px' }}>
                     <thead className="table-light">
                         <tr>
@@ -101,7 +100,7 @@ const UnitSubTab = () => {
                         {isLoadingUnit ? (
                             <tr>
                                 <td colSpan="4" className="text-center">
-                                    <LoadingComponent/>
+                                    <LoadingComponent />
                                 </td>
                             </tr>
                         ) : units && units.length > 0 ? (
@@ -111,7 +110,7 @@ const UnitSubTab = () => {
                                     <td>{unit.name}</td>
                                     <td>{unit.note}</td>
                                     <td>
-                                        <button className="btn btn-sm btn-primary me-2" onClick={handleDetailUnit}>
+                                        <button className="btn btn-sm btn-primary me-2">
                                             <i className="bi bi-pencil-square"></i>
                                         </button>
                                         <button className="btn btn-sm btn-danger">
@@ -130,8 +129,6 @@ const UnitSubTab = () => {
                     </tbody>
                 </table>
             </div>
-
-            {/* Modal thêm đơn vị */}
             <ModalComponent
                 isOpen={showModal}
                 title="THÊM ĐƠN VỊ"
@@ -143,7 +140,8 @@ const UnitSubTab = () => {
                             type="text"
                             placeholder="Nhập tên đơn vị"
                             value={name}
-                            onChange={e => setName(e.target.value)}
+                            onChange={handleOnChangeName}
+                            required={true}
                         />
                         <FormComponent
                             id="noteUnitInput"
@@ -151,13 +149,17 @@ const UnitSubTab = () => {
                             type="text"
                             placeholder="Nhập ghi chú"
                             value={note}
-                            onChange={e => setNote(e.target.value)}
+                            onChange={handleOnChangeNote}
                         />
-                        {mutation.data?.status === 'ERR' && (
-                            <span style={{ color: "red", fontSize: "16px" }}>
-                                {mutation.data?.message}
-                            </span>
-                        )}
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                            {errorMessage && (
+                                <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                    {errorMessage}
+                                </div>
+                            )}
+                            {data?.status === 'ERR' &&
+                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                        </div>
                     </>
                 }
                 textButton1="Thêm"

@@ -60,6 +60,9 @@ export const resetPassword = async (id, data, access_token) => {
     }
 };
 
+
+///////////--------có phân quyền------------/////////////////////
+
 export const getAllListAddress = async (user, access_token) => {
     const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/get-all/${user}`, {
       headers: {

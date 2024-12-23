@@ -1,6 +1,4 @@
 import axios from "axios"
-export const axiosJWT = axios.create() 
-  
 
 export const addListAddress = async (data) => {
     const res = await axios.post(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/create`, data)
