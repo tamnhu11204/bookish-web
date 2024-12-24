@@ -10,7 +10,7 @@ import LoadingComponent from '../LoadingComponent/LoadingComponent';
 const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHiddenNoti = false }) => {
   const user = useSelector((state) => state.user)
   const [name, setUserName] = useState('')
-  console.log('user', user)
+  //console.log('user', user)
 
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
@@ -74,6 +74,14 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                       {user?.isAdmin && (
                         <li>
                           <div className="row">
+                            <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-person-circle" style={{ marginLeft: '5px' }}></i></div>
+                            <div className="col-10">
+                              <a className="dropdown-item" href="/admin-profile" >
+                                Hồ sơ
+                              </a>
+                            </div>
+                          </div>
+                          <div className="row">
                             <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-house-gear" style={{ marginLeft: '5px' }}></i></div>
                             <div className="col-10">
                               <a className="dropdown-item" href="/admin" >
@@ -83,6 +91,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                           </div>
                         </li>
                       )}
+
 
                       {/* Nếu là người dùng thường */}
                       {!user?.isAdmin && (

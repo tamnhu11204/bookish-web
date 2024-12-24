@@ -44,12 +44,12 @@ export const updateUser=async(id, data, access_token)=>{
 
 export const resetPassword = async (id, data, access_token) => {
     try {
-        const response = await axios.put(
+        const response = await axiosJWT.put(
             `${process.env.REACT_APP_API_URL_BACKEND}/user/reset-password/${id}`,
             data,
             {
                 headers: {
-                    Authorization: `Bearer ${access_token}`, // Token gửi trong header
+                    token: `Bearer ${access_token}`, // Token gửi trong header
                 },
             }
         );
