@@ -2,13 +2,13 @@ import React from 'react';
 import HeaderComponent from '../HeaderComponent/HeaderComponent';
 import FooterComponent from '../FooterComponent/FooterComponent';
 
-const DefaultComponent = ({ children, isShowFooter }) => {
+const DefaultComponent = ({ children }) => {
   return (
     <div>
       <HeaderComponent />
       {children}
       {/* Hiển thị Footer nếu isShowFooter là true */}
-      {isShowFooter && <FooterComponent />}
+      <FooterComponent />
     </div>
   );
 };
