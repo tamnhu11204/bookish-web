@@ -19,12 +19,11 @@ const ShopManagementTab = () => {
   const [selectedProvince, setSelectedProvince] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedCommune, setSelectedCommune] = useState('');
-  const [imageSrcs, setImageSrcs] = useState([]);
   const [facebook, setFacebook] = useState('');
   const [insta, setInsta] = useState('');
   const [policy, setPolicy] = useState('');
   const [instruction, setInstruction] = useState('');
-
+  
   // Hiển thị địa chỉ lên dropdown
   const getProvinces = async () => {
     const res = await ListAddressService.getProvinces();
@@ -99,9 +98,9 @@ const ShopManagementTab = () => {
       try {
         const response = await ShopProfileService.getDetailShop();
         const data = response.data;
-  
+
         console.log("Email từ dữ liệu fetched:", data.email);
-  
+
         setEmail(data.email || '');
         setName(data.name || '');
         setSlogan(data.slogan || '');
@@ -112,7 +111,6 @@ const ShopManagementTab = () => {
         setSelectedProvince(data.province || '');
         setSelectedDistrict(data.district || '');
         setSelectedCommune(data.commune || '');
-        setImageSrcs(data.imageSrcs || []);  // Check data.imageSrcs
         setFacebook(data.facebook || '');
         setInsta(data.insta || '');
         setPolicy(data.policy || '');
@@ -121,15 +119,11 @@ const ShopManagementTab = () => {
         console.error('Error fetching shop details:', error);
       }
     };
-  
+
     fetchShopDetails();
   }, []);
-  
 
-  console.log("Dữ liệu ảnh slide: ", imageSrcs);
-
-
-  //////////----update------/////////////
+  /////////----update------/////////////
   const handleOnChangeName = (value) => setName(value);
   const handleOnChangeEmail = (value) => setEmail(value);
   const handleOnChangeSlogan = (value) => setSlogan(value);
@@ -151,34 +145,29 @@ const ShopManagementTab = () => {
   };
   const handleOnChangeSpecificAddress = (value) => setSpecificAddress(value);
 
-  const handleRemoveImage = (index) => {
-    const newImageSrcs = [...imageSrcs];
-    newImageSrcs.splice(index, 1);
-    setImageSrcs(newImageSrcs);
-  };
-
-  const handleImageUpload = (event) => {
-    const files = Array.from(event.target.files);
-    console.log(files); // Check if files are being selected
-    files.forEach((file) => {
+  const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
       new Compressor(file, {
-        quality: 0.6,
+        quality: 0.8,
         maxWidth: 800,
         maxHeight: 800,
         success(result) {
-          const compressedImage = URL.createObjectURL(result);
-          setImageSrcs(prevImages => [...prevImages, compressedImage]);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setLogo(reader.result); // Set the compressed base64 string for the logo
+          };
+          reader.readAsDataURL(result); // Convert compressed logo to base64 string
         },
         error(err) {
-          console.error(err);
-        }
+          console.error("Error compressing logo: ", err);
+        },
       });
-    });
+    }
   };
-  
 
   const handleUpdateClick = async () => {
-
+    // Cập nhật thông tin cửa hàng (không có ảnh)
     const updateData = {
       email,
       name,
@@ -188,9 +177,8 @@ const ShopManagementTab = () => {
       description,
       specificAddress,
       province: selectedProvince,
-      disrict: selectedDistrict,
+      district: selectedDistrict,
       commune: selectedCommune,
-      img: imageSrcs,
       facebook,
       insta,
       policy,
@@ -198,14 +186,16 @@ const ShopManagementTab = () => {
     };
 
     try {
+      // Cập nhật thông tin cửa hàng
       const response = await ShopProfileService.updateShop(updateData);
-      if (response.status === 'OK') {
-        alert("Cập nhật hồ sơ cửa hàng thành công!");
-      } else {
+      if (response.status !== 'OK') {
         alert("Lỗi khi cập nhật hồ sơ cửa hàng.");
+        return;
       }
+
+      alert("Cập nhật hồ sơ cửa hàng thành công!");
     } catch (error) {
-      console.error("Error updating shop: ", error.response ? error.response.data : error);
+      console.error("Error updating shop:", error.response ? error.response.data : error);
       alert("Đã xảy ra lỗi khi cập nhật hồ sơ cửa hàng.");
     }
   };
@@ -223,15 +213,14 @@ const ShopManagementTab = () => {
             alt="Avatar"
             className="avatar-img"
             style={{
-              width: '200px',  // Tăng kích thước logo theo yêu cầu
-              height: '100px',  // Hình chữ nhật
-              borderRadius: '10px', // Nếu bạn muốn có một chút bo góc
+              width: '200px',
+              height: '100px',
+              borderRadius: '10px',
               border: '3px solid #ffffff',
               boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
               marginBottom: '10px',
             }}
           />
-
           <ButtonComponent
             textButton="Chọn logo"
             onClick={() => document.getElementById('fileInput').click()}
@@ -241,6 +230,7 @@ const ShopManagementTab = () => {
             type="file"
             accept="image/*"
             style={{ display: 'none' }}
+            onChange={handleLogoUpload}
           />
         </div>
 
@@ -251,6 +241,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập tên cửa hàng"
           value={name}
           onChange={handleOnChangeName}
+          required={true}
         />
 
         <FormComponent
@@ -260,6 +251,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập slogan cửa hàng"
           value={slogan}
           onChange={handleOnChangeSlogan}
+          required={true}
         />
 
         <FormComponent
@@ -269,6 +261,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập email"
           value={email}
           onChange={handleOnChangeEmail}
+          required={true}
         />
 
         <FormComponent
@@ -278,6 +271,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập số điện thoại"
           value={phone}
           onChange={handleOnChangePhone}
+          required={true}
         />
 
         <FormComponent
@@ -323,96 +317,40 @@ const ShopManagementTab = () => {
         />
       </div>
 
-      <h3 className="title-profile">Ảnh slide</h3>
-      <div className="card-profile" style={{ padding: "0 20px" }}>
-        <div className="input" style={{ marginTop: '10px', marginBottom: '10px' }}>
-          <input type="file" multiple onChange={handleImageUpload} />
-          {imageSrcs.length > 0 && (
-  <div>
-    <h3>Preview Images</h3>
-    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-      {imageSrcs.map((src, index) => (
-        <div key={index} style={{ position: 'relative' }}>
-          <img
-            src={src}
-            alt={`Uploaded preview ${index}`}
-            style={{
-              width: '500px',
-              height: 'auto',
-              margin: '10px',
-              objectFit: 'cover',
-            }}
-          />
-          <button
-            style={{
-              position: 'absolute',
-              top: '0',
-              right: '0',
-              backgroundColor: 'red',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              fontSize: '12px',
-            }}
-            onClick={() => handleRemoveImage(index)}
-          >
-            X
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-
-
-        </div>
-      </div>
-
       <h3 className="title-profile">Thông tin mạng xã hội</h3>
       <div className="card-profile" style={{ padding: "0 20px" }}>
         <FormComponent
           id="facebookInput"
           label="Facebook"
-          type="url"
-          placeholder="Nhập URL Facebook"
+          type="text"
+          placeholder="Nhập link Facebook"
           value={facebook}
           onChange={handleOnChangeFacebook}
+          required={true}
         />
+
         <FormComponent
           id="instaInput"
           label="Instagram"
-          type="url"
-          placeholder="Nhập URL Instagram"
+          type="text"
+          placeholder="Nhập link Instagram"
           value={insta}
           onChange={handleOnChangeInsta}
         />
       </div>
 
       <h3 className="title-profile">Chính sách và hướng dẫn</h3>
-      <div className="card-profile" style={{ padding: "0 20px" }} >
-        <div style={{ marginTop: '10px', marginBottom: '10px' }}>
-          <h4 className="label">Chính sách cửa hàng</h4>
-          <TextEditor
-            value={policy}
-            onChange={handleOnChangePolicy}
-            placeholder="Nhập chính sách cửa hàng"
-          />
-
-          <h4 className="label" style={{ marginTop: '20px' }}>Chính sách cửa hàng</h4>
-          <TextEditor
-            value={instruction}
-            onChange={handleOnChangeInstruction}
-            placeholder="Nhập hướng dẫn mua hàng"
-          />
-        </div>
+      <div className="card-profile" style={{ padding: "0 20px" }}>
+      <h3 className="title" style={{ marginTop: "10px" }}>Chính sách</h3>
+        <TextEditor value={policy} onChange={setPolicy} />
+        <div style={{ marginBottom: "10px", marginTop: "20px"}}>
+        <h3 className="title">Hướng dẫn</h3>
+        <TextEditor value={instruction} onChange={setInstruction} />
+      </div>
       </div>
 
-      <div className="button-container" style={{ marginTop: '20px' }}>
-        <ButtonComponent
-          textButton="Lưu thay đổi"
-          onClick={handleUpdateClick}
-        />
+      <div className="card-footer" style={{ marginTop: "20px"}}>
+        <ButtonComponent textButton="Cập nhật" onClick={handleUpdateClick} />
       </div>
     </div>
   );

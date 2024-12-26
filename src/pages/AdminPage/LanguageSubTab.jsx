@@ -6,34 +6,38 @@ import './AdminPage.css';
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as message from "../../components/MessageComponent/MessageComponent";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 
 const LanguageSubTab = () => {
-    // State quản lý modal
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
+    const [selectedLanguage, setSelectedLanguage] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const queryClient = useQueryClient(); // Get query client for manual cache updates
+
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
-
-    const [showModal, setShowModal] = useState(false);
 
     const resetForm = () => {
         setName('');
         setNote('');
     };
-    const [errorMessage, setErrorMessage] = useState('');
+
     const validateForm = () => {
         if (!name) {
             setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
             return false;
         }
-        setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
+        setErrorMessage(""); // Clear error if valid
         return true;
     };
-    const mutation = useMutationHook(data => LanguageService.addLanguage(data));
 
-    // Lấy danh sách ngôn ngữ từ API
+    const addMutation = useMutationHook(data => LanguageService.addLanguage(data));
+    const updateMutation = useMutationHook(data => LanguageService.updateLanguage(selectedLanguage._id, data));
+    const deleteMutation = useMutationHook(data => LanguageService.deleteLanguage(selectedLanguage._id));
+
     const getAllLanguage = async () => {
         const res = await LanguageService.getAllLanguage();
         return res.data;
@@ -44,7 +48,9 @@ const LanguageSubTab = () => {
         queryFn: getAllLanguage,
     });
 
-    const { data, isSuccess, isError } = mutation;
+    const { data, isSuccess, isError } = addMutation;
+    const { isSuccess: isSuccessUpdate, isError: isErrorUpdate } = updateMutation;
+    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
 
     useEffect(() => {
         if (isSuccess && data?.status !== 'ERR') {
@@ -52,75 +58,55 @@ const LanguageSubTab = () => {
             alert('Thêm ngôn ngữ mới thành công!');
             resetForm();
             setShowModal(false);
+            queryClient.invalidateQueries(['languages']); // Invalidate the cache to refetch languages
         }
-        if (isError) {
+        if (isSuccessUpdate && data?.status !== 'ERR') {
+            message.success();
+            alert('Cập nhật ngôn ngữ thành công!');
+            resetForm();
+            setShowModal(false);
+            queryClient.invalidateQueries(['languages']); // Invalidate the cache to refetch languages
+        }
+        if (isError || isErrorUpdate || isErrorDelete) {
             message.error();
         }
-    }, [isSuccess, isError, data?.status]);
+    }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status, queryClient]);
 
     const handleAddLanguage = () => {
+        resetForm();
+        setShowModal(true);
+        setSelectedLanguage(null);
+    };
+
+    const handleEditLanguage = (language) => {
+        setName(language.name);
+        setNote(language.note);
+        setSelectedLanguage(language);
         setShowModal(true);
     };
 
-    const onSave = async () => {
-        if(validateForm()) await mutation.mutateAsync({ name, note });
+    const handleDeleteLanguage = (language) => {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa ngôn ngữ "${language.name}" không?`)) {
+            deleteMutation.mutate(language._id);
+        }
+    };
 
+    const onSave = async () => {
+        if (validateForm()) {
+            const dataToSave = { name, note };
+            if (selectedLanguage) {
+                dataToSave.id = selectedLanguage._id;
+                updateMutation.mutate(dataToSave); // Update language
+            } else {
+                addMutation.mutate(dataToSave); // Add new language
+            }
+        }
     };
 
     const onCancel = () => {
-        alert('Hủy thao tác!');
         resetForm();
         setShowModal(false);
     };
-
-    // // Hàm mở modal sửa ngôn ngữ
-    // const handleEditLanguage = (language) => {
-    //     setModalTitle('CẬP NHẬT NGÔN NGỮ');
-    //     setModalBody(
-    //         <>
-    //         <FormComponent
-    //                 id="nameInput"
-    //                 type="text"
-    //                 label="Tên ngôn ngữ"
-    //                 defaultValue={language.name}
-    //             ></FormComponent>
-
-    //             <FormComponent
-    //                 id="noteInput"
-    //                 label="Ghi chú"
-    //                 type="text"
-    //                 defaultValue={language.note}
-    //             ></FormComponent>
-    //         </>
-    //     );
-    //     setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
-    //     setOnSave(() => () => {
-    //         alert(`Ngôn ngữ"${language.name}" đã được cập nhật!`);
-    //         setShowModal(false);
-    //     });
-    //     setOnCancel(() => () => {
-    //         alert('Hủy cập nhật ngôn ngữ!');
-    //         setShowModal(false);
-    //     });
-    //     setShowModal(true);
-    // };
-
-    // // Hàm mở modal xóa ngôn ngữ
-    // const handleDeleteLanguage = (language) => {
-    //     setModalTitle('Xác nhận xóa');
-    //     setModalBody(
-    //         <p style={{fontSize:'16px'}}>Bạn có chắc chắn muốn xóa ngôn ngữ <strong>{language.name}</strong> không?</p>
-    //     );
-    //     setTextButton1('Xóa'); // Có thể tùy chỉnh nếu cần
-    //     setOnSave(() => () => {
-    //         alert(`Ngôn ngữ "${language.name}" đã được xóa!`);
-    //         setShowModal(false);
-    //     });
-    //     setOnCancel(() => () => {
-    //         setShowModal(false);
-    //     });
-    //     setShowModal(true);
-    // };
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -147,7 +133,7 @@ const LanguageSubTab = () => {
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '30%' }}>Mã</th>
-                            <th scope="col" style={{ width: '20%' }}>Tên đơn vị</th>
+                            <th scope="col" style={{ width: '20%' }}>Tên ngôn ngữ</th>
                             <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
                             <th scope="col" style={{ width: '10%' }}>Hành động</th>
                         </tr>
@@ -166,10 +152,16 @@ const LanguageSubTab = () => {
                                     <td>{language.name}</td>
                                     <td>{language.note}</td>
                                     <td>
-                                        <button className="btn btn-sm btn-primary me-2">
+                                        <button
+                                            className="btn btn-sm btn-primary me-2"
+                                            onClick={() => handleEditLanguage(language)}
+                                        >
                                             <i className="bi bi-pencil-square"></i>
                                         </button>
-                                        <button className="btn btn-sm btn-danger">
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => handleDeleteLanguage(language)}
+                                        >
                                             <i className="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -188,7 +180,7 @@ const LanguageSubTab = () => {
 
             <ModalComponent
                 isOpen={showModal}
-                title="THÊM NGÔN NGỮ"
+                title={selectedLanguage ? "CẬP NHẬT NGÔN NGỮ" : "THÊM NGÔN NGỮ"}
                 body={
                     <>
                         <FormComponent
@@ -214,12 +206,10 @@ const LanguageSubTab = () => {
                                     {errorMessage}
                                 </div>
                             )}
-                            {data?.status === 'ERR' &&
-                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
                         </div>
                     </>
                 }
-                textButton1="Thêm"
+                textButton1={selectedLanguage ? "Cập nhật" : "Thêm"}
                 onClick1={onSave}
                 onClick2={onCancel}
             />
