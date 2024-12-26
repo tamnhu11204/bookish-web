@@ -3,6 +3,11 @@ import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import FormComponent from '../../components/FormComponent/FormComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
 import './AdminPage.css';
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as StatusService from '../../services/OptionService/StatusService';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useQuery } from '@tanstack/react-query';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 
 const StatusSubTab = () => {
     const statuses = [
@@ -19,6 +24,13 @@ const StatusSubTab = () => {
     ];
 
     // State quản lý modal
+    const [name, setName] = useState('');
+    const [note, setNote] = useState('');
+    const [img, setImage] = useState(null);
+    const [id,setID]= useState('');
+    const handleOnChangeName = (value) => setName(value);
+    const handleOnChangeNote = (value) => setNote(value);
+
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState(null);
@@ -41,6 +53,8 @@ const StatusSubTab = () => {
                     placeholder="Nhập tên loại trạng thái đơn hàng"
                     type="text"
                     label="Loại trạng thái đơn hàng"
+                    value={name}
+                    onChange={handleOnChangeName}
                 ></FormComponent>
 
                 <FormComponent
@@ -48,6 +62,8 @@ const StatusSubTab = () => {
                     label="Ghi chú"
                     type="text"
                     placeholder="Nhập ghi chú"
+                    value={note}
+                    onChange={handleOnChangeNote}
                 ></FormComponent>
 
             </>
@@ -74,6 +90,8 @@ const StatusSubTab = () => {
                     type="text"
                     label="Tên loại trạng thái đơn hàng"
                     defaultValue={status.name}
+                    value={name}
+                    onChange={handleOnChangeName}
                 ></FormComponent>
 
                 <FormComponent
@@ -81,6 +99,8 @@ const StatusSubTab = () => {
                     label="Ghi chú"
                     type="text"
                     defaultValue={status.note}
+                    value= {note}
+                    onChange={handleOnChangeNote}
                 ></FormComponent>
             </>
         );
