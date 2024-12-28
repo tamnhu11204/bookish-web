@@ -12,22 +12,30 @@ import LoadingComponent from '../../components/LoadingComponent/LoadingComponent
 const FormSubTab = () => {
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
+    const [selectedFormat, setSelectedFormat] = useState(null); // Lưu trữ format đang được chọn
+    const [showModal, setShowModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    // Hàm thay đổi tên hình thức
     const handleOnChangeName = (value) => setName(value);
+    
+    // Hàm thay đổi ghi chú
     const handleOnChangeNote = (value) => setNote(value);
 
-    const [showModal, setShowModal] = useState(false);
-
-    const [errorMessage, setErrorMessage] = useState('');
+    // Kiểm tra form có hợp lệ không
     const validateForm = () => {
         if (!name) {
-            setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
+            setErrorMessage("Vui lòng nhập tên hình thức!");
             return false;
         }
         setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
         return true;
     };
 
-    const mutation = useMutationHook(data => FormatService.addFormat(data));
+    // Gọi hook để thêm hình thức
+    const addMutation = useMutationHook(data => FormatService.addFormat(data));
+    const updateMutation = useMutationHook(data => FormatService.updateFormat(selectedFormat._id, data)); // Sửa format
+    const deleteMutation = useMutationHook(data => FormatService.deleteFormat(data)); // Xóa format
 
     // Lấy danh sách hình thức từ API
     const getAllFormat = async () => {
@@ -40,11 +48,15 @@ const FormSubTab = () => {
         queryFn: getAllFormat,
     });
 
-    const { data, isSuccess, isError } = mutation;
+    const { data, isSuccess, isError } = addMutation;
+    const { isSuccess: isSuccessUpdate, isError: isErrorUpdate } = updateMutation;
+    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
 
+    // Reset form sau khi thêm hoặc sửa
     const resetForm = () => {
         setName('');
         setNote('');
+        setSelectedFormat(null);
     };
 
     useEffect(() => {
@@ -54,73 +66,57 @@ const FormSubTab = () => {
             resetForm();
             setShowModal(false);
         }
-        if (isError) {
+        if (isSuccessUpdate && data?.status !== 'ERR') {
+            message.success();
+            alert('Cập nhật hình thức thành công!');
+            resetForm();
+            setShowModal(false);
+        }
+        if (isError || isErrorUpdate || isErrorDelete) {
             message.error();
         }
-    }, [isSuccess, isError, data?.status]);
+    }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status]);
 
+    // Mở modal để thêm hình thức
     const handleAddFormat = () => {
+        setShowModal(true);
+        setSelectedFormat(null);
+    };
+
+    // Mở modal để sửa hình thức
+    const handleEditFormat = (format) => {
+        setName(format.name);
+        setNote(format.note);
+        setSelectedFormat(format);
         setShowModal(true);
     };
 
+    // Xử lý lưu hình thức
     const onSave = async () => {
-       if(validateForm()) await mutation.mutateAsync({ name, note });
+       if (validateForm()) {
+            const dataToSave = { name, note };
+            if (selectedFormat) {
+                dataToSave.id = selectedFormat._id;
+                updateMutation.mutate(dataToSave); // Cập nhật hình thức
+            } else {
+                addMutation.mutate(dataToSave); // Thêm mới hình thức
+            }
+        }
     };
 
+    // Hủy thao tác thêm hoặc sửa hình thức
     const onCancel = () => {
         alert('Hủy thao tác!');
         resetForm();
         setShowModal(false);
     };
 
-    // // Hàm mở modal sửa ngôn ngữ
-    // const handleEditLanguage = (language) => {
-    //     setModalTitle('CẬP NHẬT HÌNH THỨC');
-    //     setModalBody(
-    //         <>
-    //         <FormComponent
-    //                 id="nameInput"
-    //                 type="text"
-    //                 label="Tên hình thức"
-    //                 defaultValue={language.name}
-    //             ></FormComponent>
-
-    //             <FormComponent
-    //                 id="noteInput"
-    //                 label="Ghi chú"
-    //                 type="text"
-    //                 defaultValue={language.note}
-    //             ></FormComponent>
-    //         </>
-    //     );
-    //     setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
-    //     setOnSave(() => () => {
-    //         alert(`Ngôn ngữ"${language.name}" đã được cập nhật!`);
-    //         setShowModal(false);
-    //     });
-    //     setOnCancel(() => () => {
-    //         alert('Hủy cập nhật ngôn ngữ!');
-    //         setShowModal(false);
-    //     });
-    //     setShowModal(true);
-    // };
-
-    // // Hàm mở modal xóa ngôn ngữ
-    // const handleDeleteLanguage = (language) => {
-    //     setModalTitle('Xác nhận xóa');
-    //     setModalBody(
-    //         <p style={{fontSize:'16px'}}>Bạn có chắc chắn muốn xóa ngôn ngữ <strong>{language.name}</strong> không?</p>
-    //     );
-    //     setTextButton1('Xóa'); // Có thể tùy chỉnh nếu cần
-    //     setOnSave(() => () => {
-    //         alert(`Ngôn ngữ "${language.name}" đã được xóa!`);
-    //         setShowModal(false);
-    //     });
-    //     setOnCancel(() => () => {
-    //         setShowModal(false);
-    //     });
-    //     setShowModal(true);
-    // };
+    // Xử lý xóa hình thức
+    const handleDeleteFormat = (formatId) => {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa hình thức này không?`)) {
+            deleteMutation.mutate(formatId);
+        }
+    };
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -147,7 +143,7 @@ const FormSubTab = () => {
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '30%' }}>Mã</th>
-                            <th scope="col" style={{ width: '20%' }}>Tên đơn vị</th>
+                            <th scope="col" style={{ width: '20%' }}>Tên hình thức</th>
                             <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
                             <th scope="col" style={{ width: '10%' }}>Hành động</th>
                         </tr>
@@ -166,10 +162,16 @@ const FormSubTab = () => {
                                     <td>{format.name}</td>
                                     <td>{format.note}</td>
                                     <td>
-                                        <button className="btn btn-sm btn-primary me-2">
+                                        <button
+                                            className="btn btn-sm btn-primary me-2"
+                                            onClick={() => handleEditFormat(format)}
+                                        >
                                             <i className="bi bi-pencil-square"></i>
                                         </button>
-                                        <button className="btn btn-sm btn-danger">
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => handleDeleteFormat(format._id)}
+                                        >
                                             <i className="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -186,9 +188,10 @@ const FormSubTab = () => {
                 </table>
             </div>
 
+            {/* Modal thêm/sửa hình thức */}
             <ModalComponent
                 isOpen={showModal}
-                title="THÊM HÌNH THỨC"
+                title={selectedFormat ? "CẬP NHẬT HÌNH THỨC" : "THÊM HÌNH THỨC"}
                 body={
                     <>
                         <FormComponent
@@ -208,7 +211,8 @@ const FormSubTab = () => {
                             value={note}
                             onChange={handleOnChangeNote}
                         />
-                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                        {/* Hiển thị lỗi nếu có */}
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
                             {errorMessage && (
                                 <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
                                     {errorMessage}
@@ -219,7 +223,7 @@ const FormSubTab = () => {
                         </div>
                     </>
                 }
-                textButton1="Thêm"
+                textButton1={selectedFormat ? "Cập nhật" : "Thêm"}
                 onClick1={onSave}
                 onClick2={onCancel}
             />

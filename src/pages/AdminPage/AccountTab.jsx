@@ -8,8 +8,10 @@ import * as message from "../../components/MessageComponent/MessageComponent";
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 import { updateUser } from '../../redux/slides/UserSlide';
 import Compressor from 'compressorjs';
+import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 
 const AccountTab = () => {
+
     const formStyle = {
         fontSize: "16px", // Tăng cỡ chữ toàn bộ form
     };
@@ -22,6 +24,7 @@ const AccountTab = () => {
     const [birthday, setBirthday] = useState('');
     const [gender, setGender] = useState('');
 
+    // Mutation cho việc cập nhật thông tin hồ sơ
     const mutation = useMutationHook(
         async (data) => {
             const { id, ...rests } = data;
@@ -31,7 +34,7 @@ const AccountTab = () => {
     );
 
     const dispatch = useDispatch();
-    const { data, isLoading, isSuccess, isError } = mutation;
+    const { data, isLoading: isLoadingProfile, isSuccess, isError } = mutation;
 
     useEffect(() => {
         if (user) {
@@ -95,46 +98,76 @@ const AccountTab = () => {
 
     const handleUpdate = () => {
         const imgData = img instanceof File ? img : img;
-
         mutation.mutate({ id: user?.id, email, name, phone, img: imgData, gender, birthday, access_token: user?.access_token });
     };
 
     ////////////////--------Reset password-----------//////////////
-    const [oldPassword, setOldPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [oldPassword, setOldPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const mutationPass = useMutationHook(
-        async (dataPass) => {
-            const { id, ...rests } = dataPass;
-            const response = await UserService.resetPassword(id, rests);
-            return response;
-        }
-    );
+    const resetForm = () => {
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setErrorMessage("");
+    };
 
-    const { dataPass, isLoadingPass, isSuccessPass, isErrorPass } = mutationPass;
+    // Mutation cho việc đổi mật khẩu
+    const mutationEdit = useMutationHook(async (data) => {
+        const { id, oldPassword, newPassword, access_token } = data; // Giải nén dữ liệu
+        const response = await UserService.resetPassword(id, { oldPassword, newPassword }, access_token);
+        return response;
+    });
+
+    const { data: dataEdit, isLoading: isLoadingPassword, isSuccess:isSuccessEdit, isError:isErrorEdit } = mutationEdit;
+
+    const handleOnChangeOld = (value) => {
+        setOldPassword(value.trim());
+        setErrorMessage("");
+    };
+
+    const handleOnChangeNew = (value) => {
+        setNewPassword(value.trim());
+        setErrorMessage("");
+    };
+
+    const handleOnChangeConfirm = (value) => {
+        setConfirmPassword(value.trim());
+        setErrorMessage("");
+    };
 
     useEffect(() => {
-        if (isSuccessPass && dataPass?.status !== 'ERR') {
+        if (isSuccessEdit && dataEdit?.status !== "ERR") {
             message.success();
-            alert('Cập nhật mật khẩu thành công');
-        } else if (isErrorPass) {
+            alert("Cập nhật mật khẩu thành công!");
+            resetForm();
+        } else if (isErrorEdit) {
+            setErrorMessage(dataEdit?.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
             message.error();
         }
-    }, [isErrorPass, isSuccessPass, dataPass]);
+    }, [dataEdit, isErrorEdit, isSuccessEdit]);
 
-    const handleOnChangeOld = (value) => setOldPassword(value);
-    const handleOnChangeNew = (value) => setNewPassword(value);
-    const handleOnChangeConfirm = (value) => setConfirmPassword(value);
+    const handleResetPassword = async() => {
+        if (newPassword !== confirmPassword) {
+            setErrorMessage("Xác nhận mật khẩu không khớp! Vui lòng nhập lại.");
+            return;
+        }
 
-    const handleResetPassword = () => {
-        mutation.mutate({ id: user?.id, oldPassword, newPassword, confirmPassword, access_token: user?.access_token });
-    }
+        mutationEdit.mutate({
+            id: user?.id,
+            oldPassword,
+            newPassword,
+            access_token: user?.access_token,
+        });
 
+        console.log('data',mutationEdit)
+    };
 
     return (
-        <><div style={{ padding: '0 20px' }}>
+        <><HeaderComponent isHiddenSearch isHiddenCart isHiddenNoti/>
+        <div style={{ padding: '0 20px' }}>
             <div className="title-section">
                 <h3 className="text mb-0">TÀI KHOẢN CỦA TÔI</h3>
             </div>
@@ -144,7 +177,6 @@ const AccountTab = () => {
                 <form className="p-4 border rounded" style={{ fontSize: '16px' }}>
                     {/* Avatar */}
                     <div className="avatar-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px' }}>
-                        {/* Hình đại diện */}
                         <img
                             src={img || 'https://via.placeholder.com/100'}
                             alt="Avatar"
@@ -158,14 +190,10 @@ const AccountTab = () => {
                                 marginBottom: '10px',
                             }}
                         />
-
-                        {/* Nút chọn ảnh */}
                         <ButtonComponent
                             textButton="Chọn ảnh"
                             onClick={() => document.getElementById('fileInput').click()}
                         />
-
-                        {/* Input file ẩn */}
                         <input
                             id="fileInput"
                             type="file"
@@ -175,7 +203,6 @@ const AccountTab = () => {
                         />
                     </div>
 
-                    {/* Tên đăng nhập */}
                     <FormComponent
                         id="nameInput"
                         label="Họ và tên"
@@ -185,7 +212,6 @@ const AccountTab = () => {
                         onChange={handleOnChangeName}
                     />
 
-                    {/* Email */}
                     <FormComponent
                         id="emailInput"
                         label="Email"
@@ -195,7 +221,6 @@ const AccountTab = () => {
                         onChange={handleOnChangeEmail}
                     />
 
-                    {/* Số điện thoại */}
                     <FormComponent
                         id="phoneInput"
                         label="Số điện thoại"
@@ -205,7 +230,6 @@ const AccountTab = () => {
                         onChange={handleOnChangePhone}
                     />
 
-                    {/* Giới tính */}
                     <div className="mb-3">
                         <label className="form-label">Giới tính</label>
                         <div>
@@ -251,7 +275,6 @@ const AccountTab = () => {
                         </div>
                     </div>
 
-                    {/* Ngày sinh */}
                     <FormComponent
                         id="birthdayInput"
                         label="Ngày sinh"
@@ -261,12 +284,10 @@ const AccountTab = () => {
                         onChange={handleOnChangeBirthday}
                     />
 
-                    {data?.status === 'ERR' &&
-                        <span style={{ color: 'red', fontSize: '16px' }}>{data?.message}</span>}
+                    {data?.status === 'ERR' && <span style={{ color: 'red', fontSize: '16px' }}>{data?.message}</span>}
 
-                    {/* Nút lưu thay đổi */}
                     <div className="d-flex justify-content-end mt-3">
-                        <LoadingComponent isLoading={isLoading}>
+                        <LoadingComponent isLoading={isLoadingProfile}>
                             <ButtonComponent textButton="Cập nhật" onClick={handleUpdate} />
                         </LoadingComponent>
                     </div>
@@ -276,7 +297,6 @@ const AccountTab = () => {
             <div className="container mt-5">
                 <div style={{ fontSize: '20px', color: '#198754', marginBottom: '10px' }}>Đổi mật khẩu</div>
                 <form className="p-4 border rounded" style={formStyle}>
-                    {/* Mật khẩu cũ */}
                     <FormComponent
                         id="oldPassInput"
                         label="Mật khẩu cũ"
@@ -286,7 +306,6 @@ const AccountTab = () => {
                         onChange={handleOnChangeOld}
                     />
 
-                    {/* Mật khẩu mới */}
                     <FormComponent
                         id="newPassInput"
                         label="Mật khẩu mới"
@@ -296,7 +315,6 @@ const AccountTab = () => {
                         onChange={handleOnChangeNew}
                     />
 
-                    {/* Xác nhận mật khẩu */}
                     <FormComponent
                         id="confirmPassInput"
                         label="Xác nhận mật khẩu"
@@ -306,19 +324,17 @@ const AccountTab = () => {
                         onChange={handleOnChangeConfirm}
                     />
 
-                    <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
                         {errorMessage && (
                             <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
                                 {errorMessage}
                             </div>
                         )}
-                        {dataPass?.status === 'ERR' &&
-                            <span style={{ color: "red", fontSize: "16px" }}>{dataPass?.message}</span>}
+                        {dataEdit?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{dataEdit?.message}</span>}
                     </div>
 
-                    {/* Nút xác nhận */}
                     <div className="d-flex justify-content-end">
-                        <LoadingComponent isLoading={isLoadingPass}>
+                        <LoadingComponent isLoading={isLoadingPassword}>
                             <ButtonComponent textButton="Cập nhật" onClick={handleResetPassword} />
                         </LoadingComponent>
                     </div>
@@ -327,9 +343,6 @@ const AccountTab = () => {
         </div>
         </>
     );
-
-}
-
-
+};
 
 export default AccountTab;

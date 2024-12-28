@@ -5,33 +5,14 @@ import FormComponent from '../../components/FormComponent/FormComponent';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import ProductDetailForm from './ProductEdit';
 import AddProductForm from './ProductAdd';
+import * as ProductService from "../../services/ProductService" ;
+import { useQuery } from '@tanstack/react-query';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+
 
 const ProductTab = () => {
     const [activeTab, setActiveTab] = useState("all");
-    const products = [
-        {
-            id :103,
-            image :'https://via.placeholder.com/50',
-                    name : "Vợ nhặt",
-                    price : "50.000 đ",
-                    discount : "50%",
-                    type :"Văn học Việt Nam",
-                    placeholder:"Nhập mã đơn",
-                    inventory : 12,
-                    sold : 12
-        },
-        {
-            id: 104,
-            image: 'https://via.placeholder.com/50',
-            name : "Vợ nhặt",
-            price : "50.000 đ",
-            discount : "50%",
-            type :"Văn học Việt Nam",
-            placeholder:"Nhập mã đơn",
-            inventory : 12,
-            sold : 12
-        },
-    ];
+    
     // State quản lý modal
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
@@ -44,6 +25,16 @@ const ProductTab = () => {
     const handleCloseModal = () => {
         setShowModal(false);
     };
+
+    const getAllProduct = async () => {
+            const res = await ProductService.getAllProduct();
+            return res.data;
+        };
+    
+        const { isLoading: isLoadingProduct, data: products } = useQuery({
+            queryKey: ['products'],
+            queryFn: getAllProduct,
+        });
 
   
 
@@ -110,7 +101,14 @@ const ProductTab = () => {
                         </tr>
                     </thead>
                     <tbody className="table-content">
-                        {products.map((product) => (
+                    {isLoadingProduct ? (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    <LoadingComponent />
+                                </td>
+                            </tr>
+                        ) : products && products.length > 0 ? (
+                        products.map((product) => (
                             <tr key={product.id}>
                                 <td>{product.id}</td>
                             <td>
@@ -123,8 +121,8 @@ const ProductTab = () => {
                             <td>{product.name}</td>
                             <td>{product.price}</td>
                             <td>{product.discount}</td>
-                            <td>{product.type}</td>
-                            <td>{product.inventory}</td>
+                            <td>{product.category}</td>
+                            <td>{product.stock}</td>
                             <td>{product.sold}</td>
                             <td>
                                     <button
@@ -146,7 +144,14 @@ const ProductTab = () => {
                                 
                             </td>
                             </tr>
-                        ))}
+                        ))): (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    Không có dữ liệu để hiển thị.
+                                </td>
+                            </tr>
+                        )
+                    }
                     </tbody>
                 </table>
             </div>

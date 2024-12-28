@@ -69,13 +69,14 @@ function App() {
             {routes.map((route) => {
               const Page = route.page;
               const isCheckAuth = !route.isPrivate || user.isAdmin;
-              const Layout = route.isShowHeader ? DefaultComponent : Fragment;
+              const Layout = route.isShowHeader||route.isShowFooter ? DefaultComponent : Fragment;
+
               return (
                 <Route
                   key={route.path}
                   path={isCheckAuth ? route.path : undefined}
                   element={
-                    <Layout>
+                    <Layout isShowFooter={routes.isShowFooter}>
                       <Page />
                     </Layout>
                   }
@@ -87,6 +88,7 @@ function App() {
       </LoadingComponent>
     </div>
   );
+  
 }
 
 export default App;

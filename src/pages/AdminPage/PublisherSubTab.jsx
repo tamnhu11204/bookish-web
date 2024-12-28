@@ -32,7 +32,7 @@ const PublisherSubTab = () => {
     const mutationEdit = useMutationHook(data => PublisherService.updatePublisher(id, data));
     const mutationDelete = useMutationHook(data => PublisherService.deletePublisher(id));
 
-    // Lấy danh sách nhà cung cấp từ API
+    // Lấy danh sách nhà xb từ API
     const getAllPublisher = async () => {
         const res = await PublisherService.getAllPublisher();
         return res.data;

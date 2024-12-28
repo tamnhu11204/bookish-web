@@ -13,41 +13,63 @@ const PasswordTab = () => {
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const resetForm = () => {
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setErrorMessage("");
+    };
 
     const mutation = useMutationHook(async (data) => {
-        const { id, access_token, ...rest } = data;
-        const response = await UserService.resetPassword(id, rest, access_token);
+        const { id, oldPassword, newPassword, access_token } = data; // Giải nén dữ liệu
+        const response = await UserService.resetPassword(id, { oldPassword, newPassword }, access_token);
         return response;
     });
+    
 
     const { data, isLoading, isSuccess, isError } = mutation;
+
+    const handleOnChangeOld = (value) => {
+        setOldPassword(value.trim());
+        setErrorMessage("");
+    };
+
+    const handleOnChangeNew = (value) => {
+        setNewPassword(value.trim());
+        setErrorMessage("");
+    };
+
+    const handleOnChangeConfirm = (value) => {
+        setConfirmPassword(value.trim());
+        setErrorMessage("");
+    };
 
     useEffect(() => {
         if (isSuccess && data?.status !== "ERR") {
             message.success();
-            alert("Cập nhật mật khẩu thành công");
+            alert("Cập nhật mật khẩu thành công!");
+            resetForm();
         } else if (isError) {
+            setErrorMessage(data?.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
             message.error();
         }
     }, [data?.status, isError, isSuccess]);
 
-    const handleUpdate = () => {
+    const handleUpdate = async() => {
         if (newPassword !== confirmPassword) {
-            alert("Mật khẩu xác nhận không khớp!");
+            setErrorMessage("Xác nhận mật khẩu không khớp! Vui lòng nhập lại.");
             return;
         }
-
-        console.log("Access Token:", user?.access_token); 
-        console.log("Redux State - User:", user);// Log token
-        console.log("User ID:", user?.id);
 
         mutation.mutate({
             id: user?.id,
             oldPassword,
             newPassword,
-            confirmPassword,
             access_token: user?.access_token,
         });
+        console.log('data',user?.id)
     };
 
     return (
@@ -63,7 +85,7 @@ const PasswordTab = () => {
                         placeholder="Nhập mật khẩu cũ"
                         type="password"
                         value={oldPassword}
-                        onChange={setOldPassword}
+                        onChange={handleOnChangeOld}
                     />
                     <FormComponent
                         id="newPassword"
@@ -71,7 +93,7 @@ const PasswordTab = () => {
                         placeholder="Nhập mật khẩu mới"
                         type="password"
                         value={newPassword}
-                        onChange={setNewPassword}
+                        onChange={handleOnChangeNew}
                     />
                     <FormComponent
                         id="confirmPassword"
@@ -79,11 +101,25 @@ const PasswordTab = () => {
                         placeholder="Nhập lại mật khẩu trên"
                         type="password"
                         value={confirmPassword}
-                        onChange={setConfirmPassword}
+                        onChange={handleOnChangeConfirm}
                     />
-                    {data?.status === "ERR" && (
-                        <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>
-                    )}
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+                        {errorMessage && (
+                            <div
+                                style={{
+                                    color: "red",
+                                    textAlign: "center",
+                                    marginBottom: "10px",
+                                    fontSize: "16px",
+                                }}
+                            >
+                                {errorMessage}
+                            </div>
+                        )}
+                        {data?.status === "ERR" && (
+                            <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>
+                        )}
+                    </div>
                     <div className="d-flex justify-content-end mt-3">
                         <LoadingComponent isLoading={isLoading}>
                             <ButtonComponent textButton="Cập nhật" onClick={handleUpdate} />

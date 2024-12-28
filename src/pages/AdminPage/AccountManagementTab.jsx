@@ -130,14 +130,14 @@ const AccountManagementTab = () => {
             const message = user?.active
                 ? "Bạn có chắc chắn muốn chặn trạng thái hoạt động của tài khoản này?"
                 : "Bạn có chắc chắn muốn khôi phục trạng thái hoạt động của tài khoản này?";
-    
+
             // eslint-disable-next-line no-restricted-globals
             const isConfirmed = confirm(message);
-    
+
             if (isConfirmed) {
                 // Gọi service để chuyển đổi trạng thái active
                 await UserService.toggleActiveUser(user._id, getUser?.access_token);
-    
+
                 const successMessage = user?.active
                     ? "Tài khoản đã bị chặn thành công!"
                     : "Tài khoản đã được khôi phục thành công!";
@@ -148,7 +148,7 @@ const AccountManagementTab = () => {
             alert("Đã xảy ra lỗi khi thay đổi trạng thái tài khoản.");
         }
     };
-    
+
 
     //Nội dung ở tab tài khoản khách hàng
     const customerContent = (
@@ -202,16 +202,15 @@ const AccountManagementTab = () => {
                                 <td>{accountUser.email}</td>
                                 <td>{accountUser.phone}</td>
                                 <td>
-                                <button
-                                        className={`btn btn-sm ${
-                                            accountUser.active ? "btn-danger" : "btn-primary"
-                                        }`}
+                                    <button
+                                        className={`btn btn-sm ${accountUser.active ? "btn-danger" : "btn-primary"
+                                            }`}
                                         onClick={() => handleToggleActive(accountUser)}
                                     >
-                                        {accountUser.active ? 
-                                        <i class="bi bi-exclamation-lg"></i> 
-                                        : 
-                                        <i class="bi bi-arrow-clockwise"></i>}
+                                        {accountUser.active ?
+                                            <i class="bi bi-exclamation-lg"></i>
+                                            :
+                                            <i class="bi bi-arrow-clockwise"></i>}
                                     </button>
                                 </td>
                             </tr>
@@ -429,6 +428,87 @@ const AccountManagementTab = () => {
                 onClick1={onSave}
                 onClick2={onCancel}
             />
+
+            {/* <ModalComponent
+                isOpen={showModal}
+                title="THÊM TÀI KHOẢN ADMIN"
+                body={
+                    <>
+                        <FormComponent
+                            id="emailInput"
+                            placeholder="Nhập email"
+                            type="email"
+                            label="Email"
+                            value={email}
+                            onChange={handleOnChangeEmail}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="passwordInput"
+                            label="Mật khẩu"
+                            type="password"
+                            placeholder="Nhập mật khẩu"
+                            value={password}
+                            onChange={handleOnChangePassword}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="confirmPasswordInput"
+                            label="Xác nhận mật khẩu"
+                            type="password"
+                            placeholder="Nhập lại mật khẩu ở trên"
+                            value={confirmPassword}
+                            onChange={handleOnChangeConfirmPassword}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="nameInput"
+                            label="Họ và tên"
+                            type="text"
+                            placeholder="Nhập họ và tên"
+                            value={name}
+                            onChange={handleOnChangeName}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="phoneInput"
+                            label="Số điện thoại"
+                            type="tel"
+                            placeholder="Nhập số điện thoại"
+                            value={phone}
+                            onChange={handleOnChangePhone}
+                            required={true}
+                        />
+
+                        <FormComponent
+                            id="birthInput"
+                            label="Ngày sinh"
+                            type="date"
+                            placeholder="Chọn ngày sinh"
+                            value={birthday}
+                            onChange={handleOnChangeBirth}
+                            required={true}
+                        />
+
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
+                            {errorMessage && (
+                                <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                    {errorMessage}
+                                </div>
+                            )}
+                            {data?.status === 'ERR' &&
+                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                        </div>
+                    </>
+                }
+                textButton1="Thêm"
+                onClick1={onSave}
+                onClick2={onCancel}
+            /> */}
         </div>
     );
 };

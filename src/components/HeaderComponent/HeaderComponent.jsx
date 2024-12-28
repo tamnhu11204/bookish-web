@@ -1,49 +1,56 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import logo from '../../assets/img/logo.png';
+import logo from '../../assets/img/logo.png'; // Đặt logo mặc định
 import * as UserService from '../../services/UserService';
 import Styles from '../../style';
 import { resetUser } from '../../redux/slides/UserSlide';
-import LoadingComponent from '../LoadingComponent/LoadingComponent';
-
+import LoadingComponent from '../LoadingComponent/LoadingComponent'; // Selector để lấy shop từ Redux
 
 const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHiddenNoti = false }) => {
-  const user = useSelector((state) => state.user)
-  const [name, setUserName] = useState('')
-  console.log('user', user)
-
-  const [loading, setLoading] = useState(false)
-  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user);
+  const shop = useSelector((state) => state.shop); // Lấy thông tin shop từ Redux
+  const [name, setUserName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleLogout = async () => {
-    setLoading(true)
-    await UserService.logoutUser()
-    dispatch(resetUser())
-    setLoading(false)
-  }
+    setLoading(true);
+    await UserService.logoutUser();
+    dispatch(resetUser());
+    setLoading(false);
+  };
 
   useEffect(() => {
-    setLoading(true)
-    setUserName(user?.name)
-    setLoading(false)
-  }, [user?.name])
+    setLoading(true);
+    setUserName(user?.name);
+    setLoading(false);
+  }, [user?.name]);
 
   return (
     <>
-      <nav className="navbar" style={{ backgroundColor: '#198754', height: '60px' }} >
+      <nav className="navbar" style={{ backgroundColor: '#198754', height: '60px' }}>
         <div className="container">
           <a className="navbar-brand" href="/">
-            <img src={logo} alt="Logo" style={{ height: '40px', width: 'auto' }} />
+            {/* Hiển thị logo từ Redux hoặc logo mặc định nếu không có */}
+            <img
+              src={shop?.logo || logo} // Sử dụng logo từ Redux hoặc logo mặc định
+              alt="Logo"
+              style={{ height: '40px', width: 'auto' }}
+            />
           </a>
 
           {!isHiddenSearch && (
-            <input className="form-control" type="text" placeholder="Tìm" style={{ width: '500px', height: '35px', fontSize: '14px' }}></input>
+            <input
+              className="form-control"
+              type="text"
+              placeholder="Tìm"
+              style={{ width: '500px', height: '35px', fontSize: '14px' }}
+            />
           )}
 
-          <div className="row" >
-
+          <div className="row">
             {!isHiddenCart && (
-              <div className="col-3" >
+              <div className="col-3">
                 <a className="nav-link" href="/shoppingcart">
                   <i className="bi bi-cart3" style={Styles.iconHeader}></i>
                 </a>
@@ -56,7 +63,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
               </div>
             )}
 
-            <div className="col-6" >
+            <div className="col-6">
               <LoadingComponent isLoading={loading}>
                 {user?.name ? (
                   <div className="btn-group" role="group">
@@ -70,13 +77,24 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                       Hello, {user.name}
                     </button>
                     <ul className="dropdown-menu" style={{ fontSize: '16px' }}>
-                      {/* Nếu là người dùng admin */}
                       {user?.isAdmin && (
                         <li>
                           <div className="row">
-                            <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-house-gear" style={{ marginLeft: '5px' }}></i></div>
+                            <div className="col-2" style={{ marginTop: '3px' }}>
+                              <i className="bi bi-person-circle" style={{ marginLeft: '5px' }}></i>
+                            </div>
                             <div className="col-10">
-                              <a className="dropdown-item" href="/admin" >
+                              <a className="dropdown-item" href="/admin-profile">
+                                Hồ sơ
+                              </a>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-2" style={{ marginTop: '3px' }}>
+                              <i className="bi bi-house-gear" style={{ marginLeft: '5px' }}></i>
+                            </div>
+                            <div className="col-10">
+                              <a className="dropdown-item" href="/admin">
                                 Hệ thống
                               </a>
                             </div>
@@ -84,13 +102,14 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                         </li>
                       )}
 
-                      {/* Nếu là người dùng thường */}
                       {!user?.isAdmin && (
                         <li>
                           <div className="row">
-                            <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-person-circle" style={{ marginLeft: '5px' }}></i></div>
+                            <div className="col-2" style={{ marginTop: '3px' }}>
+                              <i className="bi bi-person-circle" style={{ marginLeft: '5px' }}></i>
+                            </div>
                             <div className="col-10">
-                              <a className="dropdown-item" href="/profile" >
+                              <a className="dropdown-item" href="/profile">
                                 Hồ sơ
                               </a>
                             </div>
@@ -98,14 +117,15 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                         </li>
                       )}
 
-                      {/* Đăng xuất */}
                       <li>
                         <div className="row">
-                          <div className="col-2" style={{ marginTop: '3px' }}><i className="bi bi-box-arrow-right" style={{ marginLeft: '5px' }}></i></div>
+                          <div className="col-2" style={{ marginTop: '3px' }}>
+                            <i className="bi bi-box-arrow-right" style={{ marginLeft: '5px' }}></i>
+                          </div>
                           <div className="col-10">
-                            <btn className="dropdown-item" onClick={handleLogout} >
+                            <button className="dropdown-item" onClick={handleLogout}>
                               Đăng xuất
-                            </btn>
+                            </button>
                           </div>
                         </div>
                       </li>
@@ -160,6 +180,6 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
       </nav>
     </>
   );
-}
+};
 
 export default HeaderComponent;

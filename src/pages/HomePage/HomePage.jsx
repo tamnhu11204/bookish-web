@@ -6,10 +6,11 @@ import img3 from '../../assets/img/img3.jpg'
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
 import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent'
 import CardComponent from '../../components/CardComponent/CardComponent'
+import * as PublisherService from '../../services/OptionService/PublisherService';
+import { useQuery } from '@tanstack/react-query'
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent'
 
 const HomePage = () => {
-
-
   const catagoryInfo = (
     <>
       <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
@@ -58,17 +59,41 @@ const HomePage = () => {
     </>
   )
 
+  /////////////----------NXB------------///////////
+
+  // Lấy danh sách nhà xb từ API
+  const getAllPublisher = async () => {
+    const res = await PublisherService.getAllPublisher();
+    return res.data;
+  };
+
+  const { isLoading: isLoadingPublisher, data: publishers } = useQuery({
+    queryKey: ['publishers'],
+    queryFn: getAllPublisher,
+  });
+
   const publisherInfo = (
     <>
       <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-        {[...Array(5)].map((_, index) => (
-          <MiniCardComponent key={index}
-            img={img3}
-            content="Văn học" />
-        ))}
+        {isLoadingPublisher ? (
+          <LoadingComponent isLoading={isLoadingPublisher} />
+        ) : publishers && publishers.length > 0 ? (
+          publishers.map((publisher) => (
+            <MiniCardComponent 
+              key={publisher._id}
+              img={publisher.img}
+              content={publisher.name} 
+            />
+          ))
+        ) : (
+          <div className="text-center">
+            Không có dữ liệu để hiển thị.
+          </div>
+        )}
       </div>
     </>
   )
+  
 
   const monthlyBestSellInfo = (
     <>

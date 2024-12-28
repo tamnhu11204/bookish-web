@@ -16,12 +16,15 @@ import AdminPage from "../pages/AdminPage/AdminPage";
 import MonthlyBestSellPage from "../pages/MonthlyBestSellPage/MonthlyBestSellPage";
 import DiscountPage from "../pages/DiscountPage/DiscountPage";
 import OrderDetailsPage from "../pages/OrderDetailsPage/OrderDetailsPage";
+import AccountTab from "../pages/AdminPage/AccountTab";
 
 export const routes =[
     {
         path: '/',
         page: HomePage,
         isShowHeader: true
+        
+        
     },
 
     {
@@ -33,7 +36,7 @@ export const routes =[
     {
         path: '/login',
         page: LogInPage,
-        //isShowHeader: true
+        isShowFooter: true
     },
 
     {
@@ -123,6 +126,12 @@ export const routes =[
         path: '/admin',
         page: AdminPage,
         //isShowHeader: true,
+        isPrivate: true
+    },
+
+    {
+        path: '/admin-profile',
+        page: AccountTab,
         isPrivate: true
     },
 

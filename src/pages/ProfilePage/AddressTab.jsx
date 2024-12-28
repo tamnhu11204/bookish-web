@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import * as message from "../../components/MessageComponent/MessageComponent";
 import * as UserService from '../../services/UserService';
+import Compressor from 'compressorjs';
 
 // Khung chứa các địa chỉ
 const AddressItem = ({ phone, province, district, commune, specificAddress, isDefault, onEdit, onDelete }) => {

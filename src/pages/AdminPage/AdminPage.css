@@ -71,3 +71,19 @@
 .form-check{
   font-size: 16px;
 }
+
+.title-profile {
+  margin-top: 40px;
+  color: #198754;
+  font-size: 24px;
+}
+
+.card-profile {
+  border-radius: 10px;
+  border: 1px solid #198754;
+}
+.img {
+  display: block;
+  max-width: 100%;
+  max-height: auto;
+}

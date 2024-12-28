@@ -1,181 +1,159 @@
-import React, { useState } from 'react';
-import './AdminPage.css';
-import FormComponent from '../../components/FormComponent/FormComponent';
+import React, { useEffect, useState } from 'react';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import FormComponent from '../../components/FormComponent/FormComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
-import FormSelectComponent from '../../components/FormSelectComponent/FormSelectComponent';
+import './AdminPage.css';
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as SupplierService from '../../services/OptionService/SupplierService';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useQuery } from '@tanstack/react-query';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import Compressor from 'compressorjs';
 
 const SupplierSubTab = () => {
-    const suppliers = [
-        {
-            id: 103,
-            image: 'https://via.placeholder.com/50',
-            name: 'An Nam',
-            email: 'annam@gmail.com',
-            numPhone: '2124354425', 
-            address:'hhjhsabhkbckabskcbkab'
-        },
-        {
-            id: 104,
-            image: 'https://via.placeholder.com/50',
-            name: 'An Nam',
-            email: 'annam@gmail.com',
-            numPhone: '2124354425', 
-            address:'hhjhsabhkbckabskcbkab'
-        },
-    ];
-
     // State quản lý modal
+    const [name, setName] = useState('');
+    const [note, setNote] = useState('');
+    const [img, setImage] = useState('');
+    const [id, setID] = useState('');
+    const [editingSupplier, setEditingSupplier] = useState(null);
+    const [rowSelected, setRowSelected] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [modalBody, setModalBody] = useState(null);
-    const [textButton1, setTextButton1] = useState(''); // Nút Lưu/Cập nhật
-    const [onSave, setOnSave] = useState(() => () => {});
-    const [onCancel, setOnCancel] = useState(() => () => {});
+    const [editModal, setEditModal] = useState(false);
 
-    const handleCloseModal = () => {
+    const resetForm = () => {
+        setName('');
+        setNote('');
+        setImage('');
+        setEditingSupplier(null);
+    };
+
+    const mutation = useMutationHook(data => SupplierService.addSupplier(data));
+    const mutationEdit = useMutationHook(data => SupplierService.updateSupplier(id, data));
+    const mutationDelete = useMutationHook(data => SupplierService.deleteSupplier(id));
+
+    // Lấy danh sách nhà xb từ API
+    const getAllSupplier = async () => {
+        const res = await SupplierService.getAllSupplier();
+        return res.data;
+    };
+
+    const { isLoading: isLoadingSupplier, data: suppliers } = useQuery({
+        queryKey: ['suppliers'],
+        queryFn: getAllSupplier,
+    });
+
+    const { data, isSuccess, isError } = mutation;
+    const { data: editData, isSuccess: isEditSuccess, isError: isEditError } = mutationEdit;
+    const { data: deleteData, isSuccess: isDeleteSuccess, isError: isDeleteError } = mutationDelete;
+
+    // Xử lý chọn ảnh và nén ảnh
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            new Compressor(file, {
+                quality: 0.6,
+                maxWidth: 800,
+                maxHeight: 800,
+                success(result) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        setImage(reader.result); // Cập nhật ảnh đã nén dưới dạng base64
+                    };
+                    reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
+                },
+                error(err) {
+                    console.error(err);
+                }
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (isSuccess && data?.status !== 'ERR') {
+            message.success();
+            alert('Thêm nhà cung cấp mới thành công!');
+            resetForm();
+            setShowModal(false);
+        }
+        if (isError) {
+            message.error();
+        }
+    }, [isSuccess, isError, data?.status]);
+
+    useEffect(() => {
+        if (isEditSuccess && editData?.status !== 'ERR') {
+            message.success();
+            alert('Chỉnh sửa nhà cung cấp thành công!');
+            resetForm();
+            setEditModal(false);
+        }
+        if (isEditError) {
+            message.error();
+        }
+    }, [isEditSuccess, isEditError, editData?.status]);
+
+    useEffect(() => {
+        if (isDeleteSuccess && deleteData?.status !== 'ERR') {
+            message.success();
+            alert('Xóa nhà cung cấp thành công!');
+            resetForm();
+        }
+        if (isDeleteError) {
+            message.error();
+        }
+    }, [isDeleteSuccess, isDeleteError, deleteData?.status]);
+
+    const handleAddSupplier = () => {
+        setShowModal(true);
+    };
+
+    const handleEditSupplier = (supplier) => {
+        setEditModal(true);
+        setRowSelected(supplier);
+        setID(supplier._id);
+        setName(supplier.name);
+        setNote(supplier.note);
+        setImage(supplier.img);
+    };
+
+    const handleDeleteSupplier = async (supplier) => {
+        setID(supplier._id);
+        // eslint-disable-next-line no-restricted-globals
+        const isConfirmed = confirm("Bạn có chắc chắn muốn xóa " + supplier.name + "?");
+        if (isConfirmed) {
+            onDelete();
+            getAllSupplier();
+        }
+    };
+
+    const onSave = async () => {
+        if (editingSupplier) {
+            await mutationEdit.mutateAsync({ id: editingSupplier._id, name, note, img });
+        } else {
+            await mutation.mutateAsync({ name, note, img });
+        }
+    };
+
+    const onSave2 = async () => {
+        await mutationEdit.mutateAsync({ id, name, note, img });
+        getAllSupplier();
+    };
+
+    const onDelete = async () => {
+        await mutationDelete.mutateAsync({ id });
+    };
+
+    const onCancel = () => {
+        alert('Hủy thao tác!');
+        resetForm();
         setShowModal(false);
     };
 
-    // Hàm mở modal thêm ncc
-    const handleAddSupplier = () => {
-        setModalTitle('THÊM NHÀ CUNG CẤP');
-        setModalBody(
-            <>
-                
-                <FormComponent
-                    id="emailInput"
-                    placeholder="Nhập email"
-                    type="email"
-                    label="Email"
-                ></FormComponent>
-
-                <FormComponent
-                    id="nameInput"
-                    label="Tên nhà cung cấp"
-                    type="text"
-                    placeholder="Nhập tên nhà cung cấp"
-                ></FormComponent>
-
-                <FormComponent
-                    id="phoneInput"
-                    label="Số điện thoại"
-                    type="tel"
-                    placeholder="Nhập số điện thoại"
-                ></FormComponent>
-
-
-                {/* Địa chỉ được tách thành các trường riêng biệt */}
-                <FormSelectComponent
-                    id="wardInput"
-                    label="Xã/Phường"
-                    type="text"
-                    placeholder="Nhập Xã/Phường"
-                ></FormSelectComponent>
-
-                <FormSelectComponent
-                    id="districtInput"
-                    label="Quận/Huyện/TP"
-                    type="text"
-                    placeholder="Nhập Quận/Huyện/TP"
-                ></FormSelectComponent>
-
-                <FormSelectComponent
-                    id="provinceInput"
-                    label="Tỉnh"
-                    type="text"
-                    placeholder="Nhập Tỉnh"
-                ></FormSelectComponent>
-            </>
-        );
-        setTextButton1('Thêm'); // Đặt nút là "Thêm"
-        setOnSave(() => () => {
-            alert('Nhà cung cấp mới đã được thêm!');
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy thêm nhà cung cấp!');
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
-
-    // Hàm mở modal sửa ncc
-    const handleEditSupplier = (supplier) => {
-        setModalTitle('CẬP NHẬT NHÀ CUNG CẤP');
-        setModalBody(
-            <>
-            <FormComponent
-                    id="emailInput"
-                    label="Nhập email"
-                    type="email"
-                    defaultValue={supplier.email}
-                ></FormComponent>
-
-                <FormComponent
-                    id="nameInput"
-                    label="Tên nhà cung cấp"
-                    type="text"
-                    defaultValue={supplier.name}
-                ></FormComponent>
-
-                <FormComponent
-                    id="phoneInput"
-                    label="Số điện thoại"
-                    type="tel"
-                    defaultValue={supplier.numPhone}
-                ></FormComponent>
-
-                {/* Địa chỉ được tách thành các trường riêng biệt */}
-                <FormSelectComponent
-                    id="wardInput"
-                    label="Xã/Phường"
-                    type="text"
-                    defaultValue={supplier.address}
-                ></FormSelectComponent>
-
-                <FormSelectComponent
-                    id="districtInput"
-                    label="Quận/Huyện/TP"
-                    type="text"
-                    defaultValue={supplier.address}
-                ></FormSelectComponent>
-
-                <FormSelectComponent
-                    id="provinceInput"
-                    label="Tỉnh"
-                    type="text"
-                    defaultValue={supplier.address}
-                ></FormSelectComponent>
-            </>
-        );
-        setTextButton1('Cập nhật'); // Đặt nút là "Cập nhật"
-        setOnSave(() => () => {
-            alert(`Nhà cung cấp"${supplier.name}" đã được cập nhật!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            alert('Hủy cập nhật nhà cung cấp!');
-            setShowModal(false);
-        });
-        setShowModal(true);
-    };
-
-    // Hàm mở modal xóa ncc
-    const handleDeleteSupplier = (supplier) => {
-        setModalTitle('Xác nhận xóa');
-        setModalBody(
-            <p style={{fontSize:'16px'}}>Bạn có chắc chắn muốn xóa nhà cung cấp <strong>{supplier.name}</strong> không?</p>
-        );
-        setTextButton1('Xóa'); // Có thể tùy chỉnh nếu cần
-        setOnSave(() => () => {
-            alert(`NHà cung cấp "${supplier.name}" đã được xóa!`);
-            setShowModal(false);
-        });
-        setOnCancel(() => () => {
-            setShowModal(false);
-        });
-        setShowModal(true);
+    const onCancel2 = () => {
+        alert('Hủy thao tác!');
+        resetForm();
+        setEditModal(false);
     };
 
     return (
@@ -189,7 +167,6 @@ const SupplierSubTab = () => {
                             placeholder="Tìm kiếm theo tên nhà cung cấp"
                         />
                     </div>
-
                     <div className="col-6 text-end">
                         <ButtonComponent
                             textButton="Thêm nhà cung cấp"
@@ -199,60 +176,153 @@ const SupplierSubTab = () => {
                     </div>
                 </div>
 
-                <table className="table custom-table" style={{marginTop:'30px'}}>
+                <table className="table custom-table" style={{ marginTop: '30px' }}>
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '10%' }}>Mã</th>
-                            <th scope="col" style={{ width: '10%' }}>Hình ảnh</th>
-                            <th scope="col" style={{ width: '15%' }}>Tên nhà cung cấp</th>
-                            <th scope="col" style={{ width: '15%' }}>Email</th>
-                            <th scope="col" style={{ width: '10%' }}>Số điện thoại</th>
-                            <th scope="col" style={{ width: '30%' }}>Địa chỉ</th>
+                            <th scope="col" style={{ width: '20%' }}>Hình ảnh</th>
+                            <th scope="col" style={{ width: '20%' }}>Tên nhà cung cấp</th>
+                            <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
                             <th scope="col" style={{ width: '10%' }}></th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
-                        {suppliers.map((supplier) => (
-                            <tr key={supplier.id}>
-                                <td>{supplier.id}</td>
-                                <td>
-                                    <img
-                                        src={supplier.image}
-                                        alt={supplier.name}
-                                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                    />
-                                </td>
-                                <td>{supplier.name}</td>
-                                <td>{supplier.email}</td>
-                                <td>{supplier.numPhone}</td>
-                                <td>{supplier.address}</td>
-                                <td>
-                                    <button
-                                        className="btn btn-sm btn-primary me-2"
-                                        onClick={() => handleEditSupplier(supplier)}
-                                    >
-                                        <i className="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => handleDeleteSupplier(supplier)}
-                                    >
-                                        <i className="bi bi-trash"></i>
-                                    </button>
+                        {isLoadingSupplier ? (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    <LoadingComponent />
                                 </td>
                             </tr>
-                        ))}
+                        ) : suppliers && suppliers.length > 0 ? (
+                            suppliers.map((supplier) => (
+                                <tr key={supplier._id}>
+                                    <td>{supplier._id}</td>
+                                    <td>
+                                        <img
+                                            src={supplier.img}
+                                            alt={supplier.name}
+                                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                        />
+                                    </td>
+                                    <td>{supplier.name}</td>
+                                    <td>{supplier.note}</td>
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-primary me-2"
+                                            onClick={() => handleEditSupplier(supplier)}
+                                        >
+                                            <i className="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => handleDeleteSupplier(supplier)}
+                                        >
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    Không có dữ liệu để hiển thị.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
 
             <ModalComponent
                 isOpen={showModal}
-                title={modalTitle}
-                body={modalBody}
-                textButton1={textButton1} 
-                onClick1={onSave} 
-                onClick2={onCancel} 
+                title="THÊM nhà cung cấp"
+                body={
+                    <>
+                        <FormComponent
+                            id="nameSupplierInput"
+                            label="Tên nhà cung cấp"
+                            type="text"
+                            placeholder="Nhập tên nhà cung cấp"
+                            value={name}
+                            onChange={setName}
+                        />
+                        <FormComponent
+                            id="noteSupplierInput"
+                            label="Ghi chú"
+                            type="text"
+                            placeholder="Nhập ghi chú"
+                            value={note}
+                            onChange={setNote}
+                        />
+                        <div className="mb-3">
+                            <label htmlFor="image" className="form-label">Hình ảnh</label>
+                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
+                                {img ? (
+                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
+                                ) : (
+                                    <span className="text-muted">Chọn hình ảnh</span>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                id="image"
+                                className="form-control mt-2"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                            />
+                        </div>
+                        {data?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
+                    </>
+                }
+                textButton1="Thêm"
+                onClick1={onSave}
+                onClick2={onCancel}
+            />
+
+            <ModalComponent
+                isOpen={editModal}
+                title={editingSupplier ? "CHỈNH SỬA nhà cung cấp" : "CHỈNH SỬA nhà cung cấp"}
+                body={
+                    <>
+                        <FormComponent
+                            id="nameSupplierInput"
+                            label="Tên nhà cung cấp"
+                            type="text"
+                            placeholder={rowSelected.name}
+                            value={name}
+                            onChange={setName}
+                        />
+                        <FormComponent
+                            id="noteSupplierInput"
+                            label="Ghi chú"
+                            type="text"
+                            placeholder={rowSelected.note}
+                            value={note}
+                            onChange={setNote}
+                        />
+                        <div className="mb-3">
+                            <label htmlFor="image" className="form-label">Hình ảnh</label>
+                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
+                                {img ? (
+                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
+                                ) : (
+                                    <span className="text-muted">Chọn hình ảnh</span>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                id="image"
+                                className="form-control mt-2"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                            />
+                        </div>
+                        {editData?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{editData?.message}</span>}
+                    </>
+                }
+                textButton1="Lưu"
+                onClick1={onSave2}
+                onClick2={onCancel2}
             />
         </div>
     );
