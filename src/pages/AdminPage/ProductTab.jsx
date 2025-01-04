@@ -8,10 +8,17 @@ import AddProductForm from './ProductAdd';
 import * as ProductService from "../../services/ProductService" ;
 import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import * as PublisherService from "../../services/OptionService/PublisherService";
+import * as LanguageService from "../../services/OptionService/LanguageService"
+import * as SupplierService from "../../services/OptionService/SupplierService"
+import * as FormatService from "../../services/OptionService/FormatService"
+import * as UnitService from "../../services/OptionService/UnitService"
+import * as CategoryService from "../../services/CategoryService"
 
 
 const ProductTab = () => {
     const [activeTab, setActiveTab] = useState("all");
+    const[productID,setProductID] = useState("");
     
     // State quản lý modal
     const [showModal, setShowModal] = useState(false);
@@ -35,6 +42,8 @@ const ProductTab = () => {
             queryKey: ['products'],
             queryFn: getAllProduct,
         });
+
+        
 
   
 
@@ -161,7 +170,8 @@ const ProductTab = () => {
     );
     if(Type== false) return(
         <ProductDetailForm
-            isOpen={showModal}/>
+            isOpen={showModal}
+            IDProduct={productID}/>
     );
     else return(
         <AddProductForm

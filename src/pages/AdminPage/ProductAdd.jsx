@@ -203,11 +203,12 @@ const AddProductForm = (isOpen) => {
     
     });
 
-  const AllLang=  languages.map((language) => ({
-
-   value: language._id,
-   label :language.name,
-     } ));
+    const AllLang = Array.isArray(languages) && languages.length > 0
+    ? languages.map((language) => ({
+        value: language._id,
+        label: language.name,
+      }))
+    : [];
 
       //Xử lý Format
   const [selectedFormat, setSelectedFormat] = useState("");

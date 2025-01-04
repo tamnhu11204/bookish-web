@@ -21,3 +21,8 @@ export const getAllProduct = async () => {
     const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/product/get-all`);
     return res.data;
   };
+
+  export const getDetailProduct = async (id) => {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/product/get-detail/${id}`);
+    return res.data;
+  };
