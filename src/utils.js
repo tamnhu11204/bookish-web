@@ -6,3 +6,12 @@ export const isJsonString=(data)=>{
     }
     return true
 }
+
+export const convertPrice=(price)=>{
+  try{
+const result=price?.toLocaleString().replayAll(',','.')
+return `${result} VND`
+  } catch(error){
+    return null
+  } 
+}

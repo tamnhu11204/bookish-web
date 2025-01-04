@@ -19,3 +19,8 @@ export const deleteSupplier=async(id)=>{
     const res =await axios.delete(`${process.env.REACT_APP_API_URL_BACKEND}/supplier/delete/${id}`)
     return res.data
 }
+
+export const getDetailSupplier=async(id)=>{
+    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/supplier/get-detail/${id}`)
+    return res.data
+}

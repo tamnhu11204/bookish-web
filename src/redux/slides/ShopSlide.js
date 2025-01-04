@@ -15,7 +15,10 @@ const initialState = {
   facebook: '',
   insta: '',
   policy: '',
-  instruction: ''
+  instruction: '',
+  bank:'',
+  momo:'',
+  deliveryFee:0
 };
 
 export const shopSlice = createSlice({
@@ -24,21 +27,24 @@ export const shopSlice = createSlice({
   reducers: {
     updateShop: (state, action) => {
       const {
-        email = '',
-        name = '',
-        slogan = '',
-        phone = '',
-        logo = '',
-        description = '',
-        specificAddress = '',
-        selectedProvince = '',
-        selectedDistrict = '',
-        selectedCommune = '',
-        imageSrcs = [],
-        facebook = '',
-        insta = '',
-        policy = '',
-        instruction = ''
+        email ,
+        name,
+        slogan ,
+        phone ,
+        logo ,
+        description ,
+        specificAddress ,
+        selectedProvince ,
+        selectedDistrict ,
+        selectedCommune ,
+        imageSrcs ,
+        facebook ,
+        insta ,
+        policy ,
+        instruction ,
+        bank,
+        momo,
+        deliveryFee
       } = action.payload;
 
       state.email = email;
@@ -56,6 +62,9 @@ export const shopSlice = createSlice({
       state.insta = insta;
       state.policy = policy;
       state.instruction = instruction;
+      state.bank = bank;
+      state.momo = momo;
+      state.deliveryFee = deliveryFee;
     },
     resetShop: (state) => {
       state.email = '';
@@ -73,6 +82,9 @@ export const shopSlice = createSlice({
       state.insta = '';
       state.policy = '';
       state.instruction = '';
+      state.bank = '';
+      state.momo = '';
+      state.deliveryFee = '';
     }
   }
 });

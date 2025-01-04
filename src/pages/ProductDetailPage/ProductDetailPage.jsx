@@ -1,204 +1,233 @@
-import React from 'react'
-import './ProductDetailPage.css'
-import img4 from '../../assets/img/img4.png'
-import ButtonComponent from '../../components/ButtonComponent/ButtonComponent'
-import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2'
-import CardComponent from '../../components/CardComponent/CardComponent'
-import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
+import { useQuery } from '@tanstack/react-query';
+import parse from 'html-react-parser';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import img4 from '../../assets/img/img4.png';
+import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
+import CardComponent from '../../components/CardComponent/CardComponent';
+import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
+import * as FormatService from '../../services/OptionService/FormatService';
+import * as LanguageService from '../../services/OptionService/LanguageService';
+import * as PublisherService from '../../services/OptionService/PublisherService';
+import * as SupplierService from '../../services/OptionService/SupplierService';
+import * as UnitService from '../../services/OptionService/UnitService';
+import * as ProductService from '../../services/ProductService';
+import './ProductDetailPage.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { addOrderProduct } from '../../redux/slides/OrderSlide';
 
 
 const ProductDetailPage = () => {
+  const user = useSelector((state) => state.user)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const dispatch = useDispatch()
+  const [amount, setAmount] = useState(1);
 
-  //body của card thông tin vận chuyển
-  const shippingInfo = (
-    <><div className="d-flex justify-content-between align-items-center mb-3">
-      <div>
-        <p className="mb-1" style={{ fontSize: "16px" }}>
-          <strong>Giao hàng đến:</strong>{" "}
-          <span >Bạch Đằng, Tân Uyên, Bình Dương</span>
-        </p>
-        <p className="mb-0" style={{ fontSize: "16px" }}>
-          <strong>Đơn vị giao hàng:</strong> GHTK
-        </p>
-      </div>
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const data = await ProductService.getDetailProduct(id);
+      console.log('sá', data)
+      setProduct(data.data);
+    };
+    fetchProduct();
+  }, [id]);
 
-      <a class="text-decoration-underline"
-        href="./"
-        style={{
-          color: "#198754",
-          textDecoration: "none",
-          fontStyle: "italic",
-          fontSize: '14px'
-        }}
-      >
-        Thay đổi địa chỉ
-      </a>
-    </div>
+  const { data: publisher } = useQuery({
+    queryKey: ['publisher', product?.publisher],
+    queryFn: () =>
+      product?.publisher
+        ? PublisherService.getDetailPublisher(product.publisher).then((res) => res.data)
+        : null,
+    enabled: !!product?.publisher,
+  });
 
-      <div className="mb-2" style={{ fontSize: "16px" }}>
-        <h6 className="mb-2" style={{ fontSize: "16px", fontWeight: "bold" }}>
-          Ưu đãi liên quan <a href="/" className="text-success text-decoration-none">Xem thêm</a>
-        </h6><div className="d-flex gap-2">
-          <span
-            className="px-3 py-2"
-            style={{
-              backgroundColor: "#E4F7CB",
-              color: "#2A7D46",
-              borderRadius: "5px",
-            }}
-          >
-            Mã giảm 25k
-          </span>
-          <span
-            className="px-3 py-2"
-            style={{
-              backgroundColor: "#E4F7CB",
-              color: "#2A7D46",
-              borderRadius: "5px",
-            }}
-          >
-            Free ship 25k
-          </span>
-        </div>
-      </div></>
-  )
+  const { data: language } = useQuery({
+    queryKey: ['language', product?.language],
+    queryFn: () =>
+      product?.language
+        ? LanguageService.getDetailLanguage(product.language).then((res) => res.data)
+        : null,
+    enabled: !!product?.language,
+  });
 
-  //chứa các thông tin của bảng thông tin chi tiết sản phẩm
+  const { data: supplier } = useQuery({
+    queryKey: ['supplier', product?.supplier],
+    queryFn: () =>
+      product?.supplier
+        ? SupplierService.getDetailSupplier(product.supplier).then((res) => res.data)
+        : null,
+    enabled: !!product?.supplier,
+  });
+
+  const { data: format } = useQuery({
+    queryKey: ['format', product?.format],
+    queryFn: () =>
+      product?.format
+        ? FormatService.getDetailFormat(product.format).then((res) => res.data)
+        : null,
+    enabled: !!product?.format,
+  });
+
+  const { data: unit } = useQuery({
+    queryKey: ['unit', product?.unit],
+    queryFn: () =>
+      product?.unit ? UnitService.getDetailUnit(product.unit).then((res) => res.data) : null,
+    enabled: !!product?.unit,
+  });
+
+  if (!product) {
+    return <div>Loading...</div>;
+  }
+
   const detailData = [
-    { criteria: 'Mã hàng', detail: '200.000đ -50%' },
-    { criteria: 'Tác giả', detail: '100.000đ' },
-    { criteria: 'Nhà xuất bản', detail: '2222 điểm' },
-    { criteria: 'Năm xuất bản', detail: '11' },
-    { criteria: 'Ngôn ngữ', detail: '4,5/5 ⭐ (2000 đánh giá)' },
-    { criteria: 'Trọng lượng', detail: '5000' },
-    { criteria: 'Kích thước', detail: '5000' },
-    { criteria: 'Số trang', detail: '5000' },
-    { criteria: 'Hình thức', detail: '5000' },
-    { criteria: 'Nhà cung cấp', detail: '5000' },
-    { criteria: 'Bộ', detail: '5000' },
+    { criteria: 'Mã hàng', detail: product?._id || 'N/A' },
+    { criteria: 'Tác giả', detail: product?.author || 'N/A' },
+    { criteria: 'Nhà xuất bản', detail: publisher?.name || 'N/A' },
+    { criteria: 'Năm xuất bản', detail: product?.publishDate || 'N/A' },
+    { criteria: 'Ngôn ngữ', detail: language?.name || 'N/A' },
+    { criteria: 'Trọng lượng', detail: product?.weight || 'N/A' },
+    { criteria: 'Kích thước', detail: `${product?.length}x${product?.width}x${product?.height}` || 'N/A' },
+    { criteria: 'Số trang', detail: product?.page || 'N/A' },
+    { criteria: 'Hình thức', detail: format?.name || 'N/A' },
+    { criteria: 'Nhà cung cấp', detail: supplier?.name || 'N/A' },
+    { criteria: 'Đơn vị', detail: unit?.name || 'N/A' },
   ];
 
-  //body của card thông tin chi tiết sản phẩm
-  const detailInfo = (
-    <>
-      <div className="container mt-5">
-        <table className="table table-bordered table-striped custom-table">
-          <tbody className="custom-body">
-            {detailData.map((row, index) => (
-              <tr key={index}>
-                <td className="col-4">{row.criteria}</td>
-                <td className="col-8">
-                  <span className={row.detail}>
-                    {row.detail}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  )
+  const priceCurrent = (product.price * (100 - product.discount)) / 100;
 
-  //body của card chứa các sản phẩm gợi ý cho khách hàng
+  const detailInfo = (
+    <div className="container mt-5">
+      <table className="table table-bordered table-striped custom-table">
+        <tbody className="custom-body">
+          {detailData.map((row, index) => (
+            <tr key={index}>
+              <td className="col-4">{row.criteria}</td>
+              <td className="col-8">
+                <span className={row.detail}>
+                  {row.detail}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   const relatedProductInfo = (
-    <>
-      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-        {[...Array(5)].map((_, index) => (
-          <CardProductComponent
-            key={index}
-            img={img4}
-            proName="Ngàn mặt trời rực rỡ"
-            currentPrice="120000"
-            sold="12"
-            star="4.5"
-            score="210"
-          />
-        ))}
-      </div>
-    </>
-  )
+    <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+      {[...Array(5)].map((_, index) => (
+        <CardProductComponent
+          key={index}
+          img={img4}
+          proName="Ngàn mặt trời rực rỡ"
+          currentPrice="120000"
+          sold="12"
+          star="4.5"
+          score="210"
+        />
+      ))}
+    </div>
+  );
+  const images = product.img || []; // Mảng hình ảnh từ sản phẩm
+  const mainImage = images[0]; // Ảnh bìa
+  const secondaryImages = images.slice(1); // Ảnh phụ
+
+  const handleOnAddToCart = () => {
+    if (!user?.id) {
+      alert('Hãy đăng nhập để tiếp tục mua sắm!')
+      navigate('/login', { state: location?.pathname })
+    } else {
+      dispatch(addOrderProduct({
+        orderItem: {
+          product: product._id,
+          price: priceCurrent,
+          amount: amount
+        }
+      }))
+    }
+  }
+
+  const handleOnBuyNow = () => {
+    if (!user?.id) {
+      navigate('/login', { state: location?.pathname })
+    }
+  }
 
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
-      <div class="container" >
-
-        {/* row đầu tiên chứa các thông tin liên quan đến sản phẩm */}
-        <div className="row">
+      <div className="container" >
+        <div className="row" >
           <div className="col-4">
-            <div className="sticky-card" >
-              <div className="card p-3" style={{ maxWidth: "400px", margin: "auto" }}>
-                {/* Hình ảnh chính */}
+            <div className="sticky-card" style={{ marginTop: '20px' }}>
+              <div className="card p-3" style={{ maxWidth: '400px', margin: 'auto' }}>
                 <img
-                  src={img4}
+                  src={mainImage || img4} // Hiển thị ảnh bìa hoặc ảnh mặc định nếu không có
                   className="custom-img"
                   alt="Product"
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: 'cover' }}
                 />
-
-                {/* Nội dung chi tiết */}
                 <div className="card-body text-center">
-                  {/* Các hình ảnh nhỏ */}
-                  <div className="d-flex justify-content-center my-2">
-                    <img
-                      src={img4}
-                      alt="Thumbnail 1"
-                      className="img-thumbnail mx-1"
-                      style={{ width: "50px", height: "50px" }}
-                    />
-                    <img
-                      src={img4}
-                      alt="Thumbnail 2"
-                      className="img-thumbnail mx-1"
-                      style={{ width: "50px", height: "50px" }}
-                    />
-                    <img
-                      src={img4}
-                      alt="Thumbnail 3"
-                      className="img-thumbnail mx-1"
-                      style={{ width: "50px", height: "50px" }}
-                    />
-                    <div
-                      className="img-thumbnail d-flex align-items-center justify-content-center mx-1"
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        backgroundColor: "#d6c7c7",
-                        color: "#fff",
-                      }}
-                    >
-                      +2
+                  {secondaryImages.length > 0 && (
+                    <div className="d-flex justify-content-center my-2">
+                      {secondaryImages.slice(0, 3).map((image, index) => (
+                        <img
+                          key={index}
+                          src={image}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="img-thumbnail mx-1"
+                          style={{ width: '50px', height: '50px' }}
+                        />
+                      ))}
+                      {secondaryImages.length > 3 && (
+                        <div
+                          className="img-thumbnail d-flex align-items-center justify-content-center mx-1"
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            backgroundColor: '#d6c7c7',
+                            color: '#fff',
+                          }}
+                        >
+                          +{secondaryImages.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="col-6">
+                    <div className="d-flex align-items-center justify-content-between mt-3">
+                      Số lượng:
+                      <input
+                        id="quantity"
+                        className="form-control"
+                        type="number"
+                        style={{ width: '60px', fontSize: '16px' }}
+                        value={amount}
+                        min="1"
+                        max="10"
+                        onChange={(e) => {
+                          const value = Math.max(1, Math.min(10, Number(e.target.value)));
+                          setAmount(value);
+                        }}
+                      />
                     </div>
                   </div>
 
-                  {/* Chọn số lượng */}
-                  <div className="my-3">
-                    <div className="d-flex justify-content-center align-items-center">
-                      <button className="btn btn-outline-secondary px-2">-</button>
-                      <span className="mx-2">1</span>
-                      <button className="btn btn-outline-secondary px-2">+</button>
-                    </div>
-                  </div>
-
-                  {/* Nút thêm vào giỏ hàng và mua ngay */}
                   <div className="d-flex justify-content-between mt-3">
-                    <ButtonComponent
-                      textButton="Thêm vào giỏ hàng"
-                    />
-                    <ButtonComponent2
-                      textButton="Mua ngay"
-                    />
+                    <ButtonComponent textButton="Thêm vào giỏ hàng"
+                      onClick={handleOnAddToCart} />
+                    {/* <ButtonComponent2 textButton="Mua ngay"
+                      onClick={handleOnBuyNow} /> */}
                   </div>
 
-                  {/* Nút so sánh */}
-                  <a class="text-decoration-underline"
+                  <a
+                    className="text-decoration-underline"
                     href="./comparison"
-                    style={{
-                      color: "#198754",
-                      textDecoration: "none",
-                      fontStyle: "italic",
-                      fontSize: '14px'
-                    }}
+                    style={{ color: '#198754', textDecoration: 'none', fontStyle: 'italic', fontSize: '14px' }}
                   >
                     So sánh với sách khác
                   </a>
@@ -208,105 +237,65 @@ const ProductDetailPage = () => {
           </div>
 
           <div className="col-8">
-            <div className="card p-3 mb-4" style={{ maxWidth: "600px", margin: "auto", borderRadius: "10px" }}>
-              {/* Tiêu đề và thông tin sản phẩm */}
+            <div className="card p-3 mb-4" style={{ maxWidth: "600px", marginTop: "20px", borderRadius: "10px" }}>
               <div className="card-body">
-                <h5 className="card-title-detail fw-bold">
-                  Muôn Kiếp Nhân Sinh - Many Times, Many Lives - Tập 2
-                </h5>
+                <h5 className="card-title-detail fw-bold">{product.name}</h5>
                 <p className="card-text-detail mb-2">
-                  <strong>Tác giả:</strong> Nguyên Phong
+                  <strong>Tác giả:</strong> {product.author}
                 </p>
                 <p className="card-text-detail mb-2">
-                  <strong>Nhà xuất bản:</strong> NXB Tổng hợp TPHCM
+                  <strong>Nhà xuất bản:</strong> {publisher?.name || 'N/A'}
                 </p>
                 <p className="card-text-detail mb-2">
-                  <strong>Nhà cung cấp:</strong> First News
+                  <strong>Nhà cung cấp:</strong> {supplier?.name || 'N/A'}
                 </p>
-                <p className="card-text-detail mb-3">
-                  <strong>Bộ:</strong> Muôn kiếp nhân sinh Many Times Lives
-                </p>
-
                 <div className="row">
                   <div className="col-4">
-                    <p style={{ color: 'red', fontSize: '25px' }}>150.000đ</p>
+                    <p style={{ color: 'red', fontSize: '25px' }}>{priceCurrent}đ</p>
                   </div>
                   <div className="col-2">
-                    <div class="badge text-wrap" style={{ width: 'fit-content', fontSize: '16px', backgroundColor: '#E4F7CB', marginTop: '5px', color: '#198754' }}>
-                      -25%
+                    <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '16px', backgroundColor: '#E4F7CB', marginTop: '5px', color: '#198754' }}>
+                      -{product.discount}%
                     </div>
                   </div>
-                  <div className="col" >
-                    <div class="badge text-wrap" style={{ width: 'fit-content', fontSize: '12px', backgroundColor: '#FFFFFF', border: '1px solid #198754', marginTop: '8px', color: '#198754' }}>
-                      Còn 12 sản phẩm
+                  <div className="col">
+                    <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '12px', backgroundColor: '#FFFFFF', border: '1px solid #198754', marginTop: '8px', color: '#198754' }}>
+                      Còn {product.stock} sản phẩm
                     </div>
                   </div>
                 </div>
-                <p class="text-decoration-line-through" style={{ fontSize: '16px', marginTop: '-20px' }}>200.000đ</p>
-
-                {/* Đánh giá và lượt bán */}
+                <p className="text-decoration-line-through" style={{ fontSize: '16px', marginTop: '-20px' }}>{product.price}đ</p>
                 <div className="mt-3 text-muted" style={{ fontSize: "14px" }}>
                   <span>
-                    <strong>4,5/5⭐</strong> (2000 đánh giá) | 3200 lượt bán | 1200 điểm
+                    <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán
                   </span>
                 </div>
               </div>
             </div>
-
             <div style={{ backgroundColor: '#F9F6F2' }}>
               <div className="container" style={{ marginTop: '30px' }}>
-                <CardComponent
-                  title="Thông tin vận chuyển"
-                  bodyContent={shippingInfo}
-                  icon="bi bi-truck"
-                />
+                <CardComponent title="Thông tin chi tiết" bodyContent={detailInfo} icon="bi bi-card-list" />
               </div>
             </div>
-
             <div style={{ backgroundColor: '#F9F6F2' }}>
               <div className="container" style={{ marginTop: '30px' }}>
-                <CardComponent
-                  title="Thông tin chi tiết"
-                  bodyContent={detailInfo}
-                  icon="bi bi-card-list"
-                />
+                <CardComponent title="Mô tả sản phẩm" bodyContent={<><p style={{ fontSize: '20px', fontWeight: 'bold' }}>{product.name}</p><div style={{ fontSize: '16px' }}>{product.description ? parse(product.description) : 'Không có mô tả.'}</div></>} icon="bi bi-card-list" />
               </div>
             </div>
-
-            <div style={{ backgroundColor: '#F9F6F2' }}>
-              <div className="container" style={{ marginTop: '30px' }}>
-                <CardComponent
-                  title="Mô tả sản phẩm"
-                  bodyContent={
-                    <>
-                      <p style={{ fontSize: '20px', fontWeight: 'bold' }}> Muôn kiếp nhân sinh </p>
-                      <p style={{ fontSize: '16px' }}> Hiếm có cuốn sách nào ngay từ khi ra mắt đã tạo nên hiện tượng văn hóa đọc và sau nửa năm đã trở thành cuốn sách bán chạy nhất năm 2020 tại Việt Nam như Muôn Kiếp Nhân Sinh. Cơn sốt của cuốn sách này tiếp tục được dấy lên vào dịp Tết Nguyên Đán 2021 khi công ty First News Trí Việt hé lộ đang “ngày đêm thực hiện Muôn Kiếp Nhân Sinh tập 2”. Đáp lại sự mong đợi của độc giả suốt hơn ba tháng, Muôn Kiếp Nhân Sinh tập 2 đã chính thức phát hành trên cả nước.
-                        Muôn Kiếp Nhân Sinh tập 2 của tác giả Nguyên Phong tiếp tục là những câu chuyện tiền kiếp, nhân quả luân hồi hấp dẫn gắn liền với những kiến giải uyên bác về quá khứ, hiện tại, tương lai của nhân loại và thế giới thông qua góc nhìn của cả khoa học và tâm linh. Chúng ta là ai, chúng ta đến từ đâu và sẽ đi về đâu? Làm cách nào để chữa lành thế giới này, hành tinh này trước những biến cố lớn đang và sẽ diễn ra trong tương lai gần? </p>
-                    </>
-                  }
-                  icon="bi bi-card-list"
-                />
-              </div>
-            </div>
-
           </div>
         </div>
 
-        {/* row tiếp theo là các sản phẩm gợi ý cho khách hàng */}
         <div className="row">
           <div style={{ backgroundColor: '#F9F6F2' }}>
             <div className="container" style={{ marginTop: '30px' }}>
-              <CardComponent
-                title="Có thể bạn sẽ quan tâm"
-                bodyContent={relatedProductInfo}
-                icon="bi bi-bag-heart"
-              />
+              <CardComponent title="Có thể bạn sẽ quan tâm" bodyContent={relatedProductInfo} icon="bi bi-bag-heart" />
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
 
 export default ProductDetailPage

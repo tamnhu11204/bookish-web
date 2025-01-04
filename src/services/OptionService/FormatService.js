@@ -19,3 +19,8 @@ export const deleteFormat=async(id)=>{
     const res =await axios.delete(`${process.env.REACT_APP_API_URL_BACKEND}/format/delete/${id}`)
     return res.data
 }
+
+export const getDetailFormat=async(id)=>{
+    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/format/get-detail/${id}`)
+    return res.data
+}

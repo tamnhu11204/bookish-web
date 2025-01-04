@@ -19,3 +19,8 @@ export const deleteLanguage=async(id)=>{
     const res =await axios.delete(`${process.env.REACT_APP_API_URL_BACKEND}/language/delete/${id}`)
     return res.data
 }
+
+export const getDetailLanguage=async(id)=>{
+    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/language/get-detail/${id}`)
+    return res.data
+}

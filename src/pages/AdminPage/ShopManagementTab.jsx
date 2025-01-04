@@ -23,7 +23,10 @@ const ShopManagementTab = () => {
   const [insta, setInsta] = useState('');
   const [policy, setPolicy] = useState('');
   const [instruction, setInstruction] = useState('');
-  
+  const [bank, setBank] = useState('');
+  const [momo, setMomo] = useState('');
+  const [deliveryFee, setDeliveryFee] = useState('');
+
   // Hiển thị địa chỉ lên dropdown
   const getProvinces = async () => {
     const res = await ListAddressService.getProvinces();
@@ -144,6 +147,7 @@ const ShopManagementTab = () => {
     setSelectedCommune("");
   };
   const handleOnChangeSpecificAddress = (value) => setSpecificAddress(value);
+  const handleOnChangeDeliveryFee = (value) => setDeliveryFee(value);
 
   const handleLogoUpload = (event) => {
     const file = event.target.files[0];
@@ -200,12 +204,78 @@ const ShopManagementTab = () => {
     }
   };
 
+  const handleBankQRCodeUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      new Compressor(file, {
+        quality: 0.8,
+        maxWidth: 800,
+        maxHeight: 800,
+        success(result) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setBank(reader.result); // Set the compressed base64 string for the bank QR code
+          };
+          reader.readAsDataURL(result); // Convert compressed image to base64 string
+        },
+        error(err) {
+          console.error("Error compressing bank QR code: ", err);
+        },
+      });
+    }
+  };
+
+  const handleUpdateClick2 = async () => {
+    // Cập nhật thông tin cửa hàng (không có ảnh)
+    const updateData = {
+      bank,
+      momo,
+      deliveryFee
+      
+    };
+
+    try {
+      // Cập nhật thông tin cửa hàng
+      const response = await ShopProfileService.updateShop2(updateData);
+      if (response.status !== 'OK') {
+        alert("Lỗi khi cập nhật hồ sơ cửa hàng.");
+        return;
+      }
+
+      alert("Cập nhật hồ sơ cửa hàng thành công!");
+    } catch (error) {
+      console.error("Error updating shop:", error.response ? error.response.data : error);
+      alert("Đã xảy ra lỗi khi cập nhật hồ sơ cửa hàng.");
+    }
+  };
+
+  const handleMomoQRCodeUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      new Compressor(file, {
+        quality: 0.8,
+        maxWidth: 800,
+        maxHeight: 800,
+        success(result) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setMomo(reader.result); // Set the compressed base64 string for the MoMo QR code
+          };
+          reader.readAsDataURL(result); // Convert compressed image to base64 string
+        },
+        error(err) {
+          console.error("Error compressing MoMo QR code: ", err);
+        },
+      });
+    }
+  };
+
   return (
     <div style={{ padding: '0 20px' }}>
       <div className="title-section">
         <h3 className="text mb-0">HỒ SƠ CỬA HÀNG</h3>
       </div>
-      <h3 className="title-profile">Profile</h3>
+      <h3 className="title-profile">Thông tin cửa hàng</h3>
       <div className="card-profile" style={{ padding: "0 20px" }}>
         <div className="avatar-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px', marginTop: '10px' }}>
           <img
@@ -341,16 +411,93 @@ const ShopManagementTab = () => {
 
       <h3 className="title-profile">Chính sách và hướng dẫn</h3>
       <div className="card-profile" style={{ padding: "0 20px" }}>
-      <h3 className="title" style={{ marginTop: "10px" }}>Chính sách</h3>
+        <h3 className="title" style={{ marginTop: "10px" }}>Chính sách</h3>
         <TextEditor value={policy} onChange={setPolicy} />
-        <div style={{ marginBottom: "10px", marginTop: "20px"}}>
-        <h3 className="title">Hướng dẫn</h3>
-        <TextEditor value={instruction} onChange={setInstruction} />
-      </div>
+        <div style={{ marginBottom: "10px", marginTop: "20px" }}>
+          <h3 className="title">Hướng dẫn</h3>
+          <TextEditor value={instruction} onChange={setInstruction} />
+        </div>
       </div>
 
-      <div className="card-footer" style={{ marginTop: "20px"}}>
+      <div className="card-footer" style={{ marginTop: "20px" }}>
         <ButtonComponent textButton="Cập nhật" onClick={handleUpdateClick} />
+      </div>
+
+      <h3 className="title-profile">Thông tin thanh toán</h3>
+      <div className="card-profile" style={{ padding: "0 20px" }}>
+        {/* QR Code Ngân Hàng */}
+        <div className="payment-section">
+          <h3 className="title" style={{ marginTop: "10px" }}>Mã QR Ngân Hàng</h3>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "20px" }}>
+            <img
+              src={bank || 'https://via.placeholder.com/200'}
+              alt="QR Ngân Hàng"
+              style={{
+                width: '200px',
+                height: '200px',
+                borderRadius: '10px',
+                border: '2px solid #ffffff',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                marginBottom: '10px',
+              }}
+            />
+            <ButtonComponent
+              textButton="Chọn mã QR Ngân Hàng"
+              onClick={() => document.getElementById('bankQRInput').click()}
+            />
+            <input
+              id="bankQRInput"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleBankQRCodeUpload}
+            />
+          </div>
+        </div>
+
+        {/* QR Code MoMo */}
+        <div className="payment-section">
+          <h3 className="title" style={{ marginTop: "10px" }}>Mã QR MoMo</h3>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "20px" }}>
+            <img
+              src={momo || 'https://via.placeholder.com/200'}
+              alt="QR MoMo"
+              style={{
+                width: '200px',
+                height: '200px',
+                borderRadius: '10px',
+                border: '2px solid #ffffff',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                marginBottom: '10px',
+              }}
+            />
+            <ButtonComponent
+              textButton="Chọn mã QR MoMo"
+              onClick={() => document.getElementById('momoQRInput').click()}
+            />
+            <input
+              id="momoQRInput"
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleMomoQRCodeUpload}
+            />
+          </div>
+        </div>
+
+        <FormComponent
+          id="feeInput"
+          label="Phí vận chuyển cố định"
+          type="number"
+          placeholder="Nhập phí vận chuyển"
+          value={deliveryFee}
+          onChange={handleOnChangeDeliveryFee}
+        />
+      </div>
+
+
+      <div className="card-footer" style={{ marginTop: "20px" }}>
+        <ButtonComponent textButton="Cập nhật" onClick={handleUpdateClick2} />
       </div>
     </div>
   );

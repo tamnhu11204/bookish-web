@@ -21,3 +21,10 @@ export const deletePublisher=async(id)=>{
     return res.data
 }
 
+export const getDetailPublisher=async(id)=>{
+    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/publisher/get-detail/${id}`)
+    return res.data
+}
+
+
+

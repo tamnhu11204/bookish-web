@@ -57,7 +57,7 @@ const ProductTab = () => {
     };
     
 
-     if (showModal == false)return (
+     if (showModal === false)return (
         <div style={{ padding: '0 20px' }}>
             <div className="title-section">
                 <h3 className="text mb-0">DANH SÁCH ĐƠN HÀNG</h3>
@@ -110,10 +110,10 @@ const ProductTab = () => {
                         ) : products && products.length > 0 ? (
                         products.map((product) => (
                             <tr key={product.id}>
-                                <td>{product.id}</td>
+                                <td>{product._id}</td>
                             <td>
                                 <img
-                                    src={product.image}
+                                    src={product.img[0]}
                                     alt={product.name}
                                     style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                 />
@@ -159,7 +159,7 @@ const ProductTab = () => {
 
             </div> 
     );
-    if(Type== false) return(
+    if(Type=== false) return(
         <ProductDetailForm
             isOpen={showModal}/>
     );

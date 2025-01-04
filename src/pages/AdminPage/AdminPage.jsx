@@ -80,7 +80,7 @@ const AdminPage = () => {
                         </div>
                     </button>
 
-                    <button
+                    {/* <button
                         className={`nav-link ${activeTab === "importManagement" ? "active" : ""}`}
                         onClick={() => setActiveTab("importManagement")}
                     >
@@ -88,7 +88,7 @@ const AdminPage = () => {
                             <div className="col-1"><i class="bi-nav bi-cart4"></i></div>
                             <div className="col"><p className="nav-title">Quản lý nhập hàng</p></div>
                         </div>
-                    </button>
+                    </button> */}
 
                     <button
                         className={`nav-link ${activeTab === "statistics" ? "active" : ""}`}
@@ -118,7 +118,7 @@ const AdminPage = () => {
                         {activeTab === "accountManagement" && <AccountManagementTab />}
                         {activeTab === "options" && <OptionTab />}
                         {activeTab === "statistics" && <StatisticTab />}
-                        {activeTab === "importManagement" && <ImportTab />}
+                        {/* {activeTab === "importManagement" && <ImportTab />} */}
                         {activeTab === "orderManagement" && <OrderTab />}
                         {activeTab === "productManagement" && <ProductTab />}
                         {activeTab === "shopManagement" && <ShopManagementTab />}

@@ -1,149 +1,247 @@
-import React, { useState } from 'react'
-import img3 from '../../assets/img/img3.jpg';
-import ProductItem from '../../components/ProductItemComponent/ProductItemComponent'
-import "../ShoppingCartPage/ShoppingCartPage.css"
-import SelectPromo from './PromoSelectionPage'
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import { decreaseAmount, increaseAmount, removeAllOrderProduct, removeOrderProduct, seletedOrder } from '../../redux/slides/OrderSlide';
+import * as ProductService from '../../services/ProductService';
+import "../ShoppingCartPage/ShoppingCartPage.css";
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useNavigate } from 'react-router-dom';
 
 export const ShoppingCartPage = () => {
-  const [ProductItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Ngàn mặt trời rực rỡ',
-      price: 100000,
-      quantity: 1,
-      image: img3,
-    },
-    {
-      id: 2,
-      name: 'Thư gửi quý nhà giàu Việt Nam',
-      price: 100000,
-      quantity: 1,
-      image: img3,
-    },
-  ]);
+  const order = useSelector((state) => state.order);
+  //const user = useSelector((state) => state.user);
+  const [productDetails, setProductDetails] = useState([]);
+  const dispatch = useDispatch();
+  const [listChecked, setListChecked] = useState([]);
+  const navigate=useNavigate()
 
-  const handleQuantityChange = (id, newQuantity) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      if (order && order.orderItems && order.orderItems.length > 0) {
+        try {
+          const limitedOrderItems = order.orderItems.slice(0, 20); // Giới hạn số lượng (ví dụ: 20 sản phẩm)
+          const productData = await Promise.all(
+            limitedOrderItems.map(async (item) => {
+              const productDetail = await ProductService.getDetailProduct(item.product);
+              return productDetail.data;
+            })
+          );
+          setProductDetails(productData);
+        } catch (error) {
+          console.error("Error fetching product details:", error);
+        }
+      } else {
+        setProductDetails([]);
+      }
+    };
+
+    fetchProductDetails();
+  }, [JSON.stringify(order?.orderItems)]);
+
+  const handleOnClickCount = ({ type, idProduct }) => {
+    if (type === 'increase') {
+      dispatch(increaseAmount({ idProduct }));
+    } else {
+      dispatch(decreaseAmount({ idProduct }));
+    }
   };
 
-  const handleRemove = (id) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  const handleOnClickDelete = ({ idProduct }) => {
+    dispatch(removeOrderProduct({ idProduct }));
   };
 
-  const totalPrice = ProductItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
-  const discount = 25000;
+  const handleClickCheckBox = (e) => {
+    if (listChecked.includes(e.target.value)) {
+      const newListChecked = listChecked.filter((item) => item !== e.target.value);
+      setListChecked(newListChecked);
+    } else {
+      setListChecked([...listChecked, e.target.value]);
+    }
+  };
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalBody, setModalBody] = useState(null);
-  const [textButton1, setTextButton1] = useState(''); // Nút Lưu/Cập nhật
-  const [onSave, setOnSave] = useState(() => () => {});
-  const [onCancel, setOnCancel] = useState(() => () => {});
+  const handleOnClickAll = (e) => {
+    if (e.target.checked) {
+      const newListChecked = [];
+      order?.orderItems?.forEach((item) => {
+        newListChecked.push(item.product);
+      });
+      setListChecked(newListChecked);
+    } else {
+      setListChecked([]);
+    }
+  };
 
-  const handleAddLanguage = () => {
-    setModalTitle('THÊM NGÔN NGỮ');
-   
-    setTextButton1('Thêm'); // Đặt nút là "Thêm"
-    setOnSave(() => () => {
-        alert('Đã chọn mã khuyến mãi!');
-        setShowModal(false);
-    });
-    setOnCancel(() => () => {
-        alert('Hủy chọn mã khuyến mãi!');
-        setShowModal(false);
-    });
-    setShowModal(true);
-};
+  useEffect(() => {
+    dispatch(seletedOrder({listChecked}))
+  }, [listChecked])
+
+  const handleOnClickDeleteAll = () => {
+    if (listChecked && listChecked.length > 0) {
+      dispatch(removeAllOrderProduct({ listChecked }));
+    }
+  }
+
+  const priceMemo = useMemo(() => {
+    if (!order?.orderItemSelected) return 0; // Early return if orderItemSelected is undefined
+    
+    const result = order?.orderItemSelected.reduce((totalMoney, cur) => {
+      return totalMoney + ((cur.price * cur.amount) || 0); // Ensure price or amount is not undefined
+    }, 0);
+  
+    return result;
+  }, [order]);
+
+  const handleOrder=()=>{
+    if(!order?.orderItemSelected?.length){
+      alert('Vui lòng chọn sản phẩm')
+    } else{
+    navigate('/order')
+    }
+  }
+  
 
   return (
-    <><><div className="container">
+    <div className="container">
       <div className="cart-page">
-        <h3 className="cart-title mb-4">Giỏ Hàng ({ProductItems.length} sản phẩm)</h3>
-
-        {/* Bố cục chính: Sản phẩm và Thanh toán/Khuyến mãi ngang nhau */}
-        <div className="d-flex">
-          {/* Phần hiển thị sản phẩm */}
-          <div className="flex-grow-1">
-            {/* Header nằm phía trên phần sản phẩm */}
-            <div className="cart-header d-flex align-items-center border-bottom pb-2 mb-3">
-              <input type="checkbox" className="me-3" />
-              <span className="header-label flex-grow-1">Chọn tất cả ({ProductItems.length} sản phẩm)</span>
-              <span className="header-quantity text-center" style={{ width: '100px' }}>
-                Số lượng
-              </span>
-              <span className="header-price text-end" style={{ width: '120px' }}>
-                Thành tiền
-              </span>
-            </div>
-
-            {/* Hiển thị danh sách sản phẩm */}
-            <div className="cart-items">
-              {ProductItems.map((item, index) => (
-                <ProductItem
-                  key={index}
-                  image={item.image}
-                  name={item.name}
-                  price={item.price}
-                  quantity={item.quantity}
-                  onQuantityChange={(newQuantity) => handleQuantityChange(index, newQuantity)}
-                  onRemove={() => handleRemove(index)} />
-              ))}
-            </div>
+        <h3 className="cart-title mb-4">Giỏ Hàng sản phẩm</h3>
+        <div className="row">
+          {/* Cột Checkbox */}
+          <div className="col-3">
+            <input
+              type="checkbox"
+              className="me-3 mt-2"
+              onChange={handleOnClickAll}
+              checked={listChecked?.length === order?.orderItems?.length}
+            />
+            <span className="header-label flex-grow-1">Chọn tất cả</span>
           </div>
 
-          {/* Phần Khuyến mãi và Thanh toán */}
-          <div className="checkout-section ms-4" style={{ width: '300px' }}>
-            {/* Phần Khuyến mãi */}
-            <div className="promo-section mb-3">
-              <div className="d-flex justify-content-between border-bottom pb-2">
-                <span>Khuyến mãi</span>
-                <button> 
-                  <a onClick={handleAddLanguage} className="text-decoration-none">Xem thêm</a>
-                </button>
-              </div>
-              <div className="promo-details bg-light p-2 my-2">
-                <div className="d-flex justify-content-between align-items-center">
-                  <span>Mã giảm 25k</span>
-                  <button className="btn btn-sm btn-danger">X</button>
-                </div>
-                <small>Chỉ có thể áp dụng tối đa 1 mã giảm giá</small>
-              </div>
-            </div>
+          {/* Cột sản phẩm */}
+          <div className="col-3">
+            <span className="header-quantity text-end">Sản phẩm</span>
+          </div>
 
-            {/* Phần Thanh toán */}
-            <div className="payment-section border-top pt-2">
-              <div className="d-flex justify-content-between">
-                <span>Thành tiền:</span>
-                <span>100.000đ</span>
-              </div>
-              <div className="d-flex justify-content-between">
-                <span>Giảm giá:</span>
-                <span>-25.000đ</span>
-              </div>
-              <div className="d-flex justify-content-between fw-bold text-danger">
-                <span>Tổng số tiền:</span>
-                <span>75.000đ</span>
-              </div>
-              <a className="nav-link" href="/order">
-                <button className="btn btn-success w-100 mt-3">THANH TOÁN</button>
-              </a>
-            </div>
+          {/* Cột Giá tiền */}
+          <div className="col-2">
+            <span className="header-quantity text-center">Giá tiền</span>
+          </div>
+
+          {/* Cột Số lượng */}
+          <div className="col-2 ">
+            <span className="header-quantity text-center">Số lượng</span>
+          </div>
+
+          {/* Cột Thành tiền */}
+          <div className="col-1">
+            <span className="header-quantity text-center">Thành tiền</span>
+          </div>
+
+          <div className="col-1">
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => handleOnClickDeleteAll()}
+            >
+              <i className="bi bi-trash"></i>
+            </button>
+          </div>
+
+          {/* Hiển thị danh sách sản phẩm */}
+          <div className="cart-items">
+            {productDetails && productDetails.length > 0 ? (
+              productDetails.map((item, index) => (
+                order?.orderItems[index] ? (
+                  <div className="cart-item d-flex align-items-center border-bottom py-3" key={index}>
+                    <div className="col-1">
+                      <input
+                        type="checkbox"
+                        className="me-3 mt-2"
+                        onChange={handleClickCheckBox}
+                        value={order.orderItems[index].product}
+                        checked={listChecked.includes(order.orderItems[index].product)}
+                      />
+                    </div>
+
+                    <div className="col-2">
+                      <img
+                        src={item.img[0]}
+                        alt={item.name}
+                        className="item-image"
+                        style={{ width: '80px', height: '100px' }}
+                      />
+                    </div>
+
+                    <div className="col-3">
+                      <h5 className="mb-2">{item.name}</h5>
+                    </div>
+
+                    <div className="col-2">
+                      <p className="mb-0">{order.orderItems[index]?.price.toLocaleString()}đ</p>
+                    </div>
+
+                    <div className="col-2 d-flex align-items-center">
+                      <button
+                        type="button"
+                        className="btn btn-light"
+                        onClick={() => handleOnClickCount({ type: 'decrease', idProduct: order.orderItems[index]?.product })}
+                      >
+                        <i className="bi bi-dash"></i>
+                      </button>
+                      <input
+                        id="quantity"
+                        className="form-control"
+                        style={{ width: '30px', fontSize: '16px' }}
+                        value={order.orderItems[index]?.amount || 1}
+                        min="1"
+                        max="10"
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-light"
+                        onClick={() => handleOnClickCount({ type: 'increase', idProduct: order.orderItems[index]?.product })}
+                      >
+                        <i className="bi bi-plus"></i>
+                      </button>
+                    </div>
+
+                    <div className="col-2">
+                      <span className="total-price">
+                        {(order.orderItems[index]?.amount * order.orderItems[index]?.price || 0).toLocaleString()}đ
+                      </span>
+                    </div>
+
+                    <div className="col-1">
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => handleOnClickDelete({ idProduct: order.orderItems[index]?.product })}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                ) : null
+              ))
+            ) : (
+              <p>Không có sản phẩm trong giỏ hàng.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Phần Thanh toán */}
+        <div className="payment-section border-top pt-2">
+          <div className="d-flex justify-content-between">
+            <span>Tổng tiền:</span>
+            <span>{priceMemo.toLocaleString()}đ</span>
+            {/* Hiển thị tổng tiền giỏ hàng */}
+          </div>
+          <div style={{marginBottom:'30px', marginTop:'20px'}} >
+            <ButtonComponent textButton="Đặt hàng" onClick={handleOrder} />
           </div>
         </div>
       </div>
-      <SelectPromo
-        isOpen={showModal}
-        onClick1={onCancel} />
     </div>
-    </>  </>
-  
   );
 };
 

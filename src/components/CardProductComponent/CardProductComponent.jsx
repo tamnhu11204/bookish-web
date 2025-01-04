@@ -1,32 +1,24 @@
 import React from 'react'
 import './CardProductComponent.css'
 
-const CardProductComponent = ({ img, proName, currentPrice, sold, star, score }) => {
+const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedbackCount,onClick }) => {
     return (
-        <div>
-            <div className="card" style={{ width: '20rem' }}>
+        <div className="card" style={{ width: '20rem' }} onClick={onClick}>
 
-                <img src={img} className="card-img-top" alt="..." />
+            <img src={img} className="card-img-top" alt="..." />
 
-                <div className="card-body">
-                    <h5 className="pro-name">{proName}</h5>
+            <div className="card-body">
+                <h5 className="pro-name">{proName}</h5>
 
-                    <div className="row">
-                        <div className="col-1"><i className="bi bi-currency-dollar" style={{ color: 'red', fontSize: '17px' }}></i></div>
-                        <div className="col"><p className="current-price">{currentPrice}</p></div>
-                    </div>
+                <div className="row">
+                    <div className="col-1"><i className="bi bi-currency-dollar" style={{ color: 'red', fontSize: '17px' }}></i></div>
+                    <div className="col"><p className="current-price" style={{ color: 'red'}}>{currentPrice}</p></div>
+                </div>
 
-                    <p className="sold">Đã bán: {sold}</p>
+                <p className="sold">Đã bán: {sold}</p>
 
-                    <div className="row">
-                        <div className="col-3"><p className="star">{star}</p></div>
-                        <div className="col-2"><i className="bi bi-star-fill" style={{ color: '#F4D761', marginLeft: '-30px', fontSize: '15px' }}></i></div>
-                        <div className="col-2">
-                            <svg height="20">
-                                <line x1="5" y1="0" x2="5" y2="100" style={{ stroke: '#666666', strokeWidth: 1 }} />
-                            </svg></div>
-                        <div className="col-5"><p className="score">{score} điểm</p></div>
-                    </div>
+                <div className="row">
+                    <strong>{star}/5⭐</strong> ({feedbackCount} đánh giá) | {sold} lượt bán
                 </div>
             </div>
         </div>
