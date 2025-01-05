@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import logo from '../../assets/img/download1.jpg'; // Đặt logo mặc định
+import logo from '../../assets/img/logo.png'; // Đặt logo mặc định
 import * as UserService from '../../services/UserService';
 import Styles from '../../style';
 import { resetUser } from '../../redux/slides/UserSlide';
