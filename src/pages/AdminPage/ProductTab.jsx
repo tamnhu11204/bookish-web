@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './AdminPage.css';
 import FormComponent from '../../components/FormComponent/FormComponent';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
@@ -8,10 +8,19 @@ import AddProductForm from './ProductAdd';
 import * as ProductService from "../../services/ProductService" ;
 import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import * as PublisherService from "../../services/OptionService/PublisherService";
+import * as LanguageService from "../../services/OptionService/LanguageService"
+import * as SupplierService from "../../services/OptionService/SupplierService"
+import * as FormatService from "../../services/OptionService/FormatService"
+import * as UnitService from "../../services/OptionService/UnitService"
+import * as CategoryService from "../../services/CategoryService"
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useMutationHook } from "../../hooks/useMutationHook";
 
 
 const ProductTab = () => {
     const [activeTab, setActiveTab] = useState("all");
+    const[productID,setProductID] = useState("");
     
     // State quản lý modal
     const [showModal, setShowModal] = useState(false);
@@ -36,8 +45,6 @@ const ProductTab = () => {
             queryFn: getAllProduct,
         });
 
-  
-
     // Hàm mở modal thêm danh mục
     const handleAddProduct = () => {
         
@@ -46,15 +53,47 @@ const ProductTab = () => {
        
     };
 
+    const onCancel2 = () => {
+        
+        setShowModal(false);
+       
+    };
+
+
     // Hàm mở modal sửa danh mục
-    const handleEditProduct = () => {
+    const handleEditProduct = (product) => {
         
         setOnCancel(() => () => {
             setShowModal(false);
         });
         setShowModal(true);
         setType(false);
+        setProductID(product._id);
     };
+
+    //Xóa sản phẩm 
+    const [selectedProduct, setSelectedProduct] = useState("");
+    const deleteMutation = useMutationHook(data => ProductService.deleteProduct(selectedProduct._id));
+    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
+
+     useEffect(() => {
+            
+            if (isSuccessDelete ) {
+                message.success();
+                alert('Xóa sản phẩm thành công!');
+                setShowModal(false);
+            }
+            if ( isErrorDelete) {
+                message.error();
+            }
+        }, [ isSuccessDelete, isErrorDelete]);
+
+        const handleDeleteProduct = (product) => {
+            if (window.confirm(`Bạn có chắc chắn muốn xóa ngôn ngữ "${product.name}" không?`)) {
+                setSelectedProduct(product);
+                deleteMutation.mutate(product.id);
+            }
+        };
     
 
      if (showModal === false)return (
@@ -127,7 +166,7 @@ const ProductTab = () => {
                             <td>
                                     <button
                                         className="btn btn-sm btn-primary me-2"
-                                        onClick={ handleEditProduct}
+                                        onClick={() =>handleEditProduct(product)}
                                     >
                                         <i className="bi bi-pencil-square"></i>
                                     </button>
@@ -137,7 +176,7 @@ const ProductTab = () => {
                             
                                 <button
                                     className="btn btn-sm btn-danger"
-                                    //onClick={() => handleDeleteAccount(product)}
+                                    onClick={() => handleDeleteProduct(product)}
                                 >
                                     <i className="bi bi-trash"></i>
                                 </button>
@@ -161,11 +200,14 @@ const ProductTab = () => {
     );
     if(Type=== false) return(
         <ProductDetailForm
-            isOpen={showModal}/>
+            isOpen={showModal}
+            IDProduct={productID}
+            onCancel={onCancel2}/>
     );
     else return(
         <AddProductForm
-            isOpen={showModal}/>
+            isOpen={showModal}
+            onCancel= {onCancel2}/>
     );
    
 };

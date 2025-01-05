@@ -15,7 +15,7 @@ import * as UnitService from "../../services/OptionService/UnitService";
 import * as ProductService from "../../services/ProductService";
 import TextEditor from "./partials/TextEditor";
 
-const AddProductForm = (isOpen) => {
+const AddProductForm = ({isOpen,onCancel}) => {
 
   // State lưu trữ thông tin sản phẩm
   const [product1, setProduct] = useState({
@@ -71,7 +71,6 @@ const AddProductForm = (isOpen) => {
     if (isSuccess && data?.status !== 'ERR') {
       message.success();
       alert('Thêm sản phẩm mới thành công!');
-
     }
     if (isError) {
       message.error();
@@ -111,6 +110,8 @@ const AddProductForm = (isOpen) => {
       };
       setProduct(name, author, pubdate, weight, "", "", "", page, "", price, img, "", "", "", "", "");
       mutation.mutate(productData); // Add new product
+      alert('Thêm sản phẩm mới thành công!');
+      onCancel();
     }
   };
 
@@ -191,12 +192,13 @@ const AddProductForm = (isOpen) => {
 
   });
 
-  const AllLang = Array.isArray(languages)
+    const AllLang = Array.isArray(languages) && languages.length > 0
     ? languages.map((language) => ({
-      value: language._id,
-      label: language.name,
-    }))
+        value: language._id,
+        label: language.name,
+      }))
     : [];
+  
 
   //Xử lý Format
   const [selectedFormat, setSelectedFormat] = useState("");
@@ -334,7 +336,7 @@ const AddProductForm = (isOpen) => {
         <div className="col-6 text-end">
           <ButtonComponent
             textButton="Hủy bỏ"
-          //onClick={handleAddLanguage}
+            onClick={onCancel}
           />
         </div>
         <div className="col-md-6 mb-3">
