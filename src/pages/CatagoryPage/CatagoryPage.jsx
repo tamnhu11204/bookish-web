@@ -137,7 +137,7 @@ const CatagoryPage = () => {
                     </div>
 
                     <div className="col-9" >
-                        <div style={{ marginTop: '30px' }}>
+                        <div style={{ marginTop: '20px' }}>
                             <SliderComponent arrImages={[img1, img2]} />
                         </div>
 

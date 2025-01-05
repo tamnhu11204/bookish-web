@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import logo from '../../assets/img/logo.png'; // Đặt logo mặc định
+import logo from '../../assets/img/download1.jpg'; // Đặt logo mặc định
 import * as UserService from '../../services/UserService';
 import Styles from '../../style';
 import { resetUser } from '../../redux/slides/UserSlide';
 import LoadingComponent from '../LoadingComponent/LoadingComponent'; // Selector để lấy shop từ Redux
+import { useNavigate } from 'react-router-dom';
 
 const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHiddenNoti = false }) => {
   const user = useSelector((state) => state.user);
@@ -12,6 +13,10 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
   const [name, setUserName] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const order = useSelector((state) => state.order)
+  const navigate=useNavigate()
+
+  console.log('svaj', user)
 
   const handleLogout = async () => {
     setLoading(true);
@@ -25,6 +30,10 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
     setUserName(user?.name);
     setLoading(false);
   }, [user?.name]);
+
+  const handleOnClickCart =()=>{
+    navigate('/shoppingcart')
+  }
 
   return (
     <>
@@ -51,17 +60,31 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
           <div className="row">
             {!isHiddenCart && (
               <div className="col-3">
-                <a className="nav-link" href="/shoppingcart">
+                <button type="button" class="btn position-relative" style={{ width: '40px' }}
+                onClick={handleOnClickCart}>
                   <i className="bi bi-cart3" style={Styles.iconHeader}></i>
-                </a>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    style={{ fontSize: '10px' }}>
+                    {order?.orderItems?.length||0}
+                    <span class="visually-hidden">unread messages</span>
+                  </span>
+                </button>
               </div>
+
             )}
 
-            {!isHiddenNoti && (
+            {/* {!isHiddenNoti && (
               <div className="col-3">
-                <i className="bi bi-bell" style={Styles.iconHeader}></i>
+                <button type="button" class="btn position-relative" style={{ width: '40px' }}>
+                  <i className="bi bi-cart3" style={Styles.iconHeader}></i>
+                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                    style={{ fontSize: '10px' }}>
+                    99+
+                    <span class="visually-hidden">unread messages</span>
+                  </span>
+                </button>
               </div>
-            )}
+            )} */}
 
             <div className="col-6">
               <LoadingComponent isLoading={loading}>

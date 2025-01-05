@@ -4,13 +4,14 @@ import FormComponent from "../../components/FormComponent/FormComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as UserService from '../../services/UserService';
 import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../../redux/slides/UserSlide";
 
 const LogInPage = () => {
   const [email, setEmail] = useState('');
+  const location=useLocation()
   const [password, setPassword] = useState('');
   const dispatch=useDispatch()
 
@@ -20,7 +21,13 @@ const LogInPage = () => {
 
   useEffect(()=>{
     if(isSuccess && data?.status !== 'ERR'){
-      navigate('/')
+      if(location?.state){
+        navigate(location?.state)
+      }
+      else{
+        navigate('/')
+      }
+
       localStorage.setItem("access_token", JSON.stringify(data?.access_token));
       if (data?.access_token){
         const decoded=jwtDecode(data?.access_token)

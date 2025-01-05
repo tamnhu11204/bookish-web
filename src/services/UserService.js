@@ -130,5 +130,14 @@ export const getAllListAddress = async (user, access_token) => {
     return res.data;
   };
 
+  export const getAllListAddressIsDefault = async (user, access_token) => {
+    const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/get-all/${user}?isDefault=true`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,  // Đảm bảo sử dụng "Bearer" đúng cách
+      }
+    });
+    return res.data;
+  };
+
 
 

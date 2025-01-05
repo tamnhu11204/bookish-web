@@ -1,49 +1,63 @@
 import React from 'react';
 
-const ProductItem = ({ image, name, price, quantity, onQuantityChange, onRemove }) => {
-  const handleDecrease = () => {
-    if (quantity > 1) {
-      onQuantityChange(quantity - 1);
-    }
-  };
+const ProductItem = ({ onClickIncrease, onClickDecrease, image, name, price, quantity, onQuantityChange, index, onRemove }) => {
+  const totalPrice = price * quantity;
 
-  const handleIncrease = () => {
-    onQuantityChange(quantity + 1);
-  };
- // Tính thành tiền
- const totalPrice = price * quantity;
+  return (
+    <div className="cart-item d-flex align-items-center border-bottom py-3">
+      <div className="col-1">
+        <input type="checkbox" className="me-3 mt-2" />
+      </div>
 
- return (
-   <div className="cart-item d-flex align-items-start border-bottom py-3">
-     <input type="checkbox" className="me-3 mt-2" />
-     <img
-       src={image}
-       alt={name}
-       className="item-image me-3"
-       style={{ width: '80px', height: '100px' }}
-     />
-     <div className="item-details flex-grow-1 d-flex flex-column">
-       <h5 className="mb-2">{name}</h5>
-       <div className="d-flex align-items-center justify-content-end mb-2">
-         <button onClick={handleDecrease} className="btn btn-outline-secondary me-2">
-           -
-         </button>
-         <span className="quantity mx-2">{quantity}</span>
-         <button onClick={handleIncrease} className="btn btn-outline-secondary me-2">
-           +
-         </button>
-         <span className="total-price mx-3">{totalPrice.toLocaleString()}đ</span>
-         <button onClick={onRemove} className="remove-button btn btn-danger">
-           X
-         </button>
-       </div>
-       <p className="mb-0 mt-auto">{price.toLocaleString()}đ</p>
-     </div>
-   </div>
- );
+      <div className="col-2">
+        <img
+          src={image}
+          alt={name}
+          className="item-image"
+          style={{ width: '80px', height: '100px' }}
+        />
+      </div>
+
+      <div className="col-3">
+        <h5 className="mb-2">{name}</h5>
+      </div>
+
+      <div className="col-2">
+        <p className="mb-0">{price.toLocaleString()}đ</p>
+      </div>
+
+      <div className="col-2 d-flex align-items-center">
+        <button style={{ width: '30px', height: '30px', marginRight:'5px', fontSize:'16px' }}
+        type="button" className="btn btn-light" onClick={onClickDecrease}>
+        <i className="bi bi-plus" ></i>
+        </button>
+        <input
+          id="quantity"
+          className="form-control"
+          style={{ width: '30px', fontSize: '16px' }}
+          value={quantity}
+          min="1"
+          max="10"
+          onChange={(e) => onQuantityChange(e, index)} // Truyền index vào onChange
+        />
+        <button style={{ width: '30px', height: '30px', marginLeft:'5px', fontSize:'16px' }}
+        type="button" className="btn btn-light" onClick={onClickIncrease}>
+        <i className="bi bi-dash" ></i>
+        </button>
+      </div>
+
+      <div className="col-1">
+        <span className="total-price">{totalPrice.toLocaleString()}đ</span>
+      </div>
+
+      <div className="col-1">
+        <button onClick={onRemove} className="remove-button btn btn-danger">
+        <i className="bi bi-trash" ></i>
+        </button>
+      </div>
+    </div>
+  );
 };
-
-
 
 
 export default ProductItem;

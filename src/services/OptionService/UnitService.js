@@ -19,3 +19,8 @@ export const deleteUnit=async(id)=>{
     const res =await axios.delete(`${process.env.REACT_APP_API_URL_BACKEND}/unit/delete/${id}`)
     return res.data
 }
+
+export const getDetailUnit=async(id)=>{
+    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/unit/get-detail/${id}`)
+    return res.data
+}

@@ -14,10 +14,25 @@ import { useMutationHook } from "../../hooks/useMutationHook";
 import * as message from "../../components/MessageComponent/MessageComponent";
 import Compressor from 'compressorjs';
 
-const ProductDetailForm = (isOpen, IDProduct) => {
+const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
+  
+
+   //Lấy thông tin product
+   
+    const [product,setDetailProduct] = useState(null);
   // State lưu trữ thông tin sản phẩm
+   useEffect(() => {
+      const fetchProduct = async () => {
+        const data = await ProductService.getDetailProduct(IDProduct);
+        console.log('sá', data)
+        setDetailProduct(data.data);
+      };
+      fetchProduct();
+    }, [IDProduct]);
+
   const [product1, setProduct] = useState({
-    name: "Vợ nhặt",
+
+    name: product?.name,
     author: "Kim Lân",
     publisher: "NXB Văn học",
     publishYear: "2024",
@@ -158,11 +173,7 @@ const ProductDetailForm = (isOpen, IDProduct) => {
           }
       };
 
-  //Lấy thông tin product
-  const getDetailProduct = async (id) => {
-    const detail = await ProductService.getDetailProduct(id);
-    return detail.data;
-    };
+ 
   
 
   //Xử lý nhà xuất bản
@@ -184,11 +195,12 @@ const ProductDetailForm = (isOpen, IDProduct) => {
     
     });
 
-  const AllPub =  publishers.map((publisher) => ({
-
-   value: publisher._id,
-   label : publisher.name,
-     } ));
+    const AllPub = Array.isArray(publishers)
+    ? publishers.map((publisher) => ({
+      value: publisher._id,
+      label: publisher.name,
+    }))
+    : [];
 
      //Xử lý ngôn ngữ
   const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -235,12 +247,12 @@ const ProductDetailForm = (isOpen, IDProduct) => {
     
     });
 
-  const AllFormat=  formats.map((format) => ({
-
-   value: format._id,
-   label :format.name,
-     } ));
-
+    const AllFormat = Array.isArray(formats)
+    ? formats.map((format) => ({
+      value: format._id,
+      label: format.name,
+    }))
+    : [];
     
   //Xử lý nhà cung cấp
   const [selectedSupplier, setSelectedSupplier] = useState("");
@@ -261,13 +273,12 @@ const ProductDetailForm = (isOpen, IDProduct) => {
     
     });
 
-  const AllSupplier=  suppliers.map((supplier) => ({
-
-   value: supplier._id,
-   label : supplier.name,
-     } ));
-
-
+    const AllSupplier = Array.isArray(suppliers)
+    ? suppliers.map((supplier) => ({
+      value: supplier._id,
+      label: supplier.name,
+    }))
+    : [];
      //Xử lý đơn vị
   const [selectedUnit, setSelectedUnit] = useState("");
 
@@ -287,12 +298,12 @@ const ProductDetailForm = (isOpen, IDProduct) => {
     
     });
 
-  const AllUnit=  units.map((unit) => ({
-
-   value: unit._id,
-   label : unit.name,
-     } ));
-
+    const AllUnit = Array.isArray(units)
+    ? units.map((unit) => ({
+      value: unit._id,
+      label: unit.name,
+    }))
+    : [];
  //Xử lý danh mục
  const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -312,11 +323,12 @@ const ProductDetailForm = (isOpen, IDProduct) => {
    
    });
 
- const AllCategory =  categories.map((category) => ({
-
-  value: category._id,
-  label : category.name,
-    } ));
+   const AllCategory = Array.isArray(categories)
+   ? categories.map((categorie) => ({
+     value: categorie._id,
+     label: categorie.name,
+   }))
+   : [];
   
   
 
@@ -329,7 +341,7 @@ const ProductDetailForm = (isOpen, IDProduct) => {
   if (!isOpen) return null;
   return (
     <div className="container my-4">
-      <h4>Thêm sản phẩm mới</h4>
+      <h4>Chỉnh sửa sản phẩm</h4>
       
       <div className="row">
         <div className="col-md-6 mb-3">
@@ -340,7 +352,7 @@ const ProductDetailForm = (isOpen, IDProduct) => {
                   label="Tên sản phẩm"
                   type="text"
                   placeholder="Nhập tên sản phẩm"
-                  value={name}
+                  value={product.name}
                   onChange={handleOnChangeName}
                   required={true}
           />
@@ -348,7 +360,7 @@ const ProductDetailForm = (isOpen, IDProduct) => {
         <div className="col-6 text-end">
           <ButtonComponent
               textButton="Hủy bỏ"
-              //onClick={handleAddLanguage}
+              onClick={onCancel}
            />
            </div>
         <div className="col-md-6 mb-3">
@@ -412,13 +424,37 @@ const ProductDetailForm = (isOpen, IDProduct) => {
         <div className="col-md-6 mb-3">
           <label className="form-label"></label>
           <FormComponent
-                  id="nameLanguageInput"
-                  label="Kích thước"
-                  type="text"
-                  placeholder="Nhập kích thước (ví dụ: 26×20×0,5cm)"
-                  value={size}
-                  onChange={handleOnChangeSize}
-                  required={true}
+            id="nameLanguageInput"
+            label="Chiều cao"
+            type="number"
+            placeholder="Nhập chiều cao (cm)"
+            value={height}
+            onChange={handleOnChangeHeight}
+            required={true}
+          />
+        </div>
+        <div className="col-md-6 mb-3">
+          <label className="form-label"></label>
+          <FormComponent
+            id="nameLanguageInput"
+            label="Chiều rộng"
+            type="number"
+            placeholder="Nhập chiều rộng"
+            value={width}
+            onChange={handleOnChangeWidth}
+            required={true}
+          />
+        </div>
+        <div className="col-md-6 mb-3">
+          <label className="form-label"></label>
+          <FormComponent
+            id="nameLanguageInput"
+            label="Chiều dài"
+            type="number"
+            placeholder="Nhập chiều dài (cm)"
+            value={length}
+            onChange={handleOnChangeLength}
+            required={true}
           />
         </div>
         <div className="col-md-6 mb-3">

@@ -19,3 +19,8 @@ export const deleteCategory=async(id)=>{
     const res =await axios.delete(`${process.env.REACT_APP_API_URL_BACKEND}/category/delete/${id}`)
     return res.data
 }
+
+export const getDetailCategory=async(id)=>{
+    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/category/get-detail/${id}`)
+    return res.data
+}

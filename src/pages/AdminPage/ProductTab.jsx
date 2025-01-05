@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './AdminPage.css';
 import FormComponent from '../../components/FormComponent/FormComponent';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
@@ -14,6 +14,8 @@ import * as SupplierService from "../../services/OptionService/SupplierService"
 import * as FormatService from "../../services/OptionService/FormatService"
 import * as UnitService from "../../services/OptionService/UnitService"
 import * as CategoryService from "../../services/CategoryService"
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useMutationHook } from "../../hooks/useMutationHook";
 
 
 const ProductTab = () => {
@@ -43,10 +45,6 @@ const ProductTab = () => {
             queryFn: getAllProduct,
         });
 
-        
-
-  
-
     // Hàm mở modal thêm danh mục
     const handleAddProduct = () => {
         
@@ -55,18 +53,50 @@ const ProductTab = () => {
        
     };
 
+    const onCancel2 = () => {
+        
+        setShowModal(false);
+       
+    };
+
+
     // Hàm mở modal sửa danh mục
-    const handleEditProduct = () => {
+    const handleEditProduct = (product) => {
         
         setOnCancel(() => () => {
             setShowModal(false);
         });
         setShowModal(true);
         setType(false);
+        setProductID(product._id);
     };
+
+    //Xóa sản phẩm 
+    const [selectedProduct, setSelectedProduct] = useState("");
+    const deleteMutation = useMutationHook(data => ProductService.deleteProduct(selectedProduct._id));
+    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
+
+     useEffect(() => {
+            
+            if (isSuccessDelete ) {
+                message.success();
+                alert('Xóa sản phẩm thành công!');
+                setShowModal(false);
+            }
+            if ( isErrorDelete) {
+                message.error();
+            }
+        }, [ isSuccessDelete, isErrorDelete]);
+
+        const handleDeleteProduct = (product) => {
+            if (window.confirm(`Bạn có chắc chắn muốn xóa ngôn ngữ "${product.name}" không?`)) {
+                setSelectedProduct(product);
+                deleteMutation.mutate(product.id);
+            }
+        };
     
 
-     if (showModal == false)return (
+     if (showModal === false)return (
         <div style={{ padding: '0 20px' }}>
             <div className="title-section">
                 <h3 className="text mb-0">DANH SÁCH ĐƠN HÀNG</h3>
@@ -119,10 +149,10 @@ const ProductTab = () => {
                         ) : products && products.length > 0 ? (
                         products.map((product) => (
                             <tr key={product.id}>
-                                <td>{product.id}</td>
+                                <td>{product._id}</td>
                             <td>
                                 <img
-                                    src={product.image}
+                                    src={product.img[0]}
                                     alt={product.name}
                                     style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                 />
@@ -136,7 +166,7 @@ const ProductTab = () => {
                             <td>
                                     <button
                                         className="btn btn-sm btn-primary me-2"
-                                        onClick={ handleEditProduct}
+                                        onClick={() =>handleEditProduct(product)}
                                     >
                                         <i className="bi bi-pencil-square"></i>
                                     </button>
@@ -146,7 +176,7 @@ const ProductTab = () => {
                             
                                 <button
                                     className="btn btn-sm btn-danger"
-                                    //onClick={() => handleDeleteAccount(product)}
+                                    onClick={() => handleDeleteProduct(product)}
                                 >
                                     <i className="bi bi-trash"></i>
                                 </button>
@@ -168,14 +198,16 @@ const ProductTab = () => {
 
             </div> 
     );
-    if(Type== false) return(
+    if(Type=== false) return(
         <ProductDetailForm
             isOpen={showModal}
-            IDProduct={productID}/>
+            IDProduct={productID}
+            onCancel={onCancel2}/>
     );
     else return(
         <AddProductForm
-            isOpen={showModal}/>
+            isOpen={showModal}
+            onCancel= {onCancel2}/>
     );
    
 };
