@@ -89,7 +89,7 @@ const ProductTab = () => {
         }, [ isSuccessDelete, isErrorDelete]);
 
         const handleDeleteProduct = (product) => {
-            if (window.confirm(`Bạn có chắc chắn muốn xóa ngôn ngữ "${product.name}" không?`)) {
+            if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}" không?`)) {
                 setSelectedProduct(product);
                 deleteMutation.mutate(product.id);
             }

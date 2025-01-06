@@ -16,43 +16,6 @@ import Compressor from 'compressorjs';
 
 const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
   
-
-   //Lấy thông tin product
-   
-    const [product,setDetailProduct] = useState(null);
-  // State lưu trữ thông tin sản phẩm
-   useEffect(() => {
-      const fetchProduct = async () => {
-        const data = await ProductService.getDetailProduct(IDProduct);
-        console.log('sá', data)
-        setDetailProduct(data.data);
-      };
-      fetchProduct();
-    }, [IDProduct]);
-
-  const [product1, setProduct] = useState({
-
-    name: product?.name,
-    author: "Kim Lân",
-    publisher: "NXB Văn học",
-    publishYear: "2024",
-    language: "Tiếng Việt",
-    weight: "100g",
-    dimensions: "26×20×0,5cm",
-    pages: "100 trang",
-    coverType: "Bìa mềm",
-    series: "Không có",
-    supplier: "An Nam",
-    unit: "Quyển",
-    description: `Tác phẩm "Vợ nhặt" của tác giả Kim Lân (1921-2007). Ông là một trong những cây bút viết truyện ngắn xuất sắc nhất của văn học Việt Nam hiện đại. Với "Vợ nhặt", tác giả viết về cái đói, khi con người ta tưởng như khánh kiệt và chỉ muốn chết. Nhưng không, khi đói người ta không nghĩ đến con đường chết mà chỉ nghĩ đến con đường sống.`,
-    price: 100000,
-    discount: 50,
-    discountedPrice: 50000,
-    category: "Văn học > Văn học Việt Nam",
-    stock: 12,
-    sold: 12,
-  });
-
   // Xử lý khi thay đổi trường
   const [name, setName] = useState('');
   const [id, setID] = useState('');
@@ -71,7 +34,56 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
   const [stock,setStock] = useState(0);
   const [img, setImage] = useState('');
 
+  const [selectedPublisher, setSelectedPublisher] = useState("");
+  const [selectedFormat, setSelectedFormat] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedSupplier, setSelectedSupplier] = useState("");
+  const [selectedUnit, setSelectedUnit] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
+
+
+   //Lấy thông tin product
+   
+    const [product,setDetailProduct] = useState(null);
+  // State lưu trữ thông tin sản phẩm
+   useEffect(() => {
+      const fetchProduct = async () => {
+        const data = await ProductService.getDetailProduct(IDProduct);
+        console.log('sá', data)
+        setDetailProduct(data.data);
+        setID(data?.data.id ||"");
+        setName(data?.data.name || ""); 
+        setWeight(data?.data.weight ||"");
+        setWidth(data?.data.width || "");
+        setHeight(data?.data.height || "");
+        setLength(data?.data.length || "");
+        setAuthor(data?.data.author || "");
+        //setDate(data?.data.publishDate || "");
+        setPage(data?.data.page || "");
+        setPrice(data?.data.price || "");
+        setDiscount(data?.data.discount || "");
+        setStock(data?.data.stock || "");
+        setImage(data?.data.img || "");
+        setSelectedCategory(data?.data.category || "");
+        setSelectedFormat(data?.data.format || "");
+        setSelectedLanguage(data?.data.language || "");
+        setSelectedPublisher(data?.data.publisher || "");
+        setSelectedSupplier(data?.data.supplier || "");
+        setSelectedUnit(data?.data.unit || "");
+        const publishdate = new Date(data?.data.publishDate).toISOString().split('T')[0];  // Lấy phần ngày của ISO string
+        setDate(publishdate);
+
+
+      
+      };
+      fetchProduct();
+    }, [IDProduct]);
+
+
+  
+
+  
   const handleOnChangePriceEntry = (value) => setPriceEntry(value);
   const handleOnChangeName = (value) => setName(value);
   const handleOnChangeSize = (value) => setSize(value)
@@ -91,17 +103,18 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
     setPriceEntry(calculatedPriceEntry)};
 
 
-   const mutation = useMutationHook(data => ProductService.addProduct(data));
+   const mutation = useMutationHook(data => ProductService.updateProduct(IDProduct,data));
    const { data, isSuccess, isError } = mutation;
 
+   
+
    useEffect(() => {
-    console.log("Dữ liệu gửi đi: ", product1); // Kiểm tra dữ liệu gửi đi
+    console.log("Dữ liệu gửi đi: ", product); // Kiểm tra dữ liệu gửi đi
     console.log(isSuccess);
            if (isSuccess && data?.status !== 'ERR') {
                message.success();
-               alert('Thêm sản phẩm mới thành công!');
-               //resetForm();
-               //set(false);
+               alert('Cập nhật sản phẩm thành công!');
+               onCancel();
            }
            if (isError) {
                message.error();
@@ -110,8 +123,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
 
    const onSave = async () => {
      if (
-      author == "" || name == "" || price == "" ||  
-      stock == "" 
+      author == "" || name == "" || price == "" 
   ) {
     alert('Cần nhập đầy đủ thông tin!');
   }
@@ -144,8 +156,13 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
 
        
     };
-        setProduct(name,author,pubdate,weight,"","","",page,"",price,priceEntry,discount,stock,img,"","","","","");
-        mutation.mutate(productData); // Add new product
+    const response = await ProductService.updateProduct(IDProduct,productData );
+                if (response.status === 'OK') {
+                    alert("Cập nhật sản phẩm thành công!");
+                    onCancel();
+                } else {
+                    alert("Lỗi khi cập nhật ưu đãi.");
+                }
   }
     
 };
@@ -177,7 +194,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
   
 
   //Xử lý nhà xuất bản
-  const [selectedPublisher, setSelectedPublisher] = useState("");
+ 
 
   const handleOnChangePublisher = (e) => {
     setSelectedPublisher(e.target.value); 
@@ -203,7 +220,6 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
     : [];
 
      //Xử lý ngôn ngữ
-  const [selectedLanguage, setSelectedLanguage] = useState("");
 
   const handleOnChangeLanguage = (e) => {
     setSelectedLanguage(e.target.value); 
@@ -229,7 +245,6 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
     : [];
 
       //Xử lý Format
-  const [selectedFormat, setSelectedFormat] = useState("");
 
   const handleOnChangeFormat = (e) => {
     setSelectedFormat(e.target.value); 
@@ -255,7 +270,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
     : [];
     
   //Xử lý nhà cung cấp
-  const [selectedSupplier, setSelectedSupplier] = useState("");
+ 
 
   const handleOnChangeSupplier = (e) => {
     setSelectedSupplier(e.target.value); 
@@ -280,7 +295,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
     }))
     : [];
      //Xử lý đơn vị
-  const [selectedUnit, setSelectedUnit] = useState("");
+  
 
   const handleOnChangeUnit = (e) => {
     setSelectedUnit(e.target.value); 
@@ -305,7 +320,6 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
     }))
     : [];
  //Xử lý danh mục
- const [selectedCategory, setSelectedCategory] = useState("");
 
  const handleOnChangeCategory = (e) => {
    setSelectedCategory(e.target.value); 
@@ -330,11 +344,6 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
    }))
    : [];
   
-  
-
- 
-
-
   // Xử lý khi nhấn nút Lưu sản phẩm
   
  
@@ -352,7 +361,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   label="Tên sản phẩm"
                   type="text"
                   placeholder="Nhập tên sản phẩm"
-                  value={product.name}
+                  value={name}
                   onChange={handleOnChangeName}
                   required={true}
           />
@@ -391,7 +400,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
           <FormComponent
                   id="nameLanguageInput"
                   label="Năm xuất bản"
-                  type="text"
+                  type="date"
                   placeholder="Nhập năm xuất bản"
                   value={pubdate}
                   onChange={handleOnChangeDate}
@@ -544,54 +553,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   required={true}
           />
         </div>
-        <div className="col-md-4 mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-                  id="nameLanguageInput"
-                  label="Giảm giá (%)"
-                  type="number"
-                  placeholder="Nhập phần trăm giảm giá"
-                  value={discount}
-                  onChange={handleOnChangeDiscount}
-                  required={true}
-          />
-        </div>
-        <div className="col-md-4 mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-                  id="nameLanguageInput"
-                  label="Giá sau giảm"
-                  type="number"
-                  placeholder="Tự động tính toán hoặc nhập giá sau giảm"
-                  value={priceEntry}
-                  //onChange={handleOnChangeName}
-                  required={true}
-          />
-        </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-                  id="nameLanguageInput"
-                  label="Tồn kho"
-                  type="number"
-                  placeholder="Nhập số lượng tồn kho"
-                  value={stock}
-                  onChange={handleOnChangeStock}
-                  required={true}
-          />
-        </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-                  id="nameLanguageInput"
-                  label="Đã bán"
-                  type="number"
-                  placeholder="Nhập số lượng đã bán"
-                  value={0}
-                  //onChange={handleOnChangeName}
-                  required={true}
-          />
-        </div>
+        
       </div>
       <div className="text-end">
         <td>

@@ -367,7 +367,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
           <FormComponent
             id="nameLanguageInput"
             label="Năm xuất bản"
-            type="text"
+            type="date"
             placeholder="Nhập năm xuất bản"
             value={pubdate}
             onChange={handleOnChangeDate}
