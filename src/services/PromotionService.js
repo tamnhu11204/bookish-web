@@ -19,3 +19,13 @@ export const getAllPromotion = async () => {
     const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/promotion/get-all`);
     return res.data;
   };
+
+  export const getDetailPromotion = async (id) => {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/promotion/get-detail/${id}`)
+    return res.data
+}
+
+export const updateUsedPromotion = async (id) => {
+    const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/promotion/update-used/${id}`)
+    return res.data
+}

@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import parse from 'html-react-parser';
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import img4 from '../../assets/img/img4.png';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
-import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 import CardComponent from '../../components/CardComponent/CardComponent';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
+import { addOrderProduct } from '../../redux/slides/OrderSlide';
 import * as FormatService from '../../services/OptionService/FormatService';
 import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as PublisherService from '../../services/OptionService/PublisherService';
@@ -14,8 +15,6 @@ import * as SupplierService from '../../services/OptionService/SupplierService';
 import * as UnitService from '../../services/OptionService/UnitService';
 import * as ProductService from '../../services/ProductService';
 import './ProductDetailPage.css';
-import { useDispatch, useSelector } from 'react-redux';
-import { addOrderProduct } from '../../redux/slides/OrderSlide';
 
 
 const ProductDetailPage = () => {
@@ -30,7 +29,6 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       const data = await ProductService.getDetailProduct(id);
-      console.log('sá', data)
       setProduct(data.data);
     };
     fetchProduct();

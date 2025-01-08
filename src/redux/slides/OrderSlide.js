@@ -4,7 +4,12 @@ import { createSlice } from "@reduxjs/toolkit"
 const initialState = {
     orderItems: [],
     orderItemSelected: [],
-    shippingAddress: {},
+    phone: '',
+    name: '',
+    specificAddress: '',
+    province: '',
+    district: '',
+    commune: '',
     paymentMethod: false,
     itemsPrice: 0,
     shippingPrice: 0,
@@ -36,24 +41,24 @@ export const orderSlide = createSlice({
             const itemOrder = state?.orderItems?.filter((item) => item?.product !== idProduct)
             const itemOrderSelected = state?.orderItemSelected?.filter((item) => item?.product === idProduct)
             state.orderItems = itemOrder
-            state.orderItemSelected=itemOrderSelected
+            state.orderItemSelected = itemOrderSelected
         },
         increaseAmount: (state, action) => {
             const { idProduct } = action.payload
             const itemOrder = state?.orderItems?.find((item) => item?.product === idProduct)
             const itemOrderSelected = state?.orderItemSelected?.find((item) => item?.product === idProduct)
             itemOrder.amount++
-            if(itemOrderSelected){
+            if (itemOrderSelected) {
                 itemOrderSelected.amount++
             }
-            
+
         },
         decreaseAmount: (state, action) => {
             const { idProduct } = action.payload
             const itemOrder = state?.orderItems?.find((item) => item?.product === idProduct)
             const itemOrderSelected = state?.orderItemSelected?.find((item) => item?.product === idProduct)
             itemOrder.amount--
-            if(itemOrderSelected){
+            if (itemOrderSelected) {
                 itemOrderSelected.amount--
             }
         },
@@ -74,7 +79,7 @@ export const orderSlide = createSlice({
                     orderSelected.push(order)
                 }
             })
-            state.orderItemSelected=orderSelected
+            state.orderItemSelected = orderSelected
         },
     }
 })

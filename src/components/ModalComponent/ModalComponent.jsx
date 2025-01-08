@@ -1,7 +1,6 @@
 import React from 'react';
-import './ModalComponent.css';
 import ButtonComponent from '../ButtonComponent/ButtonComponent';
-import ButtonComponent2 from '../ButtonComponent/ButtonComponent2';
+import './ModalComponent.css';
 
 const ModalComponent = ({ isOpen, title, body, onClick1, onClick2, textButton1 }) => {
     if (!isOpen) return null; // Không hiển thị nếu isOpen là false
@@ -12,9 +11,12 @@ const ModalComponent = ({ isOpen, title, body, onClick1, onClick2, textButton1 }
                 <div className="modal-header">
                     <h5 className="modal-title">{title}</h5>
                     <div style={{marginBottom:'5px'}}>
-                    <ButtonComponent2  
+                    {/* <ButtonComponent2  
                     icon={<i className="bi bi-x"></i>}
-                    onClick={onClick2}/>
+                    onClick={onClick2}/> */}
+                    <button className="btn-close" 
+                    aria-label="Close" 
+                    onClick={onClick2}></button>
                     </div>
                 </div>
                 <div className="modal-body">

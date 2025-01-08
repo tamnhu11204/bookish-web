@@ -360,7 +360,7 @@ const AddressTab = () => {
             <FormComponent
               id="phoneInput"
               label="Số điện thoại"
-              type="tel"
+              type="text"
               placeholder="Nhập số điện thoại"
               value={phone}
               onChange={handleOnChangePhone}

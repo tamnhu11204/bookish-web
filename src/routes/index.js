@@ -115,10 +115,11 @@ export const routes =[
         isShowHeader: true
     },
     {
-        path: '/orderdetail',
+        path: '/order-detail/:id',
         page: OrderDetailsPage,
         isShowHeader: true
     },
+
 
     //////////////////////admin//////////////////////
 

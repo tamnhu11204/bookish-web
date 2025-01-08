@@ -191,6 +191,7 @@ const StatusSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteStatusInput"
@@ -199,6 +200,7 @@ const StatusSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
+                            enable={true}
                         />
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {errorMessage && (

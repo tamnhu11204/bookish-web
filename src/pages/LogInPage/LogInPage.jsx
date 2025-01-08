@@ -96,6 +96,7 @@ const LogInPage = () => {
             placeholder="Nhập email"
             value={email}
             onChange={handleOnChangeEmail}
+            enable={true}
           ></FormComponent>
 
           <FormComponent
@@ -105,6 +106,7 @@ const LogInPage = () => {
             placeholder="Nhập mật khẩu"
             value={password}
             onChange={handleOnChangePassword}
+            enable={true}
           ></FormComponent>
           <a
             href="/"

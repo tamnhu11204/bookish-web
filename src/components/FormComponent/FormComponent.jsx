@@ -8,8 +8,7 @@ const FormComponent = (props) => {
     return (
         <div style={{ marginBottom: '10px' }}>
             <label className="form-label" style={{ display: 'block', marginBottom: '5px', fontSize: '16px' }}>
-                
-                {props.required && <span style={{ color: 'red' }}>*</span>} 
+                {props.required && <span style={{ color: 'red' }}>*</span>}
                 {props.label} {/* Thêm dấu * nếu trường bắt buộc */}
             </label>
             <input
@@ -26,6 +25,7 @@ const FormComponent = (props) => {
                     borderRadius: '10px',
                 }}
                 onChange={handleOnChangeInput}
+                disabled={!props.enable} // Điều chỉnh để không cho phép nhập khi enable là false
             />
         </div>
     );

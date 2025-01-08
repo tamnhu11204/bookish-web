@@ -1,64 +1,122 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import * as OrderService from '../../services/OrderService';
+import * as ListAddressService from '../../services/ListAddressService';
+import * as ProductService from '../../services/ProductService';
+import * as OrderActiveListService from '../../services/OrderActiveListService';
+import { useQuery } from "@tanstack/react-query";
 
 const OrderDetailsPage = () => {
+  const { id } = useParams();
+  const [order, setOrder] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('')
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const data = await OrderService.getDetailOrder(id);
+      setOrder(data.data);
+    };
+    fetchProduct();
+  }, [id]);
+
+  const [addressDetails, setAddressDetails] = useState(null);
+
+  useEffect(() => {
+    if (!order) return;
+
+    const fetchDetails = async () => {
+      if (!order.province || !order.district || !order.commune) {
+        console.warn("Thiếu thông tin tỉnh, huyện, xã trong order.");
+        return;
+      }
+
+      try {
+        const provinceDetail = await ListAddressService.getProvinceDetail(order.province);
+        const districtDetail = await ListAddressService.getDistrictDetail(order.district);
+        const communeDetail = await ListAddressService.getCommuneDetail(order.commune);
+
+        setAddressDetails({
+          province: order.province,
+          district: order.district,
+          commune: order.commune,
+          provinceName: provinceDetail.data.data.name,
+          districtName: districtDetail.data.data.name,
+          communeName: communeDetail.data.data.name,
+        });
+      } catch (error) {
+        console.error("Error fetching address details for order:", error);
+        setAddressDetails({
+          province: order.province,
+          district: order.district,
+          commune: order.commune,
+        });
+      }
+    };
+
+    fetchDetails();
+  }, [order]);
+
+  // Ensure that addressDetails and order are available before rendering customer information
   const customer = {
-    name: "Nguyễn Văn A",
-    phone: "01234556778",
-    address: "Bạch Đằng, Tân Uyên, Bình Dương",
-    orderDate: "01/01/2023",
-    orderId: 103,
+    name: order?.name,
+    phone: order?.phone,
+    address: order && addressDetails
+      ? `${order.specificAddress}, ${addressDetails.communeName}, ${addressDetails.districtName}, ${addressDetails.provinceName}`
+      : "Địa chỉ chưa được cập nhật",
+    orderDate: order ? new Date(order.createdAt).toISOString().split('T')[0] : "",
+    orderId: order?._id,
   };
 
-  const items = [
-    {
-      name: "Đêm nhớ và những đứa con của biển",
-      id: "#12",
-      price: 70000,
-      originalPrice: 75000,
-      quantity: 1,
-      image: "https://via.placeholder.com/80", // Thay bằng link ảnh thực tế
-    },
-    {
-      name: "Đêm nhớ và những đứa con của biển",
-      id: "#12",
-      price: 70000,
-      originalPrice: 75000,
-      quantity: 1,
-      image: "https://via.placeholder.com/80",
-    },
-    {
-      name: "Đêm nhớ và những đứa con của biển",
-      id: "#12",
-      price: 70000,
-      originalPrice: 75000,
-      quantity: 1,
-      image: "https://via.placeholder.com/80",
-    },
-  ];
+  useEffect(() => {
+    if (order?.paymentMethod === true) {
+      setPaymentMethod('Thanh toán khi nhận hàng');
+    } else {
+      setPaymentMethod('Thanh toán qua ngân hàng');
+    }
+  }, [order?.paymentMethod]);
 
-  const totals = {
-    subtotal: 210000,
-    shippingFee: 25000,
-    shippingDiscount: -25000,
-    voucherDiscount: -20000,
-    total: 200000,
+
+  const [productDetails, setProductDetails] = useState([]);
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      if (order && order.orderItems && order.orderItems.length > 0) {
+        try {
+          const limitedOrderItems = order.orderItems.slice(0, 20);
+          const productData = await Promise.all(
+            limitedOrderItems.map(async (item) => {
+              const productDetail = await ProductService.getDetailProduct(item.product);
+              return productDetail.data;
+            })
+          );
+          setProductDetails(productData);
+        } catch (error) {
+          console.error("Error fetching product details:", error);
+        }
+      } else {
+        setProductDetails([]);
+      }
+    };
+
+    fetchProductDetails();
+  }, [JSON.stringify(order?.orderItems)]);
+
+  const getAllOrderActive = async (id) => {
+    const res = await OrderActiveListService.getAllOrderActive(id);
+    return res?.data ;
   };
 
-  const payment = {
-    method: "Thanh toán bằng tiền mặt khi nhận hàng",
-    orderTime: "01/01/2023",
-    paymentTime: "07/01/2023",
-    shippingTime: "02/01/2023",
-    completionTime: "07/01/2023",
-  };
+  const { isLoading: isLoadingActiveList, data: activeLists } = useQuery(
+    ["activeLists", id],
+    () => getAllOrderActive(id)  // Truyền hàm vào queryFn
+  );
+
 
   return (
     <div className="container my-4">
       <div className="card shadow-sm">
         <div className="card-body">
-          <h5 className="mb-4">Trạng thái: <span className="badge bg-success">Đã giao</span></h5>
+          <h5 className="mb-4">Trạng thái: <span className="badge bg-success">{order?.activeNow}</span></h5>
 
           <div className="row mb-4">
             <div className="col-md-6">
@@ -90,48 +148,50 @@ const OrderDetailsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {items.map((item, index) => (
-                <tr key={index}>
-                  <td className="d-flex align-items-center">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="img-thumbnail me-3"
-                      style={{ width: "80px" }}
-                    />
-                    <div>
-                      <div>{item.name}</div>
-                      <small className="text-muted">{item.id}</small>
-                    </div>
-                  </td>
-                  <td>
-                    {item.price.toLocaleString()}đ
-                    <br />
-                    <small className="text-muted">
-                      <del>{item.originalPrice.toLocaleString()}đ</del>
-                    </small>
-                  </td>
-                  <td>{item.quantity}</td>
-                  <td>{(item.price * item.quantity).toLocaleString()}đ</td>
-                </tr>
-              ))}
+              {productDetails && productDetails.length > 0 ? (
+                productDetails.map((item, index) => (
+                  order?.orderItems[index] ? (
+                    <tr key={index}>
+                      <td className="d-flex align-items-center">
+                        <img
+                          src={item.img}
+                          alt={item.name}
+                          className="img-thumbnail me-3"
+                          style={{ width: "80px" }}
+                        />
+                        {item.name}
+                      </td>
+                      <td>{order?.orderItems[index].price.toLocaleString()} đ</td>
+                      <td>{order?.orderItems[index].amount}</td>
+                      <td>{(order?.orderItems[index].price * order?.orderItems[index].amount).toLocaleString()} đ</td>
+                    </tr>
+                  ) : null
+                ))
+              ) : (
+                <p>Không có sản phẩm.</p>
+              )}
             </tbody>
+
           </table>
 
           <div className="text-end">
-            <p>Tiền hàng: {totals.subtotal.toLocaleString()}đ</p>
-            <p>Phí vận chuyển: {totals.shippingFee.toLocaleString()}đ</p>
-            <p>Ưu đãi phí vận chuyển: {totals.shippingDiscount.toLocaleString()}đ</p>
-            <p>Voucher cửa hàng: {totals.voucherDiscount.toLocaleString()}đ</p>
-            <h5 className="fw-bold text-danger">Tổng tiền: {totals.total.toLocaleString()}đ</h5>
+            <p>Tạm tính: {order?.itemsPrice.toLocaleString()} đ</p>
+            <p>Phí vận chuyển: {order?.shippingPrice.toLocaleString()} đ</p>
+            <p>Giảm giá: {order?.discount.toLocaleString()} đ</p>
+            <h5 className="fw-bold text-danger" style={{ fontSize: '20px' }}>Tổng tiền: {order?.totalMoney.toLocaleString()}đ</h5>
           </div>
 
-          <h5 className="bg-light p-2 mt-4">Phương thức thanh toán: {payment.method}</h5>
+          <h5 className="bg-light p-2 mt-4">Phương thức thanh toán: {paymentMethod}</h5>
           <ul>
-            <li>Thời gian đặt hàng: {payment.orderTime}</li>
-            <li>Thời gian thanh toán: {payment.paymentTime}</li>
-            <li>Thời gian giao hàng cho vận chuyển: {payment.shippingTime}</li>
-            <li>Thời gian hoàn thành đơn hàng: {payment.completionTime}</li>
+          {activeLists && activeLists.length > 0 ? (
+            activeLists[0].activeList.map((item, index) => (
+              <li key={index}>
+                <strong>{item.active}</strong> : {new Date(item.date).toISOString().split('T')[0]}
+              </li>
+            ))
+          ) : (
+            <p>Không có trạng thái nào.</p>
+          )}
           </ul>
         </div>
       </div>

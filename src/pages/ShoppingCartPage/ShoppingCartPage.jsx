@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import { decreaseAmount, increaseAmount, removeAllOrderProduct, removeOrderProduct, seletedOrder } from '../../redux/slides/OrderSlide';
 import * as ProductService from '../../services/ProductService';
 import "../ShoppingCartPage/ShoppingCartPage.css";
-import * as message from "../../components/MessageComponent/MessageComponent";
-import { useNavigate } from 'react-router-dom';
 
 export const ShoppingCartPage = () => {
   const order = useSelector((state) => state.order);
