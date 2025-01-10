@@ -4,6 +4,7 @@ import AddressTab from './AddressTab';
 import OrderTab from './OrderTab';
 import ProductTab from './ProductTab';
 import ProfileTab from './Profiletab';
+import FeedbackTab from './FeedbackTab';
 
 export const ProfilePage = () => {
 
@@ -62,7 +63,17 @@ export const ProfilePage = () => {
                 >
                     <div className="row">
                         <div className="col-1"><i class="bi-nav bi-box2"></i></div>
-                        <div className="col"><p className="nav-title">Quản lý đơn hàng</p></div>
+                        <div className="col"><p className="nav-title">Đơn hàng</p></div>
+                    </div>
+                </button>
+
+                <button
+                    className={`nav-link ${activeTab === "feedbackManagement" ? "active" : ""}`}
+                    onClick={() => setActiveTab("feedbackManagement")}
+                >
+                    <div className="row">
+                        <div className="col-1"><i class="bi bi-bookmark-star"></i></div>
+                        <div className="col"><p className="nav-title">Đánh giá</p></div>
                     </div>
                 </button>
 
@@ -74,7 +85,7 @@ export const ProfilePage = () => {
                 >
                     <div className="row">
                         <div className="col-1"><i class="bi-nav bi-book"></i></div>
-                        <div className="col"><p className="nav-title">Quản lý sản phẩm</p></div>
+                        <div className="col"><p className="nav-title">Sản phẩm yêu thích</p></div>
                     </div>
                 </button>
             </div>
@@ -86,6 +97,7 @@ export const ProfilePage = () => {
                     {activeTab === "addressManagement" && <AddressTab/>} 
                     {activeTab === "productManagement" && <ProductTab/>} 
                     {activeTab === "orderManagement" && <OrderTab/>} 
+                    {activeTab === "feedbackManagement" && <FeedbackTab/>} 
 
                 </div>
             </div>

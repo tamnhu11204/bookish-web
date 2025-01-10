@@ -11,8 +11,7 @@ const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedback
                 <h5 className="pro-name">{proName}</h5>
 
                 <div className="row">
-                    <div className="col-1"><i className="bi bi-currency-dollar" style={{ color: 'red', fontSize: '17px' }}></i></div>
-                    <div className="col"><p className="current-price" style={{ color: 'red'}}>{currentPrice}</p></div>
+                    <div className="col"><p className="current-price" style={{ color: 'red'}}>{currentPrice} đ</p></div>
                 </div>
 
                 <p className="sold">Đã bán: {sold}</p>

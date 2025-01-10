@@ -1,22 +1,21 @@
-import HomePage from "../pages/HomePage/HomePage";
-import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
-import SignUpPage from "../pages/SignUpPage/SignUpPage";
-import LogInPage from "../pages/LogInPage/LogInPage";
-import ShoppingCartPage from "../pages/ShoppingCartPage/ShoppingCartPage"
-import DeliveryAddress from "../pages/DeliveryAddress/DeliveryAddress";
-import PromoCodeSelectionPage from "../pages/PromoSelectionPage/PromoSelectionPage";
+import AccountTab from "../pages/AdminPage/AccountTab";
+import AdminPage from "../pages/AdminPage/AdminPage";
 import BookPurchasingTrendPage from "../pages/BookPurchasingTrendPage/BookPurchasingTrendPage";
 import CatagoryPage from "../pages/CatagoryPage/CatagoryPage";
-import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
 import ComparisonPage from "../pages/ComparisonPage/ComparisonPage";
-import RatingProductPage from "../pages/RatingProduct/RatingProduct"
-import ProfilePage from "../pages/ProfilePage/ProfilePage";
-import OrderPage from "../pages/OrderPage/OrderPage";
-import AdminPage from "../pages/AdminPage/AdminPage";
-import MonthlyBestSellPage from "../pages/MonthlyBestSellPage/MonthlyBestSellPage";
+import DeliveryAddress from "../pages/DeliveryAddress/DeliveryAddress";
 import DiscountPage from "../pages/DiscountPage/DiscountPage";
+import HomePage from "../pages/HomePage/HomePage";
+import LogInPage from "../pages/LogInPage/LogInPage";
+import MonthlyBestSellPage from "../pages/MonthlyBestSellPage/MonthlyBestSellPage";
+import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import OrderDetailsPage from "../pages/OrderDetailsPage/OrderDetailsPage";
-import AccountTab from "../pages/AdminPage/AccountTab";
+import OrderPage from "../pages/OrderPage/OrderPage";
+import ProductDetailPage from "../pages/ProductDetailPage/ProductDetailPage";
+import ProfilePage from "../pages/ProfilePage/ProfilePage";
+import PromoCodeSelectionPage from "../pages/PromoSelectionPage/PromoSelectionPage";
+import ShoppingCartPage from "../pages/ShoppingCartPage/ShoppingCartPage";
+import SignUpPage from "../pages/SignUpPage/SignUpPage";
 
 export const routes =[
     {
@@ -86,13 +85,6 @@ export const routes =[
         isShowHeader: true
     },
 
-    {
-
-        path: '/ratingproduct',
-        page: RatingProductPage, 
-        isShowHeader: true
-
-    },
     {
         path: '/order',
         page: OrderPage,

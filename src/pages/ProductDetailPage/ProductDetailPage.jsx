@@ -14,7 +14,9 @@ import * as PublisherService from '../../services/OptionService/PublisherService
 import * as SupplierService from '../../services/OptionService/SupplierService';
 import * as UnitService from '../../services/OptionService/UnitService';
 import * as ProductService from '../../services/ProductService';
+import * as UserService from '../../services/UserService';
 import './ProductDetailPage.css';
+import * as FeedbackService from '../../services/FeedbackService';
 
 
 const ProductDetailPage = () => {
@@ -25,6 +27,7 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const dispatch = useDispatch()
   const [amount, setAmount] = useState(1);
+  const [feedbacks, setFeedbacks] = useState([])
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -76,6 +79,23 @@ const ProductDetailPage = () => {
       product?.unit ? UnitService.getDetailUnit(product.unit).then((res) => res.data) : null,
     enabled: !!product?.unit,
   });
+
+  useEffect(() => {
+    const fetchFeedbackAndUserDetails = async () => {
+      const feedbackData = await FeedbackService.getAllFeedbackByPro(id);
+      const feedbackWithUserDetails = await Promise.all(
+        feedbackData.data.map(async (feedback) => {
+          const user = await UserService.getDetailUser(feedback.user);
+          return { ...feedback, user };
+        })
+      );
+      setFeedbacks(feedbackWithUserDetails);
+    };
+
+    fetchFeedbackAndUserDetails();
+  }, [id]);
+
+
 
   if (!product) {
     return <div>Loading...</div>;
@@ -150,11 +170,40 @@ const ProductDetailPage = () => {
     }
   }
 
-  const handleOnBuyNow = () => {
-    if (!user?.id) {
-      navigate('/login', { state: location?.pathname })
-    }
-  }
+  const feedbackProduct = (
+    <div>
+      {feedbacks.length > 0 ? (
+        feedbacks.map((feedback, index) => (
+          <div key={index} className="card mb-3">
+            <div className="card-body">
+              <div className="d-flex align-items-center mb-3">
+                <img
+                  src={feedback.user?.data.img || ''}
+                  alt={`${feedback.user?.data.name}'s avatar`}
+                  className="rounded-circle"
+                  style={{ width: '50px', height: '50px', marginRight: '15px' }}
+                />
+                <h5 className="card-title mb-0">{feedback.user?.data.name || 'Người dùng ẩn danh'}</h5>
+              </div>
+              <p style={{fontSize:'16px'}}>{feedback.content}</p>
+              <small style={{fontSize:'16px'}} className="text-muted">Đánh giá: {feedback.star}/5⭐</small>
+              <div className="d-flex align-items-center mb-3">
+                <img
+                  src={feedback.img || ''}
+                  alt={'new img'}
+                  style={{ width: '300px', height: '300px' }}
+                />
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+      )}
+    </div>
+  );
+
+
 
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
@@ -287,6 +336,16 @@ const ProductDetailPage = () => {
           <div style={{ backgroundColor: '#F9F6F2' }}>
             <div className="container" style={{ marginTop: '30px' }}>
               <CardComponent title="Có thể bạn sẽ quan tâm" bodyContent={relatedProductInfo} icon="bi bi-bag-heart" />
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div style={{ backgroundColor: '#F9F6F2' }}>
+            <div className="container" style={{ marginTop: '30px' }}>
+              <CardComponent title="Đánh giá"
+                bodyContent={feedbackProduct}
+                icon="bi bi-bookmark-star" />
             </div>
           </div>
         </div>

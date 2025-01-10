@@ -478,8 +478,8 @@ const OrderPage = () => {
   const promotionInfo = (
     <div>
       <ButtonComponent2 textButton="Chọn mã khuyến mãi" onClick={openModal} />
-      <p>
-        Bạn được khuyến mãi: {detailPromo?.value ? `${detailPromo.value.toLocaleString()} ₫` : 'Chưa chọn mã nào'}
+      <p style={{fontSize:'16px'}}>
+        Khuyến mãi bạn đã chọn: {detailPromo?.value ? `${detailPromo.value.toLocaleString()} ₫` : 'Chưa chọn mã nào'}
       </p>
       <PromoSelectionPage isOpen={isModalOpen} closeModal={closeModal} />
     </div>
@@ -611,7 +611,7 @@ const OrderPage = () => {
           style={{ stroke: "#666666", strokeWidth: 1 }}
         />
       </svg>
-      <div className="card p-3">
+      <div className="card p-3" style={{fontSize:'16px'}}>
         <div className="mb-3">
           <div className="d-flex justify-content-between">
             <span>Tạm tính:</span>
@@ -654,14 +654,6 @@ const OrderPage = () => {
                 icon="bi bi-info-circle"
               />
             </div>
-
-            {/* <div style={{ marginTop: "30px" }}>
-              <CardComponent
-                title="Phương thức vận chuyển"
-                bodyContent={shippingMethodInfo}
-                icon="bi bi-truck"
-              />
-            </div> */}
 
             <div style={{ marginTop: "30px" }}>
               <CardComponent

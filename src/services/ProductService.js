@@ -26,4 +26,19 @@ export const getAllProduct = async () => {
     const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/product/get-detail/${id}`);
     return res.data;
   };
+
+  export const updateRating = async (id, data) => {
+    const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/update-rating/${id}`, data);
+    return res.data;
+  };
+
+  export const updateRating2 = async (id, data) => {
+    const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/update-rating2/${id}`, data);
+    return res.data;
+  };
+
+  export const deleteRating = async (id, data) => {
+    const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/delete-rating/${id}`, data);
+    return res.data;
+  };
   

@@ -19,7 +19,7 @@ const ModalComponent = ({ isOpen, title, body, onClick1, onClick2, textButton1 }
                     onClick={onClick2}></button>
                     </div>
                 </div>
-                <div className="modal-body">
+                <div className="modal-body" style={{fontSize:'16px'}}>
                     {body}
                 </div>
                 <div className="modal-footer">

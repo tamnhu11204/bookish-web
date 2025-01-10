@@ -28,3 +28,8 @@ export const updateCancel = async (id) => {
     const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/order/update-cancel/${id}`)
     return res.data
 }
+
+export const updateIsFeedback = async (orderId, productId) => {
+    const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/order/update-isFeedback/${orderId}/${productId}`)
+    return res.data
+}

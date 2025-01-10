@@ -1,15 +1,55 @@
 // OrderTab.js
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import Compressor from 'compressorjs';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useQuery } from '@tanstack/react-query';
+import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import ModalComponent from '../../components/ModalComponent/ModalComponent';
+import * as FeedbackService from '../../services/FeedbackService';
 import * as OrderService from '../../services/OrderService';
 import * as ProductService from '../../services/ProductService'; // Import ProductService
-import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 
 const OrderTab = () => {
     const user = useSelector((state) => state.user);
     const [activeTab, setActiveTab] = useState("all");
     const [productDetails, setProductDetails] = useState({});
+    const [showModal, setShowModal] = useState(false);
+    const [img, setImg] = useState(null);
+    const [name, setName] = useState(null);
+    const [imgPro, setImgPro] = useState(null);
+    const [starRating, setStarRating] = useState(0); // Lưu số sao
+    const [feedbackContent, setFeedbackContent] = useState('');
+    const [selectedPro, setSelectedPro] = useState('');
+    const [selectedOrder, setOrderId] = useState('');
+    const queryClient = useQueryClient(); // Lưu nội dung đánh giá
+    // State để lưu hình ảnh
+
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            new Compressor(file, {
+                quality: 0.6,
+                maxWidth: 800,
+                maxHeight: 800,
+                success(result) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        setImg(reader.result); // Cập nhật ảnh đã nén dưới dạng base64
+                    };
+                    reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
+                },
+                error(err) {
+                    console.error(err);
+                }
+            });
+        }
+    };
+
+    const handleStarClick = (rating) => {
+        setStarRating(rating);
+    };
+
 
     const getAllOrderActive = async (id) => {
         const res = await OrderService.getAllOrderByUser(id);
@@ -65,9 +105,78 @@ const OrderTab = () => {
         }
     };
 
-    const handleFeedback = (orderId) => {
-        // Handle feedback logic here
+    const handleFeedback = (product, orderId) => {
+        setShowModal(true);
+        setName(product.name);
+        setImgPro(product.img);
+        setSelectedPro(product._id);
+        setOrderId(orderId); // Lưu orderId vào state
     }
+
+    const onSave = async () => {
+        try {
+            const feedbackData = {
+                star: starRating,
+                content: feedbackContent,
+                img: img,
+                user: user.id,
+                product: selectedPro,
+            };
+    
+            console.log('feedbackData:', feedbackData);
+    
+            // Thêm feedback cho sản phẩm
+            const response = await FeedbackService.addFeedback(feedbackData);
+            if (response) {
+                alert('Đánh giá thành công!');
+    
+                // Cập nhật rating sản phẩm
+                const updateResponse = await ProductService.updateRating(selectedPro, { starRating });
+    
+                if (updateResponse) {
+                    console.log('Cập nhật số sao thành công:', updateResponse);
+                } else {
+                    console.error('Cập nhật số sao thất bại.');
+                }
+    
+                // Cập nhật trạng thái isFeedback trong đơn hàng
+                const updateFeedbackResponse = await OrderService.updateIsFeedback(selectedOrder, selectedPro);
+                if (updateFeedbackResponse) {
+                    console.log('Cập nhật trạng thái isFeedback thành công');
+                } else {
+                    console.error('Cập nhật trạng thái isFeedback thất bại.');
+                }
+    
+                // Gọi lại API để load danh sách đơn hàng mới nhất
+                const updatedOrders = await getAllOrderActive(user.id);
+                setProductDetails({}); // Reset productDetails trước khi cập nhật lại
+                setOrderId(''); // Xóa orderId sau khi đánh giá xong
+                // Lưu lại danh sách đơn hàng mới
+                queryClient.setQueryData(["orders", user.id], updatedOrders);
+    
+                // Đóng modal và reset các giá trị
+                setShowModal(false);
+                setStarRating(0);
+                setFeedbackContent('');
+                setImg(null);
+            }
+        } catch (error) {
+            console.error('Error saving feedback:', error);
+            alert('Có lỗi xảy ra khi thêm đánh giá hoặc cập nhật số sao.');
+        }
+    };
+    
+
+
+
+
+    const onCancel = () => {
+        setShowModal(false);
+        setStarRating(0);
+        setFeedbackContent('');
+        setImg(null);
+    };
+
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -109,7 +218,7 @@ const OrderTab = () => {
                 </div>
 
                 {/* Nội dung Tab */}
-                <div className="tab-content" style={{ flexGrow: 1 }}>
+                <div className="tab-content" style={{ flexGrow: 1, fontSize: '16px' }}>
                     <div className="tab-pane fade show active">
                         {orders.map((order, index) => (
                             <div className="card mb-3" key={index}>
@@ -133,6 +242,7 @@ const OrderTab = () => {
                                                 <th>Giá</th>
                                                 <th>Số lượng</th>
                                                 <th>Tổng tiền</th>
+                                                <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -152,25 +262,37 @@ const OrderTab = () => {
                                                         <td>{(productDetail?.price || item.price).toLocaleString()} đ</td>
                                                         <td>{item.amount}</td>
                                                         <td>{(item.amount * (productDetail?.price || item.price)).toLocaleString()} đ</td>
+                                                        <td>
+                                                            {/* Hiển thị nút Đánh giá nếu tất cả các điều kiện đều thỏa mãn */}
+                                                            {order.activeNow === 'Đã hoàn thành' &&
+                                                                order.isCancel === false &&
+                                                                item.isFeedback === false && (
+                                                                    <ButtonComponent2
+                                                                        textButton="Đánh giá"
+                                                                        onClick={() => handleFeedback(productDetail, order._id)} // Truyền orderId vào hàm handleFeedback
+                                                                    />
+                                                                )}
+                                                        </td>
+
                                                     </tr>
                                                 );
                                             })}
                                         </tbody>
+
+
                                     </table>
                                     <p>Tổng số tiền: <strong>{order.totalMoney.toLocaleString()} đ</strong></p>
                                 </div>
 
                                 {/* Kiểm tra nếu đơn hàng chưa bị hủy mới hiển thị phần này */}
                                 {order.isCancel !== true && (
-                                    <div className="text-end">
+                                    <div className="text-end" style={{marginBottom:'5px', marginRight:'5px'}}>
                                         {order.activeNow === "Đã hoàn thành" ? (
-                                            <ButtonComponent
-                                                textButton="Đánh giá"
-                                                onClick={() => handleFeedback(order._id)} />
+                                            ''
                                         ) : (
                                             <ButtonComponent
                                                 textButton="Hủy đơn"
-                                                onClick={() => handleCancelOrder(order._id)} />
+                                                onClick={() => handleCancelOrder()} />
                                         )}
                                     </div>
                                 )}
@@ -180,6 +302,70 @@ const OrderTab = () => {
                     </div>
                 </div>
             </div>
+            <ModalComponent
+                isOpen={showModal}
+                title="ĐÁNH GIÁ SẢN PHẨM"
+                body={
+                    <>
+                        <div className="d-flex align-items-center mb-3" >
+                            <img
+                                src={imgPro}
+                                alt="Product"
+                                className="img-thumbnail"
+                                style={{ width: '80px', height: 'auto' }}
+                            />
+                            <h6 className="ml-3" style={{fontSize:'20px', marginLeft:'10px'}}>{name}</h6>
+                        </div>
+                        <div className="mb-3" >
+                            <label className="form-label">Chất lượng sản phẩm</label>
+                            <div className="d-flex">
+                                {Array.from({ length: 5 }).map((_, index) => (
+                                    <span
+                                        key={index}
+                                        className={`mr-1 ${starRating > index ? 'text-warning' : 'text-muted'}`}
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => handleStarClick(index + 1)}
+                                    >
+                                        &#9733;
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Nội dung sản phẩm:</label>
+                            <textarea style={{fontSize:'16px'}}
+                                className="form-control"
+                                rows="3"
+                                placeholder="Nhập nội dung"
+                                value={feedbackContent}
+                                onChange={(e) => setFeedbackContent(e.target.value)}
+                            ></textarea>
+                        </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="image" className="form-label">Hình ảnh</label>
+                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
+                                {img ? (
+                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
+                                ) : (
+                                    <span className="text-muted">Chọn hình ảnh</span>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                id="image"
+                                className="form-control mt-2"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                            />
+                        </div>
+                    </>
+                }
+                textButton1="Thêm đánh giá"
+                onClick1={onSave}
+                onClick2={onCancel}
+            />
         </div>
     );
 };
