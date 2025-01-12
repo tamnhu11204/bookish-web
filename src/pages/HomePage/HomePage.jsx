@@ -19,7 +19,6 @@ const HomePage = () => {
   const getAllProduct = async () => {
     try {
       const res = await ProductService.getAllProduct();
-      console.log('fdsdas', res);  // Kiểm tra xem có nhận được dữ liệu không
       return res.data;
     } catch (error) {
       console.error('Có lỗi xảy ra khi gọi API:', error);
@@ -32,14 +31,14 @@ const HomePage = () => {
     queryFn: () => getAllProduct(),
   });
 
-  const handleOnClickProduct = (id) => {
+  const handleOnClickProduct = async (id) => {
+    await ProductService.updateView(id)
     navigate(`/product-detail/${id}`);
   }
 
   const getAllCategory = async () => {
     try {
       const res = await CategoryService.getAllCategory();
-      console.log('fdsdas', res);  // Kiểm tra xem có nhận được dữ liệu không
       return res.data;
     } catch (error) {
       console.error('Có lỗi xảy ra khi gọi API:', error);
@@ -96,6 +95,7 @@ const HomePage = () => {
               star={product.star}
               feedbackCount={product.feedbackCount}
               onClick={()=>handleOnClickProduct(product._id)}
+              view={product.view}
             />
           ))
         ) : (
@@ -125,6 +125,7 @@ const HomePage = () => {
               star={product.star}
               feedbackCount={product.feedbackCount}
               onClick={()=>handleOnClickProduct(product._id)}
+              view={product.view}
             />
           ))
         ) : (
@@ -174,23 +175,23 @@ const HomePage = () => {
   )
 
 
-  const monthlyBestSellInfo = (
-    <>
-      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-        {[...Array(10)].map((_, index) => (
-          <CardProductComponent
-            key={index}
-            img={img3}
-            proName="Ngàn mặt trời rực rỡ"
-            currentPrice="120000"
-            sold="12"
-            star="4.5"
-            score="210"
-          />
-        ))}
-      </div>
-    </>
-  )
+  // const monthlyBestSellInfo = (
+  //   <>
+  //     <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+  //       {[...Array(10)].map((_, index) => (
+  //         <CardProductComponent
+  //           key={index}
+  //           img={img3}
+  //           proName="Ngàn mặt trời rực rỡ"
+  //           currentPrice="120000"
+  //           sold="12"
+  //           star="4.5"
+  //           score="210"
+  //         />
+  //       ))}
+  //     </div>
+  //   </>
+  // )
 
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>

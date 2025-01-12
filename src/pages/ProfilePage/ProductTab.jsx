@@ -1,145 +1,80 @@
-import React, { useState } from 'react';
-
-import FormComponent from '../../components/FormComponent/FormComponent';
-import SliderComponent from '../../components/SliderComponent/SliderComponent'
-import img1 from '../../assets/img/img1.png'
-import img2 from '../../assets/img/img2.png'
-import img3 from '../../assets/img/img3.jpg'
-import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
-import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent'
-import CardComponent from '../../components/CardComponent/CardComponent'
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import * as FavoriteProductService from '../../services/FavoriteProductService';
+import * as ProductService from '../../services/ProductService'; // Assuming this includes `getDetailProduct`
+import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 
 const ProductTab = () => {
+    const user = useSelector((state) => state.user);
+    const navigate = useNavigate();
 
-    const [activeTab, setActiveTab] = useState("customer");
-    const accounts = [
-        {
-            id: 103,
-            image: 'https://via.placeholder.com/50',
-            name: 'Nguyễn Văn A',
-            email: 'nguyenvan@gmail.com',
-            numPhone: '2124354425'
-        },
-        {
-            id: 104,
-            image: 'https://via.placeholder.com/50',
-            name: 'Nguyễn Văn A',
-            email: 'nguyenvan@gmail.com',
-            numPhone: '2124354425'
-        },
-    ];
+    const [productFavorite, setProductFavorite] = useState([]);
+    const [loading, setLoading] = useState(true);
 
- 
-    
-    // Hàm hiển thị sản phẩm
-    const bookPurchasingTrendInfo = (
-        <>
-          <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-            {[...Array(8)].map((_, index) => (
-              <CardProductComponent
-                key={index}
-                img={img3}
-                proName="Ngàn mặt trời rực rỡ"
-                currentPrice="120000"
-                sold="12"
-                star="4.5"
-                score="210"
-              />
-            ))}
-          </div>
-        </>
-      )
+    const fetchFavoriteProducts = async () => {
+        if (user?.id) {
+            try {
+                // Get favorite products by user
+                const favoriteData = await FavoriteProductService.getAllFavoriteProductByUser(user.id);
+                console.log('favoriteData', favoriteData);
 
-    //Nội dung ở tab tài khoản khách hàng
-    const customerContent = (
-        <>
-            <div className="col-6">
-                <FormComponent
-                    id="searchInput"
-                    type="text"
-                    placeholder="Tìm kiếm theo tên "
-                />
-            </div>
+                // Check if the favoriteData contains products
+                if (favoriteData?.data && Array.isArray(favoriteData.data)) {
+                    const productDetailsPromises = favoriteData.data.map(async (favoriteItem) => {
+                        // For each favoriteItem, get the product details using the product ID
+                        const product = await ProductService.getDetailProduct(favoriteItem.product);
+                        return product; // Return the detailed product
+                    });
+                    const productDetails = await Promise.all(productDetailsPromises);
+                    setProductFavorite(productDetails); // Set the detailed products to state
+                } else {
+                    console.error('Product data is not available or not in expected format');
+                }
+            } catch (error) {
+                console.error('Error fetching favorite products:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
 
-            <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div class="container" style={{ marginTop: '30px' }}>
-          <CardComponent
-           title="Sản phẩm đã thích"
-            bodyContent={bookPurchasingTrendInfo}
-            //icon="bi bi-graph-up-arrow"
-          />
-        </div>
-      </div>
-        </>
-    )
+    useEffect(() => {
+        fetchFavoriteProducts();
+    }, [user?.id]);
 
-    //Nội dung ở tab tài khoản admin
-    const adminContent = (
-        <>
-            <div className="col-6">
-                <FormComponent
-                    id="searchInput"
-                    type="text"
-                    placeholder="Tìm kiếm theo tên "
-                />
-            </div>
+    const handleOnClickProduct = (productId) => {
+        navigate(`/product/${productId}`);
+    };
 
-            <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div class="container" style={{ marginTop: '30px' }}>
-          <CardComponent
-           title="Sản phẩm đã xem"
-            bodyContent={bookPurchasingTrendInfo}
-            //icon="bi bi-graph-up-arrow"
-          />
-        </div>
-      </div>
-        </>
-    )
+    if (loading) {
+        return <div>Loading...</div>; // You can add a spinner or loading animation
+    }
+    console.log('productFavorite', productFavorite);
 
-    //
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="title-section">
-                <h3 className="text mb-0">LỊCH SỬ SẢN PHẨM</h3>
+                <h3 className="text mb-0">SẢN PHẨM YÊU THÍCH</h3>
             </div>
 
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center mb-3">
-                    {/* Tabs */}
-                    <div className="row mt-4" >
-                        <div className="col-12">
-                            <ul className="nav nav-tabs" style={{ marginTop: '20px' }}>
-                                <li className="nav-item">
-                                    <button
-                                        className={`nav-link ${activeTab === "customer" ? "active" : ""}`}
-                                        onClick={() => setActiveTab("customer")}
-                                    >
-                                       Sản phẩm yêu thích
-                                    </button>
-                                </li>
-                                <li className="nav-item">
-                                    <button
-                                        className={`nav-link ${activeTab === "admin" ? "active" : ""}`}
-                                        onClick={() => setActiveTab("admin")}
-                                    >
-                                        Sản phẩm đã xem
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Nội dung Tab */}
-                <div className="tab-content" style={{ flexGrow: 1 }}>
-                    <div className="tab-pane fade show active">
-                        {activeTab === "customer" && <div>{customerContent}</div>}
-                        {activeTab === "admin" && <div>{adminContent}</div>}
-                    </div>
+                    {productFavorite.map((product) => (
+                        <CardProductComponent
+                            key={product.data._id}
+                            img={product.data.img[0]}
+                            proName={product.data.name}
+                            currentPrice={(product.data.price * (100 - product.data.discount) / 100).toLocaleString()}
+                            sold={product.data.sold}
+                            star={product.data.star}
+                            feedbackCount={product.data.feedbackCount}
+                            onClick={() => handleOnClickProduct(product.data._id)}
+                            view={product.data.view}
+                        />
+                    ))}
                 </div>
             </div>
-
-            
         </div>
     );
 };

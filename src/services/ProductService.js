@@ -42,3 +42,7 @@ export const getAllProduct = async () => {
     return res.data;
   };
   
+  export const updateView = async (id) => {
+    const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/update-view/${id}`);
+    return res.data;
+  };

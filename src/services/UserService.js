@@ -103,12 +103,8 @@ export const toggleActiveUser=async(id, access_token)=>{
 
 ///////////--------có phân quyền------------/////////////////////
 
-export const getAllListAddress = async (user, access_token) => {
-    const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/get-all/${user}`, {
-      headers: {
-        Authorization: `Bearer ${access_token}`,  // Đảm bảo sử dụng "Bearer" đúng cách
-      }
-    });
+export const getAllListAddress = async (user) => {
+    const res = await axiosJWT.get(`${process.env.REACT_APP_API_URL_BACKEND}/listAddress/get-all/${user}`);
     return res.data;
   };
 
