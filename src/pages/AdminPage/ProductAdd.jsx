@@ -331,6 +331,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={name}
             onChange={handleOnChangeName}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-6 text-end">
@@ -349,6 +350,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={author}
             onChange={handleOnChangeAuthor}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -372,6 +374,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={pubdate}
             onChange={handleOnChangeDate}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -395,6 +398,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={weight}
             onChange={handleOnChangeWeight}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -407,6 +411,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={height}
             onChange={handleOnChangeHeight}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -419,6 +424,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={width}
             onChange={handleOnChangeWidth}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -431,6 +437,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={length}
             onChange={handleOnChangeLength}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -443,6 +450,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={page}
             onChange={handleOnChangePage}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -543,6 +551,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             value={price}
             onChange={handleOnChangePrice}
             required={true}
+            enable={true}
           />
         </div>
       </div>

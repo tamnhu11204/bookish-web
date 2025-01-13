@@ -3,6 +3,7 @@ import counterReducer from './slides/counterSlide'
 import userReducer from './slides/UserSlide'
 import shopReducer from './slides/ShopSlide'
 import orderReducer from './slides/OrderSlide'
+
 import {
   persistStore,
   persistReducer,
@@ -19,14 +20,15 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  blacklist: ['product', 'user', 'shop']
+  blacklist: ['product', 'user', 'shop','favoriteproduct']
 }
 
 const rootReducer=combineReducers({
   counter: counterReducer,
     user: userReducer,
     shop: shopReducer,
-    order: orderReducer
+    order: orderReducer,
+
 }
 )
 

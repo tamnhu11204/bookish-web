@@ -8,6 +8,8 @@ import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import CardComponent from '../../components/CardComponent/CardComponent';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import { addOrderProduct } from '../../redux/slides/OrderSlide';
+import * as FavoriteProductService from '../../services/FavoriteProductService';
+import * as FeedbackService from '../../services/FeedbackService';
 import * as FormatService from '../../services/OptionService/FormatService';
 import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as PublisherService from '../../services/OptionService/PublisherService';
@@ -16,7 +18,6 @@ import * as UnitService from '../../services/OptionService/UnitService';
 import * as ProductService from '../../services/ProductService';
 import * as UserService from '../../services/UserService';
 import './ProductDetailPage.css';
-import * as FeedbackService from '../../services/FeedbackService';
 
 
 const ProductDetailPage = () => {
@@ -28,14 +29,35 @@ const ProductDetailPage = () => {
   const dispatch = useDispatch()
   const [amount, setAmount] = useState(1);
   const [feedbacks, setFeedbacks] = useState([])
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [productFavorite, setProductFavorite] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const data = await ProductService.getDetailProduct(id);
-      setProduct(data.data);
+      if (id) {
+        const data = await ProductService.getDetailProduct(id);
+        setProduct(data?.data || null);  // Add null check for data
+      }
     };
     fetchProduct();
   }, [id]);
+
+
+  const fetchFavoriteProducts = async () => {
+    if (user?.id) {
+      const favoriteData = await FavoriteProductService.getAllFavoriteProductByUser(user.id);
+      if (favoriteData?.data) {
+        const favoriteProduct = favoriteData.data.find(fav => fav.product === id);
+        setProductFavorite(favoriteProduct?._id || '');  // Store the _id of the favorite product
+        setIsFavorite(favoriteProduct ? true : false);  // Update the favorite state
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchFavoriteProducts();
+  }, [id, user?.id]);
+
 
   const { data: publisher } = useQuery({
     queryKey: ['publisher', product?.publisher],
@@ -185,8 +207,8 @@ const ProductDetailPage = () => {
                 />
                 <h5 className="card-title mb-0">{feedback.user?.data.name || 'Người dùng ẩn danh'}</h5>
               </div>
-              <p style={{fontSize:'16px'}}>{feedback.content}</p>
-              <small style={{fontSize:'16px'}} className="text-muted">Đánh giá: {feedback.star}/5⭐</small>
+              <p style={{ fontSize: '16px' }}>{feedback.content}</p>
+              <small style={{ fontSize: '16px' }} className="text-muted">Đánh giá: {feedback.star}/5⭐</small>
               <div className="d-flex align-items-center mb-3">
                 <img
                   src={feedback.img || ''}
@@ -202,6 +224,39 @@ const ProductDetailPage = () => {
       )}
     </div>
   );
+  const handleAddToFavorite = async () => {
+    if (!user?.id) {
+      alert('Hãy đăng nhập để tiếp tục sử dụng tính năng này!');
+      navigate('/login', { state: location?.pathname });
+      return;
+    }
+
+    try {
+      const favoriteData = { user: user.id, product: id };
+
+      if (isFavorite) {
+        const response = await FavoriteProductService.deleteFavoriteProduct(productFavorite);
+        if (response?.status!=='ERR') {
+          alert('Xóa sản phẩm vào danh sách yêu thích!')
+          setIsFavorite(false);
+          setProductFavorite('');
+          fetchFavoriteProducts();
+        }
+      } else {
+        const response = await FavoriteProductService.addFavoriteProduct(favoriteData);
+        if (response?.status!=='ERR') {
+          alert('Thêm sản phẩm vào danh sách yêu thích!')
+          setIsFavorite(true);
+          setProductFavorite(response?.data?._id);
+          fetchFavoriteProducts();
+        }
+      }
+    } catch (error) {
+      console.error('Error in handleAddToFavorite:', error);
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau!');
+    }
+  };
+
 
 
 
@@ -286,7 +341,24 @@ const ProductDetailPage = () => {
           <div className="col-8">
             <div className="card p-3 mb-4" style={{ maxWidth: "600px", marginTop: "20px", borderRadius: "10px" }}>
               <div className="card-body">
-                <h5 className="card-title-detail fw-bold">{product.name}</h5>
+                <div className="row">
+                  <div className="col">
+                    <h5 className="card-title-detail fw-bold">{product.name}</h5>
+                  </div>
+                  <div className="col-1">
+                    <button
+                      className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
+                      onClick={handleAddToFavorite}
+                    >
+                      <i
+                        className="bi bi-heart"
+                        style={{ fontSize: '20px', color: isFavorite ? 'white' : 'red' }}
+                      ></i>
+                    </button>
+
+
+                  </div>
+                </div>
                 <p className="card-text-detail mb-2">
                   <strong>Tác giả:</strong> {product.author}
                 </p>
@@ -314,7 +386,7 @@ const ProductDetailPage = () => {
                 <p className="text-decoration-line-through" style={{ fontSize: '16px', marginTop: '-20px' }}>{product.price}đ</p>
                 <div className="mt-3 text-muted" style={{ fontSize: "14px" }}>
                   <span>
-                    <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán
+                    <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán | {product.view} lượt xem
                   </span>
                 </div>
               </div>

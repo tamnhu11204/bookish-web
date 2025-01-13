@@ -52,15 +52,15 @@ const AddressTab = () => {
   // Lấy dữ liệu user từ Redux
   const getUser = useSelector((state) => state.user);
 
-  const getAllListAddress = async (user, token) => {
-    const res = await UserService.getAllListAddress(user, token);  // Gọi API với user và token
+  const getAllListAddress = async (user) => {
+    const res = await UserService.getAllListAddress(user);  // Gọi API với user và token
     return res.data;
   };
 
   const { isLoading: isLoadingListAddress, data: listAddressesData } = useQuery({
-    queryKey: ["listAddressesData", getUser.id, getUser.access_token],
-    queryFn: () => getAllListAddress(getUser?.id, getUser?.access_token),
-    enabled: !!getUser?.id && !!getUser?.access_token,
+    queryKey: ["listAddressesData", getUser.id],
+    queryFn: () => getAllListAddress(getUser?.id),
+    enabled: !!getUser?.id
   });
 
   const [addressDetails, setAddressDetails] = useState([]);
@@ -97,6 +97,8 @@ const AddressTab = () => {
       fetchDetails();
     }
   }, [listAddressesData]);
+
+  console.log('addressDetails', addressDetails)
 
   // Các state quản lý form
   const [phone, setPhone] = useState("");
@@ -317,15 +319,10 @@ const AddressTab = () => {
       <div className="title-section">
         <h3 className="text mb-0">ĐỊA CHỈ</h3>
       </div>
-      <div className="content-section" style={{ marginTop: "30px" }}>
-        <div className="row align-items-center mb-3">
-          <div className="col-6">
-            <FormComponent id="searchInput" type="text" placeholder="Tìm kiếm theo địa chỉ" />
-          </div>
-          <div className="col-6 text-end">
+      <div className="content-section" style={{ marginTop: "30px",  marginBottom: "30px" }}>
+
             <ButtonComponent textButton="Thêm địa chỉ" icon={<i className="bi bi-plus-circle"></i>} onClick={handleAddListAddress} />
-          </div>
-        </div>
+
       </div>
 
       <div className="list-group">
@@ -365,6 +362,7 @@ const AddressTab = () => {
               value={phone}
               onChange={handleOnChangePhone}
               required={true}
+              enable={true}
             />
             <FormSelectComponent
               label="Tỉnh/Thành phố"
@@ -397,6 +395,7 @@ const AddressTab = () => {
               placeholder="Nhập địa chỉ cụ thể"
               value={specificAddress}
               onChange={handleOnChangeSpecificAddress}
+              enable={true}
             />
             <div className="form-check">
               <input
@@ -426,10 +425,11 @@ const AddressTab = () => {
             <FormComponent
               id="editPhoneInput"
               label="Số điện thoại"
-              type="tel"
+              type="text"
               placeholder="Nhập số điện thoại"
               value={editPhone}
               onChange={handleOnChangePhoneEdit}
+              enable={true}
             />
             <FormSelectComponent
               label="Tỉnh/Thành phố"
@@ -456,6 +456,7 @@ const AddressTab = () => {
               placeholder="Nhập địa chỉ cụ thể"
               value={editSpecificAddress}
               onChange={handleOnChangeSpecificAddressEdit}
+              enable={true}
             />
             <div className="form-check">
               <input

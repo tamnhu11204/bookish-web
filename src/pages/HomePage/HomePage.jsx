@@ -1,45 +1,47 @@
 import { useQuery } from '@tanstack/react-query'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import img1 from '../../assets/img/img1.png'
 import img2 from '../../assets/img/img2.png'
-import img3 from '../../assets/img/img3.jpg'
 import CardComponent from '../../components/CardComponent/CardComponent'
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent'
 import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
+import * as CategoryService from '../../services/CategoryService'
 import * as PublisherService from '../../services/OptionService/PublisherService'
 import * as ProductService from '../../services/ProductService'
-import * as CategoryService from '../../services/CategoryService'
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2'
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [newBooks, setNewBooks] = useState([])
+  const [bestSeller, setBestSeller] = useState([])
+  const [visibleNewBooks, setVisibleNewBooks] = useState(5);
+  const [visibleBestSeller, setVisibleBestSeller] = useState(5)
 
   const getAllProduct = async () => {
     try {
       const res = await ProductService.getAllProduct();
-      console.log('fdsdas', res);  // Kiểm tra xem có nhận được dữ liệu không
       return res.data;
     } catch (error) {
       console.error('Có lỗi xảy ra khi gọi API:', error);
     }
   };
 
-
   const { isLoading: isLoadingPro, data: products } = useQuery({
     queryKey: ['products'],
     queryFn: () => getAllProduct(),
   });
 
-  const handleOnClickProduct = (id) => {
+  const handleOnClickProduct = async (id) => {
+    await ProductService.updateView(id)
     navigate(`/product-detail/${id}`);
   }
 
   const getAllCategory = async () => {
     try {
       const res = await CategoryService.getAllCategory();
-      console.log('fdsdas', res);  // Kiểm tra xem có nhận được dữ liệu không
       return res.data;
     } catch (error) {
       console.error('Có lỗi xảy ra khi gọi API:', error);
@@ -51,11 +53,109 @@ const HomePage = () => {
     queryKey: ['categories'],
     queryFn: () => getAllCategory(),
   });
+
+
+  useEffect(() => {
+    const fetchNewBooks = async () => {
+      try {
+        const params = {
+          limit: 10,
+          page: 0,
+          sort: ["createdAt", "desc"],
+        };
+        const products = await ProductService.getAllProductBySort(params);
+        setNewBooks(products.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchNewBooks();
+  }, []);
+
+  useEffect(() => {
+    const fetchBestSeller = async () => {
+      try {
+        const params = {
+          limit: 10,
+          page: 0,
+          sort: ["sold", "desc"],
+        };
+        const products = await ProductService.getAllProductBySort(params);
+        setBestSeller(products.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchBestSeller();
+  }, []);
+
+  const loadMoreNewBooks = () => {
+    navigate('/newbook');
+  };
   
+  const loadMoreBestSeller = () => {
+    navigate('/bookpurchasingtrend');
+  };
+
+  const newBookInfo = (
+    <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
+      {newBooks.slice(0, visibleNewBooks).map((product) => (
+        <CardProductComponent
+          key={product._id}
+          img={product.img[0]}
+          proName={product.name}
+          currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+          sold={product.sold}
+          star={product.star}
+          feedbackCount={product.feedbackCount}
+          onClick={() => handleOnClickProduct(product._id)}
+          view={product.view}
+        />
+      ))}
+      {newBooks.length > visibleNewBooks && (
+        <div className="w-100 text-center mt-4">
+          <ButtonComponent2
+            textButton="Xem thêm"
+            onClick={loadMoreNewBooks}
+          />
+        </div>
+      )}
+    </div>
+  );
+
+
+  const bookPurchasingTrendInfo = (
+    <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
+      {bestSeller.slice(0, visibleBestSeller).map((product) => (
+        <CardProductComponent
+          key={product._id}
+          img={product.img[0]}
+          proName={product.name}
+          currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+          sold={product.sold}
+          star={product.star}
+          feedbackCount={product.feedbackCount}
+          onClick={() => handleOnClickProduct(product._id)}
+          view={product.view}
+        />
+      ))}
+      {bestSeller.length > visibleBestSeller && (
+        <div className="w-100 text-center mt-4">
+          <ButtonComponent2
+            textButton="Xem thêm"
+            onClick={loadMoreBestSeller}
+          />
+        </div>
+      )}
+    </div>
+  );
+
 
   const catagoryInfo = (
     <>
-      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+      <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
         {/* {[...Array(5)].map((_, index) => (
           <MiniCardComponent key={index}
             img={img3}
@@ -66,8 +166,8 @@ const HomePage = () => {
         ) : categories && categories.length > 0 ? (
           categories.map((category) => (
             <MiniCardComponent key={category._id}
-            img={category.img}
-            content={category.name} />
+              img={category.img}
+              content={category.name} />
           ))
         ) : (
           <tr>
@@ -80,38 +180,9 @@ const HomePage = () => {
     </>
   )
 
-  const bookPurchasingTrendInfo = (
+  const allBooks = (
     <>
-      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-      {isLoadingPro ? (
-          <LoadingComponent />
-        ) : products && products.length > 0 ? (
-          products.map((product) => (
-            <CardProductComponent
-              key={product._id}
-              img={product.img[0]}
-              proName={product.name}
-              currentPrice={(product.price*(100-product.discount)/100).toLocaleString()}
-              sold={product.sold}
-              star={product.star}
-              feedbackCount={product.feedbackCount}
-              onClick={()=>handleOnClickProduct(product._id)}
-            />
-          ))
-        ) : (
-          <tr>
-            <td colSpan="4" className="text-center">
-              Không có dữ liệu để hiển thị.
-            </td>
-          </tr>
-        )}
-      </div>
-    </>
-  )
-
-  const newBookInfo = (
-    <>
-      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+      <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
         {isLoadingPro ? (
           <LoadingComponent />
         ) : products && products.length > 0 ? (
@@ -120,11 +191,12 @@ const HomePage = () => {
               key={product._id}
               img={product.img[0]}
               proName={product.name}
-              currentPrice={(product.price*(100-product.discount)/100).toLocaleString()}
+              currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
               sold={product.sold}
               star={product.star}
               feedbackCount={product.feedbackCount}
-              onClick={()=>handleOnClickProduct(product._id)}
+              onClick={() => handleOnClickProduct(product._id)}
+              view={product.view}
             />
           ))
         ) : (
@@ -153,7 +225,7 @@ const HomePage = () => {
 
   const publisherInfo = (
     <>
-      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
+      <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
         {isLoadingPublisher ? (
           <LoadingComponent isLoading={isLoadingPublisher} />
         ) : publishers && publishers.length > 0 ? (
@@ -169,25 +241,6 @@ const HomePage = () => {
             Không có dữ liệu để hiển thị.
           </div>
         )}
-      </div>
-    </>
-  )
-
-
-  const monthlyBestSellInfo = (
-    <>
-      <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-        {[...Array(10)].map((_, index) => (
-          <CardProductComponent
-            key={index}
-            img={img3}
-            proName="Ngàn mặt trời rực rỡ"
-            currentPrice="120000"
-            sold="12"
-            star="4.5"
-            score="210"
-          />
-        ))}
       </div>
     </>
   )
@@ -244,6 +297,15 @@ const HomePage = () => {
           />
         </div>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
+      </div>
+      <div style={{ backgroundColor: '#F9F6F2' }}>
+        <div className="container" style={{ marginTop: '50px' }}>
+          <CardComponent
+            title="Tất cả sách"
+            bodyContent={allBooks}
+            icon="bi bi-graph-up-arrow"
+          />
+        </div>
       </div>
 
       {/* <div style={{ backgroundColor: '#F9F6F2' }}>

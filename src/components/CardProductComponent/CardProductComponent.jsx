@@ -1,9 +1,9 @@
 import React from 'react'
 import './CardProductComponent.css'
 
-const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedbackCount,onClick }) => {
+const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedbackCount,onClick, view }) => {
     return (
-        <div className="card" style={{ width: '20rem' }} onClick={onClick}>
+        <div className="card-pro" style={{ width: '22rem' }} onClick={onClick}>
 
             <img src={img} className="card-img-top" alt="..." />
 
@@ -17,7 +17,10 @@ const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedback
                 <p className="sold">Đã bán: {sold}</p>
 
                 <div className="row">
-                    <strong>{star}/5⭐</strong> ({feedbackCount} đánh giá) | {sold} lượt bán
+                    <strong>{star}/5⭐</strong>
+                </div>
+                <div className="row" style={{marginLeft:'0px'}}>
+                    {feedbackCount} đánh giá | {sold} lượt bán | {view} lượt xem
                 </div>
             </div>
         </div>

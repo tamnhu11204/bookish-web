@@ -64,13 +64,15 @@ export const orderSlide = createSlice({
         },
         removeAllOrderProduct: (state, action) => {
             const { listChecked } = action.payload;
-            // Default listChecked to an empty array if it's undefined or null
             const checkedItems = listChecked || [];
-            const itemOrder = state?.orderItems?.filter((item) => !checkedItems.includes(item.product));
-            const itemOrderSelected = state?.orderItems?.filter((item) => !checkedItems.includes(item.product));
-            state.orderItems = itemOrder;
-            state.orderItemSelected = itemOrderSelected;
+        
+            // Loại bỏ các sản phẩm trong danh sách được chọn ra khỏi orderItems
+            state.orderItems = state.orderItems.filter((item) => !checkedItems.includes(item.product));
+        
+            // Cập nhật lại orderItemSelected để loại bỏ các sản phẩm đã được đặt
+            state.orderItemSelected = state.orderItemSelected.filter((item) => !checkedItems.includes(item.product));
         },
+        
         seletedOrder: (state, action) => {
             const { listChecked } = action.payload
             const orderSelected = []

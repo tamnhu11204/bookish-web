@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import ButtonComponent2 from "../../components/ButtonComponent/ButtonComponent2";
@@ -19,6 +19,7 @@ import * as PromotionService from '../../services/PromotionService';
 import * as ShopProfileService from '../../services/ShopProfileService';
 import * as UserService from '../../services/UserService';
 import "./OrderPage.css";
+import { removeAllOrderProduct } from "../../redux/slides/OrderSlide";
 
 const OrderPage = () => {
   const order = useSelector((state) => state.order)
@@ -29,6 +30,7 @@ const OrderPage = () => {
 
   // Lấy dữ liệu address mặc định
   const getUser = useSelector((state) => state.user);
+  const dispatch=useDispatch()
 
   const getAllListAddressIsDefault = async (user, token) => {
     const res = await UserService.getAllListAddressIsDefault(user, token);  // Gọi API với user và token
@@ -492,13 +494,29 @@ const OrderPage = () => {
   const { data, isLoading, isSuccess, isError } = mutation
   useEffect(() => {
     if (isSuccess && data?.status !== 'ERR') {
-      message.success()
-      alert('Đặt hàng thành công!')
-      navigate("/shoppingcart")
+      const arrayOrdered = [];
+      
+      // Sử dụng trực tiếp orderItemSelected nếu nó là một mảng
+      order?.orderItemSelected?.forEach((element) => {
+        arrayOrdered.push(element.product);
+      });
+  
+      console.log("Danh sách sản phẩm cần xóa:", arrayOrdered);
+  
+      dispatch(removeAllOrderProduct({ listChecked: arrayOrdered }));
+  
+      message.success();
+      alert('Đặt hàng thành công!');
+      navigate("/shoppingcart");
     } else if (isError) {
-      message.error()
+      message.error();
     }
-  }, [data?.status, isError, isSuccess, navigate])
+  }, [data?.status, isError, isSuccess, navigate]);
+  
+  
+  
+  
+  
   const handleOnOrderClick = async() => {
     let a, b, c, d, e;
 
@@ -582,7 +600,7 @@ const OrderPage = () => {
     });
   };
 
-
+console.log('order?.orderItemSelected.data.array', order?.orderItemSelected)
   //card thông tin đơn hàng
 
   const orderInfo = (
