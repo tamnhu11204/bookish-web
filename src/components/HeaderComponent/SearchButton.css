@@ -1,0 +1,20 @@
+.search-button {
+    background-color: #ffffff; /* Màu đỏ */
+    border: none;
+    border-radius: 10px; /* Góc bo tròn */
+    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .search-button i {
+    font-size: 20px; /* Kích thước icon */
+    color: #198754; /* Màu của icon */
+  }
+  
+  .search-button:hover {
+    background-color: #b71c1c; /* Màu khi hover */
+  }
+  

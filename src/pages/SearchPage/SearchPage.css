@@ -1,0 +1,45 @@
+.card-comparison {
+    background-color: #FFFFFF;
+    border: 1px solid #198754; /* Viền màu đen */
+    border-radius: 10px; /* Bo góc 10px */
+    margin-top: 30px
+  }
+
+  .card-body-comparison {
+    padding: 1rem;
+  }
+  
+  .card-title-comparison {
+    font-size: 25px;
+    margin-bottom: 0.75rem;
+    color: #198754
+
+  }
+  
+  .card-text-comparison {
+    margin-bottom: 1rem;
+    font-size: 16px;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .pagination button {
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+  }
+  
+  .pagination button.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .pagination button:hover {
+    background-color: #ddd;
+  }
+  

@@ -1,7 +1,7 @@
-import React, {useMemo, useEffect, useState }  from 'react'
+import React, { useMemo,useEffect, useState }  from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import './CatagoryPage.css'
+import './SearchPage.css'
 import SliderComponent from '../../components/SliderComponent/SliderComponent'
 import img1 from '../../assets/img/img1.png'
 import img2 from '../../assets/img/img2.png'
@@ -14,11 +14,13 @@ import * as PublisherService from '../../services/OptionService/PublisherService
 import * as ProductService from '../../services/ProductService'
 import * as CategoryService from '../../services/CategoryService'
 import * as FormatService from "../../services/OptionService/FormatService";
+import { useLocation } from 'react-router-dom';
 
 
-const CatagoryPage = () => {
+const SearchPage = () => {
 
-    
+    const query = new URLSearchParams(useLocation().search);
+  const searchTerm = query.get('q'); // Lấy từ khóa từ URL
     const navigate = useNavigate();
      const [selectedCategories, setSelectedCategories] = useState([]);
           const [selectAll, setSelectAll] = useState(false);
@@ -26,8 +28,8 @@ const CatagoryPage = () => {
   const [selectedFormats, setSelectedFormats] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 1; // Số sản phẩm trên mỗi trang
-  const [totalPages, setTotalPages] = useState(1); // Khởi tạo giá trị totalPages
+const productsPerPage = 16; // Số sản phẩm trên mỗi trang
+const [totalPages, setTotalPages] = useState(1); // Khởi tạo giá trị totalPages
     
       const getAllProduct = async () => {
         try {
@@ -48,6 +50,10 @@ const CatagoryPage = () => {
       const handleOnClickProduct = (id) => {
         navigate(`/product-detail/${id}`);
       }
+
+      useEffect(() => {
+        setCurrentPage(1); // Đặt lại trang đầu tiên khi tìm kiếm
+      }, [searchTerm]);
 
       const getAllCategory = async () => {
           const res = await CategoryService.getAllCategory();
@@ -114,7 +120,6 @@ const CatagoryPage = () => {
                     ? prev.filter((value) => value !== categoryValue)
                     : [...prev, categoryValue]
                 );
-                setCurrentPage(1);
               };
             
               const handlePublisherChange = (publisherValue) => {
@@ -123,7 +128,6 @@ const CatagoryPage = () => {
                     ? prev.filter((value) => value !== publisherValue)
                     : [...prev, publisherValue]
                 );
-                setCurrentPage(1);
               };
             
               const handleFormatChange = (formatValue) => {
@@ -132,7 +136,6 @@ const CatagoryPage = () => {
                     ? prev.filter((value) => value !== formatValue)
                     : [...prev, formatValue]
                 );
-                setCurrentPage(1);
               };
             
         
@@ -145,11 +148,12 @@ const CatagoryPage = () => {
             }
             setSelectAll(!selectAll);
           };
+          
         
       
     
 
-   
+    
       const Sort = [
         { value: 'price-asc', label: 'Giá từ thấp đến cao' },
         { value: 'price-desc', label: 'Giá từ cao đến thấp' },
@@ -174,14 +178,12 @@ const CatagoryPage = () => {
           setMaxPrice(value);
           setPriceRange([priceRange[0], value]);
         }
-        setCurrentPage(1);
       };
       const handleRangeSelect = (range) => {
         const [min, max] = range;
         setMinPrice(min);
         setMaxPrice(max);
         setPriceRange([min, max]);
-        setCurrentPage(1);
       };
       const sortProducts = (products, selectedSort) => {
         if (!selectedSort || products.length === 0) return products;
@@ -205,100 +207,112 @@ const CatagoryPage = () => {
         return sortedProducts;
       };
       
+      
     
       useEffect(() => {
-              if (products && products.length > 0) {
-                let filtered = products.filter((product) => {
-                  const categoryMatch = selectedCategories.length
-                    ? selectedCategories.includes(product.category)
-                    : true;
-                  const publisherMatch = selectedPublishers.length
-                    ? selectedPublishers.includes(product.publisher)
-                    : true;
-                  const formatMatch = selectedFormats.length
-                    ? selectedFormats.includes(product.format)
-                    : true;
-                  const priceAfterDiscount = (product.price * (100 - product.discount)) / 100;
-                  const priceMatch =
-                    priceAfterDiscount >= priceRange[0] && priceAfterDiscount <= priceRange[1];
-                    
-                  return categoryMatch && publisherMatch && formatMatch && priceMatch ;
-                });
-                
-            
-                filtered = sortProducts(filtered, selectedSort);
-                setTotalPages(Math.ceil(filtered.length / productsPerPage));
-                setFilteredProducts(filtered);
-                
-              }
-            }, [
-              products,
-              selectedCategories,
-              selectedPublishers,
-              selectedFormats,
-              priceRange,
-              selectedSort,
-              currentPage,
-            ]);
-            const handlePageChange = (newPage) => {
-              setCurrentPage(newPage); // Cập nhật trang hiện tại
-            };
-
-            const paginationButtons = (
-              <div className="pagination">
-              {currentPage > 1 && (
-                <button onClick={() => handlePageChange(currentPage - 1)}>Trước</button>
-              )}
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handlePageChange(index + 1)}
-                  className={currentPage === index + 1 ? "active" : ""}
-                >
-                  {index + 1}
-                </button>
-              ))}
-              {currentPage < totalPages && (
-                <button onClick={() => handlePageChange(currentPage + 1)}>Tiếp theo</button>
-              )}
-            </div>
-          );
-          const paginatedProducts = useMemo(() => {
-              const startIndex = (currentPage - 1) * productsPerPage;
-              return filteredProducts.slice(startIndex, startIndex + productsPerPage);
-            }, [currentPage, filteredProducts]);
-
-            const BookInfo = (
-              <>
-                <div className="d-flex flex-wrap justify-content-center align-items-center gap-0">
-                  {isLoadingPro ? (
-                    <LoadingComponent />
-                  ) : paginatedProducts && paginatedProducts.length > 0 ? (
-                    paginatedProducts.map((product) => (
-                      <CardProductComponent
-                        key={product._id}
-                        img={product.img[0]}
-                        proName={product.name}
-                        currentPrice={(product.price*(100-product.discount)/100).toLocaleString()}
-                        sold={product.sold}
-                        star={product.star}
-                        feedbackCount={product.feedbackCount}
-                        onClick={()=>handleOnClickProduct(product._id)}
-                      />
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="text-center">
-                        Không có dữ liệu để hiển thị.
-                      </td>
-                    </tr>
-                  )}
-                </div>
-                 {/* Hiển thị nút phân trang */}
-            {paginationButtons}
-              </>
-            )
+        if (products && products.length > 0) {
+          let filtered = products.filter((product) => {
+            const categoryMatch = selectedCategories.length
+              ? selectedCategories.includes(product.category)
+              : true;
+            const publisherMatch = selectedPublishers.length
+              ? selectedPublishers.includes(product.publisher)
+              : true;
+            const formatMatch = selectedFormats.length
+              ? selectedFormats.includes(product.format)
+              : true;
+            const priceAfterDiscount = (product.price * (100 - product.discount)) / 100;
+            const priceMatch =
+              priceAfterDiscount >= priceRange[0] && priceAfterDiscount <= priceRange[1];
+            const searchMatch = searchTerm
+              ? product.name.toLowerCase().includes(searchTerm.toLowerCase())
+              : true;
+            return categoryMatch && publisherMatch && formatMatch && priceMatch && searchMatch;
+          });
       
+          filtered = sortProducts(filtered, selectedSort);
+          setTotalPages(Math.ceil(filtered.length / productsPerPage));
+          setFilteredProducts(filtered);
+        }
+      }, [
+        products,
+        selectedCategories,
+        selectedPublishers,
+        selectedFormats,
+        priceRange,
+        selectedSort,
+        searchTerm,
+        currentPage,
+      ]);
+
+
+      const handlePageChange = (newPage) => {
+        setCurrentPage(newPage); // Cập nhật trang hiện tại
+      };
+
+const paginationButtons = (
+    <div className="pagination">
+    {currentPage > 1 && (
+      <button onClick={() => handlePageChange(currentPage - 1)}>Trước</button>
+    )}
+    {[...Array(totalPages)].map((_, index) => (
+      <button
+        key={index}
+        onClick={() => handlePageChange(index + 1)}
+        className={currentPage === index + 1 ? "active" : ""}
+      >
+        {index + 1}
+      </button>
+    ))}
+    {currentPage < totalPages && (
+      <button onClick={() => handlePageChange(currentPage + 1)}>Tiếp theo</button>
+    )}
+  </div>
+);
+const startIndex = (currentPage - 1) * productsPerPage;
+const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * productsPerPage;
+    return filteredProducts.slice(startIndex, startIndex + productsPerPage);
+  }, [currentPage, filteredProducts]);
+const BookInfo = (
+    <>
+      <div className="d-flex flex-wrap justify-content-center align-items-center gap-0">
+        {isLoadingPro ? (
+          <LoadingComponent />
+        ) : paginatedProducts && paginatedProducts.length > 0 ? (
+            paginatedProducts.map((product) => (
+            <CardProductComponent
+              key={product._id}
+              img={product.img[0]}
+              proName={product.name}
+              currentPrice={(product.price*(100-product.discount)/100).toLocaleString()}
+              sold={product.sold}
+              star={product.star}
+              feedbackCount={product.feedbackCount}
+              onClick={()=>handleOnClickProduct(product._id)}
+            />
+          ))
+        ) : (
+          <tr>
+            <td colSpan="4" className="text-center">
+              Không có dữ liệu để hiển thị.
+            </td>
+          </tr>
+        )}
+      </div>
+      {/* Hiển thị nút phân trang */}
+      {paginationButtons}
+    </>
+  )
+  useEffect(() => {
+    const results = products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(results);
+  }, [products, searchTerm]);
+  
+  
+
       
     return (
         <div style={{ backgroundColor: '#F9F6F2' }}>
@@ -516,7 +530,7 @@ const CatagoryPage = () => {
 
                     <div className="col-9" >
                     <div className="card-catagory" >
-                    <h4>   Danh mục : </h4>
+                    <h1>Kết quả tìm kiếm cho: "{searchTerm}"</h1>
                     <h4>   Sắp xếp theo : </h4>
                     <div className="col-md-4 mb-3">
                 
@@ -534,6 +548,7 @@ const CatagoryPage = () => {
             bodyContent={BookInfo}
             //icon="bi bi-book"
           />
+          
         </div>
       </div>
         
@@ -548,4 +563,4 @@ const CatagoryPage = () => {
     )
 }
 
-export default CatagoryPage
+export default SearchPage

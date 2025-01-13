@@ -1,11 +1,19 @@
-import React from 'react'
+import React , { useEffect, useMemo, useState }from 'react'
 import './ComparisonPage.css'
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
 import img4 from '../../assets/img/img4.png'
 import TableComparison from '../../components/TableComponent/TableComponent'
 import CardComponent from '../../components/CardComponent/CardComponent'
+import {  removeOrderProduct, addComparisonProduct } from '../../redux/slides/ComparisonSlide';
 
 const ComparisonPage = () => {
+
+    const [showModal, setShowModal] = useState(false);
+
+    const openModal = () => setShowModal(true);
+    const closeModal = () => setShowModal(false);
 
     //bảng thông tin nổi bật
     const comparisonData = [
@@ -74,16 +82,24 @@ const ComparisonPage = () => {
                                     score="210"
                                 >
                                 </CardProductComponent>
+                                <button
+              type="button"
+              className="btn btn-danger"
+              //onClick={() => handleOnClickDeleteAll()}
+            >
+              <i className="bi bi-trash"></i>
+            </button>
                             </div>
 
                             <div className="col-3">
                                 <div className="card" style={{ width: '20rem', height: '39.2rem' }}>
                                     <div className="card-body" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                        <div className="btn">
+                                        <div className="btn" onClick={openModal}>
                                             <i className="bi bi-plus-circle" style={{ fontSize: '30px', color: '#198754' }}></i>
                                         </div>
                                     </div>
                                 </div>
+                                
                             </div>
 
                             <div className="col-3">
@@ -99,6 +115,31 @@ const ComparisonPage = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal */}
+            {showModal && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Chọn sản phẩm để so sánh</h5>
+                                <button type="button" className="btn-close" onClick={closeModal}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Danh sách sản phẩm...</p>
+                                {/* Danh sách sản phẩm có thể được hiển thị ở đây */}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                                    Đóng
+                                </button>
+                                <button type="button" className="btn btn-primary">
+                                    Lưu thay đổi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div class="container" style={{ marginTop: '30px' }}>
                 <CardComponent
@@ -116,6 +157,7 @@ const ComparisonPage = () => {
                 />
             </div>
         </div>
+        
     )
 }
 

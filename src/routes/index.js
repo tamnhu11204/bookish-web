@@ -16,6 +16,7 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import PromoCodeSelectionPage from "../pages/PromoSelectionPage/PromoSelectionPage";
 import ShoppingCartPage from "../pages/ShoppingCartPage/ShoppingCartPage";
 import SignUpPage from "../pages/SignUpPage/SignUpPage";
+import SearchPage from "../pages/SearchPage/SearchPage";
 
 export const routes =[
     {
@@ -111,6 +112,12 @@ export const routes =[
         page: OrderDetailsPage,
         isShowHeader: true
     },
+    {
+        path: '/search',
+        page: SearchPage,
+        isShowHeader: true
+    },
+
 
 
     //////////////////////admin//////////////////////

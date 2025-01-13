@@ -6,6 +6,7 @@ import Styles from '../../style';
 import { resetUser } from '../../redux/slides/UserSlide';
 import LoadingComponent from '../LoadingComponent/LoadingComponent'; // Selector để lấy shop từ Redux
 import { useNavigate } from 'react-router-dom';
+import './SearchButton.css'; // Import file CSS
 
 const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHiddenNoti = false }) => {
   const user = useSelector((state) => state.user);
@@ -15,6 +16,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
   const dispatch = useDispatch();
   const order = useSelector((state) => state.order)
   const navigate=useNavigate()
+  const [searchTerm, setSearchTerm] = useState('');
 
   console.log('svaj', user)
 
@@ -34,6 +36,11 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
   const handleOnClickCart =()=>{
     navigate('/shoppingcart')
   }
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`); // Điều hướng tới trang search
+    }
+  };
 
   return (
     <>
@@ -54,8 +61,12 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
               type="text"
               placeholder="Tìm"
               style={{ width: '500px', height: '35px', fontSize: '14px' }}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           )}
+           <button className="search-button" onClick={handleSearch}>
+      <i className="bi bi-search"></i> {/* Đảm bảo class là "fas" */}
+         </button>
 
           <div className="row">
             {!isHiddenCart && (
