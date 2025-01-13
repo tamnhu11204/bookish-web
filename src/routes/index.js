@@ -7,7 +7,7 @@ import DeliveryAddress from "../pages/DeliveryAddress/DeliveryAddress";
 import DiscountPage from "../pages/DiscountPage/DiscountPage";
 import HomePage from "../pages/HomePage/HomePage";
 import LogInPage from "../pages/LogInPage/LogInPage";
-import MonthlyBestSellPage from "../pages/MonthlyBestSellPage/MonthlyBestSellPage";
+import NewBookPage from "../pages/NewBookPage/NewBookPage";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import OrderDetailsPage from "../pages/OrderDetailsPage/OrderDetailsPage";
 import OrderPage from "../pages/OrderPage/OrderPage";
@@ -41,6 +41,12 @@ export const routes =[
     {
         path: '/bookpurchasingtrend',
         page: BookPurchasingTrendPage,
+        isShowHeader: true
+    },
+
+    {
+        path: '/newbook',
+        page: NewBookPage,
         isShowHeader: true
     },
 
@@ -96,11 +102,6 @@ export const routes =[
         isShowHeader: true
     },
 
-    {
-        path: '/monthlybestsell',
-        page: MonthlyBestSellPage,
-        isShowHeader: true
-    },
     {
         path: '/discount',
         page: DiscountPage,

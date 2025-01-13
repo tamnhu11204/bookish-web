@@ -3,7 +3,7 @@ import './CardProductComponent.css'
 
 const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedbackCount,onClick, view }) => {
     return (
-        <div className="card" style={{ width: '20rem' }} onClick={onClick}>
+        <div className="card-pro" style={{ width: '22rem' }} onClick={onClick}>
 
             <img src={img} className="card-img-top" alt="..." />
 
