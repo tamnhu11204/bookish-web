@@ -1,50 +1,89 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
+import * as OrderService from "../../services/OrderService";
+import PieChart from "../../components/PieChartComponent/PieChartComponent";
 
 const MonthlyRevenueSubTab = () => {
+    const [order, setOrder] = useState([]);
     const [filters, setFilters] = useState({ year: "2024", month: "" });
 
-    const revenueData = [
-        { month: "January", year: 2024, revenue: 10000, quantity:10 },
-        { month: "February", year: 2024, revenue: 12000 , quantity:10},
-        { month: "March", year: 2024, revenue: 15000 , quantity:10},
-        { month: "April", year: 2024, revenue: 8000, quantity:10 },
-        { month: "May", year: 2024, revenue: 20000 , quantity:10},
-        { month: "June", year: 2024, revenue: 17000 , quantity:10},
-    ];
-
-    const yearOptions = [
-        { value: "2024", label: "2024" },
-        { value: "2023", label: "2023" },
-    ];
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const orders = await OrderService.getAllOrder();
+                setOrder(orders.data);
+            } catch (error) {
+                console.error("Error fetching order:", error);
+            }
+        };
+        fetchOrders();
+    }, []);
 
     const monthOptions = [
-        { value: "", label: "All" },
-        { value: "January", label: "January" },
-        { value: "February", label: "February" },
-        { value: "March", label: "March" },
-        { value: "April", label: "April" },
-        { value: "May", label: "May" },
-        { value: "June", label: "June" },
+        { value: "", label: "Tất cả" },
+        { value: "1", label: "Tháng 1" },
+        { value: "2", label: "Tháng 2" },
+        { value: "3", label: "Tháng 3" },
+        { value: "4", label: "Tháng 4" },
+        { value: "5", label: "Tháng 5" },
+        { value: "6", label: "Tháng 6" },
+        { value: "7", label: "Tháng 7" },
+        { value: "8", label: "Tháng 8" },
+        { value: "9", label: "Tháng 9" },
+        { value: "10", label: "Tháng 10" },
+        { value: "11", label: "Tháng 11" },
+        { value: "12", label: "Tháng 12" },
     ];
+
+    const currentYear = new Date().getFullYear();
+    const yearOptions = Array.from(
+        { length: currentYear - 2024 + 1 },
+        (_, index) => ({
+            value: (2024 + index).toString(),
+            label: (2024 + index).toString(),
+        })
+    );
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Lọc dữ liệu theo năm và tháng
-    const filteredData = revenueData.filter((item) => {
+    const filteredData = order.filter((item) => {
+        const updatedAtDate = new Date(item.updatedAt);
+        const itemYear = updatedAtDate.getFullYear().toString();
+        const itemMonth = (updatedAtDate.getMonth() + 1).toString();
+
         return (
-            item.year.toString() === filters.year &&
-            (filters.month === "" || item.month === filters.month)
+            item.activeNow === "Đã hoàn thành" &&
+            itemYear === filters.year &&
+            (filters.month === "" || itemMonth === filters.month)
         );
     });
 
+    const totalRevenue = filteredData.reduce((sum, item) => sum + item.totalMoney, 0);
+    const totalOrders = filteredData.length;
+
+    // Lọc ra các tháng có dữ liệu
+    const monthsWithData = Array.from(
+        new Set(filteredData.map(item => new Date(item.updatedAt).getMonth())) // Set loại bỏ trùng
+    );
+
+    // Tính tổng doanh thu từng tháng chỉ cho các tháng có dữ liệu
+    const monthlyRevenue = monthsWithData.map((month) => {
+        return filteredData
+            .filter((item) => new Date(item.updatedAt).getMonth() === month)
+            .reduce((sum, item) => sum + item.totalMoney, 0);
+    });
+
+    // Cập nhật labels chỉ cho các tháng có dữ liệu
+    const labels = monthsWithData.map((month) => `Tháng ${month + 1}`);
+
+    // Màu sắc ngẫu nhiên cho từng tháng
+    const colors = monthsWithData.map(() => `#${Math.floor(Math.random() * 16777215).toString(16)}`);
+
     return (
         <div className="container mt-5">
-
-            {/* Bộ lọc */}
             <div className="mb-4">
                 <form className="row">
                     <div className="col-md-6">
@@ -52,13 +91,9 @@ const MonthlyRevenueSubTab = () => {
                             label="Năm"
                             placeholder="Chọn năm"
                             options={yearOptions}
-                            event={(e) =>
-                                setFilters((prev) => ({
-                                    ...prev,
-                                    year: e.target.value,
-                                }))
-                            }
-                            values={filters.year}
+                            selectedValue={filters.year}
+                            onChange={handleFilterChange}
+                            name="year"
                         />
                     </div>
                     <div className="col-md-6">
@@ -66,37 +101,52 @@ const MonthlyRevenueSubTab = () => {
                             label="Tháng"
                             placeholder="Chọn tháng"
                             options={monthOptions}
-                            event={(e) =>
-                                setFilters((prev) => ({
-                                    ...prev,
-                                    month: e.target.value,
-                                }))
-                            }
-                            values={filters.month}
+                            selectedValue={filters.month}
+                            onChange={handleFilterChange}
+                            name="month"
                         />
                     </div>
                 </form>
             </div>
 
-            {/* Bảng dữ liệu */}
-            <table className="table table-striped" style={{fontSize:'16px'}}>
+            <div className="mb-4">
+                <h5>Tổng Doanh Thu: {totalRevenue.toLocaleString()} VND</h5>
+                <h5>Tổng Số Đơn Hàng: {totalOrders.toLocaleString()}</h5>
+            </div>
+
+            {/* Hiển thị biểu đồ nếu chỉ chọn năm */}
+            {filters.month === "" && (
+                <PieChart
+                    data={monthlyRevenue}
+                    labels={labels}
+                    colors={colors}
+                />
+            )}
+
+            <table className="table table-striped" style={{ fontSize: "16px", marginTop:'20px' }}>
                 <thead>
                     <tr>
-                    <th scope="col" style={{ width: '10%' }}>Tháng</th>
-                    <th scope="col" style={{ width: '10%' }}>Năm</th>
-                    <th scope="col" style={{ width: '10%' }}>Doanh thu</th>
-                    <th scope="col" style={{ width: '10%' }}>Số đơn hàng</th>
+                        <th scope="col">Tháng</th>
+                        <th scope="col">Năm</th>
+                        <th scope="col">Doanh thu</th>
+                        <th scope="col">Số sản phẩm bán được</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredData.map((item, index) => (
-                        <tr key={index}>
-                            <td>{item.month}</td>
-                            <td>{item.year}</td>
-                            <td>{item.revenue.toLocaleString()}</td>
-                            <td>{item.quantity.toLocaleString()}</td>
-                        </tr>
-                    ))}
+                    {filteredData.map((item, index) => {
+                        const updatedAtDate = new Date(item.updatedAt);
+                        const itemMonth = updatedAtDate.getMonth() + 1;
+                        const itemYear = updatedAtDate.getFullYear();
+
+                        return (
+                            <tr key={index}>
+                                <td>{itemMonth}</td>
+                                <td>{itemYear}</td>
+                                <td>{item.totalMoney.toLocaleString()}</td>
+                                <td>{item.orderItems.length}</td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

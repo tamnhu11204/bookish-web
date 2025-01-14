@@ -23,8 +23,6 @@ import { removeAllOrderProduct } from "../../redux/slides/OrderSlide";
 
 const OrderPage = () => {
   const order = useSelector((state) => state.order)
-  const shop2 = useSelector((state) => state.shop2)
-  console.log('shop2', shop2)
   const [selectedOption, setSelectedOption] = useState("default");
   const [selectedOption2, setSelectedOption2] = useState("default");
 
@@ -501,8 +499,6 @@ const OrderPage = () => {
         arrayOrdered.push(element.product);
       });
   
-      console.log("Danh sách sản phẩm cần xóa:", arrayOrdered);
-  
       dispatch(removeAllOrderProduct({ listChecked: arrayOrdered }));
   
       message.success();
@@ -514,33 +510,30 @@ const OrderPage = () => {
   }, [data?.status, isError, isSuccess, navigate]);
   
   
-  
-  
-  
-  const handleOnOrderClick = async() => {
+  const handleOnOrderClick = async () => {
     let a, b, c, d, e;
-
+  
+    // Xử lý các giá trị địa chỉ dựa trên lựa chọn
     if (selectedOption === "default") {
-      // Nếu chọn địa chỉ mặc định
       a = addressDetails.province;
       b = addressDetails.district;
       c = addressDetails.commune;
       d = addressDetails.specificAddress;
     } else if (selectedOption === "other") {
-      // Nếu chọn địa chỉ khác
       a = selectedProvince;
       b = selectedDistrict;
       c = selectedCommune;
       d = specificAddress;
     }
-
+  
+    // Xử lý lựa chọn phương thức thanh toán
     if (selectedOption2 === "default") {
       e = true;
     } else if (selectedOption2 === "other") {
       e = false;
     }
-
-    // Tạo đơn hàng
+  
+    // Tạo đơn hàng mới
     const newOrder = {
       orderItems: order?.orderItemSelected,
       phone: phone,
@@ -558,9 +551,10 @@ const OrderPage = () => {
       user: getUser?.id,
       activeNow: 'Chờ xác nhận',
     };
-
+  
     try {
-      if (detailPromo && detailPromo._id) { // Kiểm tra null và _id
+      // Kiểm tra và cập nhật khuyến mãi nếu có
+      if (detailPromo && detailPromo._id) {
         const response = await PromotionService.updateUsedPromotion(detailPromo._id);
         console.log('Promotion updated successfully:', response);
       } else {
@@ -569,12 +563,18 @@ const OrderPage = () => {
     } catch (error) {
       console.error('Error updating promotion:', error);
     }
-    
+  
+    // Gọi mutation để tạo đơn hàng
+    console.log("Preparing to send order:", newOrder);  // Kiểm tra dữ liệu đơn hàng
+  
     mutation.mutate(newOrder, {
       onSuccess: async (data) => {
-        if (data?.status === 'OK' && data?.data?._id) {
-          // Gọi API cập nhật trạng thái đơn hàng
-          const orderId = data.data._id; // Lấy ID đơn hàng từ response
+        console.log("Received data:", data);  // Kiểm tra phản hồi từ API
+  
+        if (data?.status === 'OK' && data?.data && data.data.length > 0) {
+          const orderId = data.data[0]._id;  // Lấy ID của đơn hàng từ phần tử đầu tiên trong mảng
+          console.log("Order created with ID:", orderId);
+  
           const orderActiveData = {
             order: orderId,
             activeList: [
@@ -586,7 +586,10 @@ const OrderPage = () => {
           };
   
           try {
+            // Gọi API để cập nhật trạng thái đơn hàng
             const response = await OrderActiveListService.createOrderActive(orderActiveData);
+            console.log(response);  // Kiểm tra phản hồi từ API
+  
             if (response?.status === 'OK') {
               console.log('Order status updated successfully:', response);
             } else {
@@ -595,12 +598,18 @@ const OrderPage = () => {
           } catch (error) {
             console.error('Error updating order status:', error);
           }
+        } else {
+          console.error("No valid order data received");
         }
       },
+      onError: (error) => {
+        console.error("Mutation failed:", error);  // Kiểm tra lỗi nếu mutation không thành công
+      }
     });
   };
+  
+  
 
-console.log('order?.orderItemSelected.data.array', order?.orderItemSelected)
   //card thông tin đơn hàng
 
   const orderInfo = (

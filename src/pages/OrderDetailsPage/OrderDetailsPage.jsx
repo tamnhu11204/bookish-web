@@ -137,8 +137,8 @@ const OrderDetailsPage = () => {
             </div>
           </div>
 
-          <h5 className="bg-light p-2">Mã đơn: {customer.orderId}</h5>
-          <table className="table mt-3">
+          <h5 className="bg-light p-2" style={{fontSize:'16px'}}>Mã đơn: {customer.orderId}</h5>
+          <table className="table mt-3" style={{fontSize:'16px'}}>
             <thead>
               <tr>
                 <th>Sản phẩm</th>
@@ -174,15 +174,15 @@ const OrderDetailsPage = () => {
 
           </table>
 
-          <div className="text-end">
+          <div className="text-end" style={{fontSize:'16px'}}>
             <p>Tạm tính: {order?.itemsPrice.toLocaleString()} đ</p>
             <p>Phí vận chuyển: {order?.shippingPrice.toLocaleString()} đ</p>
             <p>Giảm giá: {order?.discount.toLocaleString()} đ</p>
             <h5 className="fw-bold text-danger" style={{ fontSize: '20px' }}>Tổng tiền: {order?.totalMoney.toLocaleString()}đ</h5>
           </div>
 
-          <h5 className="bg-light p-2 mt-4">Phương thức thanh toán: {paymentMethod}</h5>
-          <ul>
+          <h5 className="bg-light p-2 mt-4" style={{fontSize:'16px'}}>Phương thức thanh toán: {paymentMethod}</h5>
+          <ul style={{fontSize:'16px'}}>
           {activeLists && activeLists.length > 0 ? (
             activeLists[0].activeList.map((item, index) => (
               <li key={index}>

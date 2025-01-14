@@ -15,10 +15,9 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const order = useSelector((state) => state.order)
-  const navigate=useNavigate()
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('');
 
-  console.log('svaj', user)
 
   const handleLogout = async () => {
     setLoading(true);
@@ -33,7 +32,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
     setLoading(false);
   }, [user?.name]);
 
-  const handleOnClickCart =()=>{
+  const handleOnClickCart = () => {
     navigate('/shoppingcart')
   }
   const handleSearch = () => {
@@ -56,27 +55,29 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
           </a>
 
           {!isHiddenSearch && (
-            <input
-              className="form-control"
-              type="text"
-              placeholder="Tìm"
-              style={{ width: '500px', height: '35px', fontSize: '14px' }}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <>
+              <input
+                className="form-control"
+                type="text"
+                placeholder="Tìm"
+                style={{ width: '500px', height: '35px', fontSize: '14px' }}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="search-button" onClick={handleSearch}>
+                <i className="bi bi-search"></i> {/* Đảm bảo class là "fas" */}
+              </button>
+            </>
           )}
-           <button className="search-button" onClick={handleSearch}>
-      <i className="bi bi-search"></i> {/* Đảm bảo class là "fas" */}
-         </button>
 
           <div className="row">
             {!isHiddenCart && (
               <div className="col-3">
                 <button type="button" class="btn position-relative" style={{ width: '40px' }}
-                onClick={handleOnClickCart}>
+                  onClick={handleOnClickCart}>
                   <i className="bi bi-cart3" style={Styles.iconHeader}></i>
                   <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                     style={{ fontSize: '10px' }}>
-                    {order?.orderItems?.length||0}
+                    {order?.orderItems?.length || 0}
                     <span class="visually-hidden">unread messages</span>
                   </span>
                 </button>

@@ -1,50 +1,125 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
-import img4 from '../../assets/img/img4.png';
+import * as OrderService from "../../services/OrderService";
+import * as ProductService from "../../services/ProductService";
+import PieChart from "../../components/PieChartComponent/PieChartComponent";
+
 
 const BestSellingBooksSubTab = () => {
+    const [order, setOrder] = useState([]);
     const [filters, setFilters] = useState({ year: "2024", month: "" });
+    const [productDetailsMap, setProductDetailsMap] = useState(new Map());
+    const [isDataFetched, setIsDataFetched] = useState(false);
 
-    const bookSalesData = [
-        { id: "B001", month: "January", year: 2024, name: "Book A", quantitySold: 50, totalRevenue: 50000, image: img4},
-        { id: "B002", month: "February", year: 2024, name: "Book B", quantitySold: 30, totalRevenue: 30000, image: img4 },
-        { id: "B003", month: "March", year: 2024, name: "Book C", quantitySold: 40, totalRevenue: 40000, image: img4 },
-        { id: "B004", month: "April", year: 2024, name: "Book D", quantitySold: 70, totalRevenue: 70000, image: img4 },
-        { id: "B005", month: "May", year: 2024, name: "Book E", quantitySold: 20, totalRevenue: 20000, image: img4},
-        { id: "B006", month: "June", year: 2024, name: "Book F", quantitySold: 60, totalRevenue: 60000, image: img4 },
-    ];
-
-    const yearOptions = [
-        { value: "2024", label: "2024" },
-        { value: "2023", label: "2023" },
-    ];
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const orders = await OrderService.getAllOrder();
+                setOrder(orders.data);
+            } catch (error) {
+                console.error("Error fetching order:", error);
+            }
+        };
+        fetchOrders();
+    }, []);
 
     const monthOptions = [
-        { value: "", label: "All" },
-        { value: "January", label: "January" },
-        { value: "February", label: "February" },
-        { value: "March", label: "March" },
-        { value: "April", label: "April" },
-        { value: "May", label: "May" },
-        { value: "June", label: "June" },
+        { value: "", label: "Tất cả" },
+        { value: "1", label: "Tháng 1" },
+        { value: "2", label: "Tháng 2" },
+        { value: "3", label: "Tháng 3" },
+        { value: "4", label: "Tháng 4" },
+        { value: "5", label: "Tháng 5" },
+        { value: "6", label: "Tháng 6" },
+        { value: "7", label: "Tháng 7" },
+        { value: "8", label: "Tháng 8" },
+        { value: "9", label: "Tháng 9" },
+        { value: "10", label: "Tháng 10" },
+        { value: "11", label: "Tháng 11" },
+        { value: "12", label: "Tháng 12" },
     ];
+
+    const currentYear = new Date().getFullYear();
+    const yearOptions = Array.from(
+        { length: currentYear - 2024 + 1 },
+        (_, index) => ({
+            value: (2024 + index).toString(),
+            label: (2024 + index).toString(),
+        })
+    );
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Lọc dữ liệu theo năm và tháng
-    const filteredData = bookSalesData.filter((item) => {
+    const filteredData = order.filter((item) => {
+        const updatedAtDate = new Date(item.updatedAt);
+        const itemYear = updatedAtDate.getFullYear().toString();
+        const itemMonth = (updatedAtDate.getMonth() + 1).toString();
+
         return (
-            item.year.toString() === filters.year &&
-            (filters.month === "" || item.month === filters.month)
+            item.activeNow === "Đã hoàn thành" &&
+            itemYear === filters.year &&
+            (filters.month === "" || itemMonth === filters.month)
         );
     });
 
+    // Lọc và gộp các sản phẩm từ các order
+    const productList = filteredData.flatMap((item) => item.orderItems)
+        .reduce((acc, orderItem) => {
+            const existingProduct = acc.get(orderItem.product);
+            if (existingProduct) {
+                existingProduct.amount += orderItem.amount;
+                existingProduct.revenue += orderItem.amount * (orderItem.price || 0);
+            } else {
+                acc.set(orderItem.product, {
+                    productId: orderItem.product,
+                    amount: orderItem.amount,
+                    revenue: orderItem.amount * (orderItem.price || 0),
+                });
+            }
+            return acc;
+        }, new Map());
+
+    useEffect(() => {
+        if (productList.size === 0) {
+            return;
+        }
+
+        const fetchProductDetails = async () => {
+            const productIds = [...productList.keys()]; // Lấy các productId duy nhất
+            const productDetailsMap = new Map();
+
+            await Promise.all(
+                productIds.map(async (productId) => {
+                    try {
+                        const productDetail = await ProductService.getDetailProduct(productId);
+                        if (productDetail && productDetail.data) {
+                            productDetailsMap.set(productId, productDetail.data);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching product details for", productId, error);
+                    }
+                })
+            );
+
+            setProductDetailsMap(productDetailsMap);
+            setIsDataFetched(true);
+        };
+
+        fetchProductDetails();
+    }, [productList]);
+
+    // Chuẩn bị dữ liệu cho PieChart
+    const chartData = [...productList.values()].map((product) => product.revenue);
+    const chartLabels = [...productList.values()].map(
+        (product) => productDetailsMap.get(product.productId)?.name || "N/A"
+    );
+    const chartColors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#FF9F40", "#9966FF"];
+
     return (
         <div className="container mt-5">
-            {/* Bộ lọc */}
             <div className="mb-4">
                 <form className="row">
                     <div className="col-md-6">
@@ -52,13 +127,9 @@ const BestSellingBooksSubTab = () => {
                             label="Năm"
                             placeholder="Chọn năm"
                             options={yearOptions}
-                            event={(e) =>
-                                setFilters((prev) => ({
-                                    ...prev,
-                                    year: e.target.value,
-                                }))
-                            }
-                            values={filters.year}
+                            selectedValue={filters.year}
+                            onChange={handleFilterChange}
+                            name="year"
                         />
                     </div>
                     <div className="col-md-6">
@@ -66,45 +137,55 @@ const BestSellingBooksSubTab = () => {
                             label="Tháng"
                             placeholder="Chọn tháng"
                             options={monthOptions}
-                            event={(e) =>
-                                setFilters((prev) => ({
-                                    ...prev,
-                                    month: e.target.value,
-                                }))
-                            }
-                            values={filters.month}
+                            selectedValue={filters.month}
+                            onChange={handleFilterChange}
+                            name="month"
                         />
                     </div>
                 </form>
             </div>
 
-            {/* Bảng dữ liệu */}
-            <table className="table table-striped" style={{ fontSize: "16px" }}>
+            <div className="mb-4">
+                <PieChart data={chartData} labels={chartLabels} colors={chartColors} />
+            </div>
+
+            <table className="table table-striped" style={{ fontSize: "16px", marginTop: "20px" }}>
                 <thead>
                     <tr>
-                        <th scope="col" style={{ width: "10%" }}>Mã sách</th>
-                        <th scope="col" style={{ width: "10%" }}>Hình ảnh</th>
-                        <th scope="col" style={{ width: "30%" }}>Tên sản phẩm</th>
-                        <th scope="col" style={{ width: "10%" }}>Số lượng bán</th>
-                        <th scope="col" style={{ width: "15%" }}>Doanh thu</th>
+                        <th scope="col">Tháng</th>
+                        <th scope="col">Năm</th>
+                        <th scope="col">Mã sách</th>
+                        <th scope="col">Hình ảnh</th>
+                        <th scope="col">Tên sản phẩm</th>
+                        <th scope="col">Số lượng bán</th>
+                        <th scope="col">Doanh thu</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredData.map((item, index) => (
-                        <tr key={index}>
-                            <td>{item.id}</td>
-                            <td>
-                                <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    style={{ width: "50px", height: "auto" }}
-                                />
-                            </td>
-                            <td>{item.name}</td>
-                            <td>{item.quantitySold.toLocaleString()}</td>
-                            <td>{item.totalRevenue.toLocaleString()}</td>
-                        </tr>
-                    ))}
+                    {[...productList.values()].map((product, idx) => {
+                        const productDetails = productDetailsMap.get(product.productId);
+                        return (
+                            <tr key={idx}>
+                                <td>{filters.month}</td>
+                                <td>{filters.year}</td>
+                                <td>{product.productId}</td>
+                                <td>
+                                    {productDetails ? (
+                                        <img
+                                            src={productDetails.img}
+                                            alt={productDetails.name}
+                                            style={{ width: "50px" }}
+                                        />
+                                    ) : (
+                                        "N/A"
+                                    )}
+                                </td>
+                                <td>{productDetails ? productDetails.name : "N/A"}</td>
+                                <td>{product.amount}</td>
+                                <td>{product.revenue.toLocaleString()}</td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

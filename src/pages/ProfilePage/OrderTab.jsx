@@ -9,6 +9,11 @@ import * as FeedbackService from '../../services/FeedbackService';
 import * as OrderService from '../../services/OrderService';
 import * as ProductService from '../../services/ProductService'; // Import ProductService
 import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
+import { useNavigate } from 'react-router-dom';
+import * as OrderActiveListService from '../../services/OrderActiveListService';
+import { useMutationHook } from '../../hooks/useMutationHook';
+import * as message from "../../components/MessageComponent/MessageComponent";
+
 
 const OrderTab = () => {
     const user = useSelector((state) => state.user);
@@ -18,12 +23,12 @@ const OrderTab = () => {
     const [img, setImg] = useState(null);
     const [name, setName] = useState(null);
     const [imgPro, setImgPro] = useState(null);
-    const [starRating, setStarRating] = useState(0); // Lưu số sao
+    const [starRating, setStarRating] = useState(0);
     const [feedbackContent, setFeedbackContent] = useState('');
     const [selectedPro, setSelectedPro] = useState('');
     const [selectedOrder, setOrderId] = useState('');
-    const queryClient = useQueryClient(); // Lưu nội dung đánh giá
-    // State để lưu hình ảnh
+    const queryClient = useQueryClient();
+    const navigate = useNavigate()
 
     const handleImageChange = (event) => {
         const file = event.target.files[0];
@@ -35,9 +40,9 @@ const OrderTab = () => {
                 success(result) {
                     const reader = new FileReader();
                     reader.onload = () => {
-                        setImg(reader.result); // Cập nhật ảnh đã nén dưới dạng base64
+                        setImg(reader.result);
                     };
-                    reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
+                    reader.readAsDataURL(result);
                 },
                 error(err) {
                     console.error(err);
@@ -84,25 +89,88 @@ const OrderTab = () => {
                 });
             };
 
-            // Iterate through all orders and their items to fetch product details
             orders.forEach(order => {
                 if (order.orderItems && order.orderItems.length > 0) {
                     fetchProductDetails(order.orderItems);
                 }
             });
         }
-    }, [orders]); // Run this effect whenever orders change
+    }, [orders]);
+
+        const mutation = useMutationHook(({ orderId, data }) =>
+            OrderActiveListService.updateOrderActive(orderId, data)
+        );
+    
+        const { data: mutationData, isSuccess, isError } = mutation;
+
+    
+    useEffect(() => {
+        if (isSuccess && mutationData?.status !== 'ERR') {
+            message.success();
+            alert('Cập nhật trạng thái thành công!');
+            setShowModal(false);
+        } else if (isError) {
+            message.error();
+        }
+    }, [mutationData, isError, isSuccess]);
 
     if (isLoadingOrders) {
         return <div>Đang tải dữ liệu đơn hàng...</div>;
     }
 
-    const handleCancelOrder = async (orderId) => {
-        // eslint-disable-next-line no-restricted-globals
-        const isConfirmed = confirm("Bạn có chắc chắn muốn xóa đơn vị này?");
-        if (isConfirmed) {
-            await OrderService.updateCancel(orderId);
+
+    const handleCancelOrder = async (orderID) => {
+        // Kiểm tra orderID có hợp lệ không
+        if (!orderID || typeof orderID !== 'string') {
+            console.error('Invalid orderID:', orderID);
+            return;
         }
+
+        // Xác nhận với người dùng trước khi hủy đơn hàng
+        // eslint-disable-next-line no-restricted-globals
+        const isConfirmed = confirm("Bạn có chắc chắn muốn hủy đơn hàng này?");
+
+        // Nếu người dùng xác nhận
+        if (isConfirmed) {
+            try {
+                // Cập nhật trạng thái đơn hàng là đã hủy
+                const cancelResponse = await OrderService.updateCancel(orderID);
+                if (cancelResponse?.status === 'OK') {
+                    console.log('Order canceled successfully');
+
+                    const payload = {
+                        active: "Đã hủy",
+                        date: new Date(),
+                    };
+                    mutation.mutate({ orderId: orderID, data: payload });
+
+
+                    // Tiến hành cập nhật trạng thái hoạt động của đơn hàng
+                    const updateActiveOrderNowResponse = await OrderService.updateActiveOrderNow(orderID, "Đã hủy");
+                    if (updateActiveOrderNowResponse?.status === 'OK') {
+                        console.log('Order active status updated to "Đã hủy"');
+                    } else {
+                        console.error('Failed to update active order status:', updateActiveOrderNowResponse?.message);
+                    }
+
+
+                } else {
+                    console.error('Failed to cancel order:', cancelResponse?.message);
+                }
+
+            } catch (error) {
+                console.error('Error during cancel operation:', error);
+            }
+        } else {
+            console.log('Order cancellation was canceled by the user.');
+        }
+    };
+
+
+      
+
+    const handleDetailOrder = async (orderId) => {
+        navigate(`/order-detail/${orderId}`)
     };
 
     const handleFeedback = (product, orderId) => {
@@ -110,7 +178,7 @@ const OrderTab = () => {
         setName(product.name);
         setImgPro(product.img);
         setSelectedPro(product._id);
-        setOrderId(orderId); // Lưu orderId vào state
+        setOrderId(orderId);
     }
 
     const onSave = async () => {
@@ -122,39 +190,34 @@ const OrderTab = () => {
                 user: user.id,
                 product: selectedPro,
             };
-    
+
             console.log('feedbackData:', feedbackData);
-    
+
             // Thêm feedback cho sản phẩm
             const response = await FeedbackService.addFeedback(feedbackData);
             if (response) {
                 alert('Đánh giá thành công!');
-    
-                // Cập nhật rating sản phẩm
+
                 const updateResponse = await ProductService.updateRating(selectedPro, { starRating });
-    
+
                 if (updateResponse) {
                     console.log('Cập nhật số sao thành công:', updateResponse);
                 } else {
                     console.error('Cập nhật số sao thất bại.');
                 }
-    
-                // Cập nhật trạng thái isFeedback trong đơn hàng
+
                 const updateFeedbackResponse = await OrderService.updateIsFeedback(selectedOrder, selectedPro);
                 if (updateFeedbackResponse) {
                     console.log('Cập nhật trạng thái isFeedback thành công');
                 } else {
                     console.error('Cập nhật trạng thái isFeedback thất bại.');
                 }
-    
-                // Gọi lại API để load danh sách đơn hàng mới nhất
+
                 const updatedOrders = await getAllOrderActive(user.id);
-                setProductDetails({}); // Reset productDetails trước khi cập nhật lại
-                setOrderId(''); // Xóa orderId sau khi đánh giá xong
-                // Lưu lại danh sách đơn hàng mới
+                setProductDetails({});
+                setOrderId('');
                 queryClient.setQueryData(["orders", user.id], updatedOrders);
-    
-                // Đóng modal và reset các giá trị
+
                 setShowModal(false);
                 setStarRating(0);
                 setFeedbackContent('');
@@ -165,9 +228,6 @@ const OrderTab = () => {
             alert('Có lỗi xảy ra khi thêm đánh giá hoặc cập nhật số sao.');
         }
     };
-    
-
-
 
 
     const onCancel = () => {
@@ -225,11 +285,29 @@ const OrderTab = () => {
                                 {/* Kiểm tra nếu isCancel === true thì hiển thị "Đã hủy" trong card-header */}
                                 {order.isCancel !== true ? (
                                     <div className={`card-header ${order.activeNow === "Đã hoàn thành" ? "text-success" : "text-primary"}`}>
-                                        <strong>{order.activeNow}</strong>
+                                        <div className="row">
+                                            <div className="col-11">
+                                                <strong>{order.activeNow}</strong>
+                                            </div>
+                                            <div className="col-1">
+                                                <ButtonComponent2
+                                                    textButton="Chi tiết"
+                                                    onClick={() => handleDetailOrder(order._id)} />
+                                            </div>
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="card-header text-danger">
-                                        <strong>Đã hủy</strong>
+                                        <div className="row">
+                                            <div className="col-11">
+                                                <strong>Đã hủy</strong>
+                                            </div>
+                                            <div className="col-1">
+                                                <ButtonComponent2
+                                                    textButton="Chi tiết"
+                                                    onClick={() => handleDetailOrder(order._id)} />
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
 
@@ -286,13 +364,16 @@ const OrderTab = () => {
 
                                 {/* Kiểm tra nếu đơn hàng chưa bị hủy mới hiển thị phần này */}
                                 {order.isCancel !== true && (
-                                    <div className="text-end" style={{marginBottom:'5px', marginRight:'5px'}}>
+                                    <div className="text-end" style={{ marginBottom: '5px', marginRight: '5px' }}>
                                         {order.activeNow === "Đã hoàn thành" ? (
                                             ''
                                         ) : (
-                                            <ButtonComponent
-                                                textButton="Hủy đơn"
-                                                onClick={() => handleCancelOrder()} />
+                                            <>
+                                                <ButtonComponent
+                                                    textButton="Hủy đơn"
+                                                    onClick={() => handleCancelOrder(order._id)} />
+
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -314,7 +395,7 @@ const OrderTab = () => {
                                 className="img-thumbnail"
                                 style={{ width: '80px', height: 'auto' }}
                             />
-                            <h6 className="ml-3" style={{fontSize:'20px', marginLeft:'10px'}}>{name}</h6>
+                            <h6 className="ml-3" style={{ fontSize: '20px', marginLeft: '10px' }}>{name}</h6>
                         </div>
                         <div className="mb-3" >
                             <label className="form-label">Chất lượng sản phẩm</label>
@@ -334,7 +415,7 @@ const OrderTab = () => {
 
                         <div className="mb-3">
                             <label className="form-label">Nội dung sản phẩm:</label>
-                            <textarea style={{fontSize:'16px'}}
+                            <textarea style={{ fontSize: '16px' }}
                                 className="form-control"
                                 rows="3"
                                 placeholder="Nhập nội dung"
