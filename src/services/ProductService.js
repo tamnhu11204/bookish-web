@@ -47,6 +47,10 @@ export const updateView = async (id) => {
   return res.data;
 };
 
+export const updateProductStock = async (id,data) => {
+  const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/update-stock/${id}`,data);
+  return res.data;
+};
 
 export const getAllProductBySort = async (params = {}) => {
   const response = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/product/get-all`, {

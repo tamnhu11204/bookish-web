@@ -25,7 +25,7 @@ const FormComponent = (props) => {
                     borderRadius: '10px',
                 }}
                 onChange={handleOnChangeInput}
-                //disabled={!props.enable} // Điều chỉnh để không cho phép nhập khi enable là false
+                disabled={!props.enable} // Điều chỉnh để không cho phép nhập khi enable là false
             />
         </div>
     );

@@ -1,9 +1,6 @@
 import React from 'react'
-import SliderComponent from '../../components/SliderComponent/SliderComponent'
-import img1 from '../../assets/img/img1.png'
-import img2 from '../../assets/img/img2.png'
-import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
-import CardComponent from '../../components/CardComponent/CardComponent'
+import { useQuery } from '@tanstack/react-query'
+import * as PromotionService from '../../services/PromotionService';
 
 const DiscountPage = () => {
 
@@ -37,6 +34,18 @@ const DiscountPage = () => {
         );
       };
 
+      // Lấy danh sách ưu đãi từ API
+          const getAllPromotion = async () => {
+              const res = await PromotionService.getAllPromotion();
+              console.log('data', res)
+              return res.data;
+          };
+      
+          const { isLoading: isLoadingPromotion, data: promotions } = useQuery({
+              queryKey: ['promotions'],
+              queryFn: getAllPromotion,
+          });
+
       const timeDiscounts = [
         {
           title: "Giảm 20k phí vận chuyển",
@@ -52,20 +61,10 @@ const DiscountPage = () => {
         },
       ];
     
-      const categoryDiscounts = [
-        {
-          title: "Mã giảm 25k",
-          description: "Áp dụng cho sách thiếu nhi từ 200k",
-          code: "XYZ1234567K",
-          time: "27/02/2024 23:59",
-        },
-        {
-          title: "Mã giảm 25k",
-          description: "Áp dụng cho sách văn học từ 200k",
-          code: "LMN1234560Z",
-          time: "27/02/2024 23:59",
-        },
-      ];
+      // Lọc và sắp xếp các ưu đãi
+  const validPromotions = promotions
+  ?.filter((promotion) => new Date(promotion.finish) > new Date()) // Lọc ưu đãi còn hạn
+  ?.sort((a, b) => b.value - a.value); // Sắp xếp theo value giảm dần
     
       const handleCopyCode = (code) => {
         navigator.clipboard.writeText(code);
@@ -78,7 +77,7 @@ const DiscountPage = () => {
         <div className="container my-5" style={formStyle}>
       <header className="text-center mb-5">
         <h1 className="text-success fw-bold" style={formStyle}>Bookish</h1>
-        <h3>Ưu Đãi Tháng 9</h3>
+        <h3>Ưu Đãi Tháng 1</h3>
         <div className="d-flex justify-content-center gap-3 my-3">
           <button className="btn btn-outline-success" style={formStyle}>Giảm Giá Sốc</button>
           <button className="btn btn-outline-success" style={formStyle}>Mã Freeship</button>
@@ -88,26 +87,21 @@ const DiscountPage = () => {
       </header>
 
       <section className="mb-5">
-        <h4 className="bg-success text-white py-2 px-3">ƯU ĐÃI KHUNG GIỜ</h4>
+        <h4 className="bg-success text-white py-2 px-3">ƯU ĐÃI </h4>
         <div className="row">
-          {timeDiscounts.map((discount, index) => (
+        {validPromotions && validPromotions.length > 0 ?
+          (validPromotions.map((promotion, index) => (
             <div className="col-md-6" key={index} >
-              <DiscountCard {...discount} onCopy={handleCopyCode} />
+              <DiscountCard title={`Giảm giá ${promotion.value} vnd tổng đơn hàng`} onCopy={handleCopyCode} 
+              description = {`Đơn hàng từ ${promotion.condition} vnd, số lượng có hạn`} 
+              code ={promotion._id}
+             time={`Hết hạn: ${(new Date(promotion.finish).toISOString().split('T')[0])}`}/>
             </div>
-          ))}
+          ))):(null)}
         </div>
       </section>
 
-      <section>
-        <h4 className="bg-success text-white py-2 px-3">ƯU ĐÃI THỂ LOẠI</h4>
-        <div className="row">
-          {categoryDiscounts.map((discount, index) => (
-            <div className="col-md-6" key={index}>
-              <DiscountCard {...discount} onCopy={handleCopyCode} />
-            </div>
-          ))}
-        </div>
-      </section>
+      
     </div>
   );
 };

@@ -364,6 +364,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   value={name}
                   onChange={handleOnChangeName}
                   required={true}
+                  enable={true}
           />
         </div>
         <div className="col-6 text-end">
@@ -382,6 +383,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   value={author}
                   onChange={handleOnChangeAuthor}
                   required={true}
+                  enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -393,6 +395,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
               selectedValue={selectedPublisher}
               onChange={handleOnChangePublisher}
               required={true}
+
             />
         </div>
         <div className="col-md-6 mb-3">
@@ -405,6 +408,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   value={pubdate}
                   onChange={handleOnChangeDate}
                   required={true}
+                  enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -428,6 +432,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   value={weight}
                   onChange={handleOnChangeWeight}
                   required={true}
+                  enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -440,6 +445,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
             value={height}
             onChange={handleOnChangeHeight}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -452,6 +458,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
             value={width}
             onChange={handleOnChangeWidth}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -464,6 +471,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
             value={length}
             onChange={handleOnChangeLength}
             required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -476,6 +484,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   value={page}
                   onChange={handleOnChangePage}
                   required={true}
+                  enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -551,6 +560,46 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
                   value={price}
                   onChange={handleOnChangePrice}
                   required={true}
+                  enable={true}
+          />
+        </div>
+        <div className="col-md-4 mb-3">
+          <label className="form-label"></label>
+          <FormComponent
+                  id="discount"
+                  label="Giảm giá"
+                  type="number"
+                  placeholder="Nhập giảm giá"
+                  value={discount}
+                  onChange={handleOnChangeDiscount}
+                  required={true}
+                  enable={true}
+          />
+        </div>
+        <div className="col-md-4 mb-3">
+          <label className="form-label"></label>
+          <FormComponent
+                  id="PriceEntry"
+                  label="Giá sau giảm"
+                  type="number"
+                  placeholder=""
+                  value={priceEntry}
+                  onChange={handleOnChangePriceEntry}
+                  required={true}
+                  enable = {false}
+          />
+        </div>
+        <div className="col-md-4 mb-3">
+          <label className="form-label"></label>
+          <FormComponent
+                  id="Stock"
+                  label="Tồn kho"
+                  type="number"
+                  placeholder="Nhập số lượng tồn"
+                  value={stock}
+                  onChange={handleOnChangeStock}
+                  required={true}
+                  enable = {true}
           />
         </div>
         

@@ -60,17 +60,34 @@ const StatusSubTab = () => {
             setShowModal(false);
             queryClient.invalidateQueries(['statuses']); // Invalidate the cache to refetch Statuss
         }
-        if (isSuccessUpdate && data?.status !== 'ERR') {
-            message.success();
-            alert('Cập nhật trạng thái đơn hàng thành công!');
-            resetForm();
-            setShowModal(false);
-            queryClient.invalidateQueries(['statuses']); // Invalidate the cache to refetch Statuss
-        }
+        
         if (isError || isErrorUpdate || isErrorDelete) {
             message.error();
         }
-    }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status, queryClient]);
+    }, [isSuccess, isError,   data?.status, queryClient]);
+
+     useEffect(() => {
+            if (isSuccessDelete ) {
+                message.success();
+                alert('Xóa trạng thái đơn hàng thành công!');
+                resetForm();
+            }
+            if (isErrorDelete) {
+                message.error();
+            }
+        }, [isSuccessDelete, isErrorDelete]);
+
+        useEffect(() => {
+            if (isSuccessUpdate && data?.status !== 'ERR') {
+                message.success();
+                alert('Cập nhật trạng thái đơn hàng thành công!');
+                resetForm();
+                setShowModal(false);
+                queryClient.invalidateQueries(['statuses']); // Invalidate the cache to refetch Statuss
+            }
+        }, [isSuccessUpdate, isErrorUpdate]);
+
+
 
     const handleAddStatus = () => {
         resetForm();
@@ -87,6 +104,7 @@ const StatusSubTab = () => {
 
     const handleDeleteStatus = (status) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa trạng thái đơn hàng "${status.name}" không?`)) {
+            setSelectedStatus(status);
             deleteMutation.mutate(status._id);
         }
     };

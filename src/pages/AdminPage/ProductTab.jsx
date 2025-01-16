@@ -8,12 +8,7 @@ import AddProductForm from './ProductAdd';
 import * as ProductService from "../../services/ProductService" ;
 import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
-import * as PublisherService from "../../services/OptionService/PublisherService";
-import * as LanguageService from "../../services/OptionService/LanguageService"
-import * as SupplierService from "../../services/OptionService/SupplierService"
-import * as FormatService from "../../services/OptionService/FormatService"
-import * as UnitService from "../../services/OptionService/UnitService"
-import * as CategoryService from "../../services/CategoryService"
+import ImportModal from '../../components/ImportComponent/ImportComponent';
 import * as message from "../../components/MessageComponent/MessageComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
 
@@ -31,8 +26,20 @@ const ProductTab = () => {
     const [onCancel, setOnCancel] = useState(() => () => {});
     const [Type,setType] = useState(false);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  //const handleCloseModal = () => setIsModalOpen(false);
+
+  const handleImportSubmit = (data) => {
+    console.log('Dữ liệu nhập hàng:', data);
+    // Gửi dữ liệu lên server hoặc xử lý theo logic của bạn
+    handleCloseModal();
+  };
+
     const handleCloseModal = () => {
         setShowModal(false);
+        setIsModalOpen(false);
     };
 
     const getAllProduct = async () => {
@@ -115,11 +122,23 @@ const ProductTab = () => {
 
                     <div className="col-6 text-end">
                         <ButtonComponent
+                            textButton="Nhập hàng "
+                            icon={<i className="bi bi-plus-circle"></i>}
+                            onClick={handleOpenModal}
+                        />
+                        <div>
+                        <ButtonComponent
                             textButton="Thêm sản phẩm "
                             icon={<i className="bi bi-plus-circle"></i>}
                             onClick={handleAddProduct}
                         />
+
+                        </div>
+
+                       
                     </div>
+
+                    
 
                     
                 </div>
@@ -194,9 +213,13 @@ const ProductTab = () => {
                     </tbody>
                 </table>
             </div>
-            
-
-            </div> 
+            <ImportModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleImportSubmit}
+      />
+               </div> 
+               
     );
     if(Type=== false) return(
         <ProductDetailForm
@@ -209,6 +232,7 @@ const ProductTab = () => {
             isOpen={showModal}
             onCancel= {onCancel2}/>
     );
+    
    
 };
 

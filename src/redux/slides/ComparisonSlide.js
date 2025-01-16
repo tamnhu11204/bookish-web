@@ -1,35 +1,23 @@
-import { createSlice } from "@reduxjs/toolkit"
-
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    comparisonItems: [],
-    
-    
-}
+  selectedProducts: [null, null, null], // 3 vị trí sản phẩm, mặc định là null
+};
 
-export const comparisonSlide = createSlice({
-    name: 'comparison',
-    initialState,
-    reducers: {
-        addComparisonProduct: (state, action) => {
-            const { comparisonItem } = action.payload
-            const itemComparison = state?.comparisonItems?.find((item) => item?.product === comparisonItem.product)
-            if (itemComparison) {
-                itemComparison.amount += comparisonItem?.amount
-            } else {
-                state.comparisonItems.push(comparisonItem)
-            }
-        },
-        removeComparisonProduct: (state, action) => {
-            const { idProduct } = action.payload
-            const itemComparison = state?.comparisonItems?.filter((item) => item?.product !== idProduct)
-            state.comparisonItems = itemComparison
-            
-        },
-        
-       
-    }
-})
+const comparisonSlice = createSlice({
+  name: 'comparison',
+  initialState,
+  reducers: {
+    addSelectedProduct: (state, action) => {
+      const { index, product } = action.payload;
+      state.selectedProducts[index] = product;
+    },
+    removeSelectedProduct: (state, action) => {
+      state.selectedProducts[action.payload] = null; // Xóa sản phẩm tại vị trí được chỉ định
+    },
+  },
+});
 
-export const {  addComparisonProduct, removeComparisonProduct } = comparisonSlide.actions
-export default comparisonSlide.reducer
+export const { addSelectedProduct, removeSelectedProduct } = comparisonSlice.actions;
+
+export default comparisonSlice.reducer;
