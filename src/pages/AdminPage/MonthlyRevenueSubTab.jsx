@@ -55,7 +55,6 @@ const MonthlyRevenueSubTab = () => {
         const itemMonth = (updatedAtDate.getMonth() + 1).toString();
 
         return (
-            item.activeNow === "Đã hoàn thành" &&
             itemYear === filters.year &&
             (filters.month === "" || itemMonth === filters.month)
         );
@@ -109,9 +108,9 @@ const MonthlyRevenueSubTab = () => {
                 </form>
             </div>
 
-            <div className="mb-4">
-                <h5>Tổng Doanh Thu: {totalRevenue.toLocaleString()} VND</h5>
-                <h5>Tổng Số Đơn Hàng: {totalOrders.toLocaleString()}</h5>
+            <div className="mb-4" >
+                <h5 style={{ fontSize: "16px" }}>Tổng Doanh Thu: {totalRevenue.toLocaleString()} VND</h5>
+                <h5 style={{ fontSize: "16px" }}>Tổng Số Đơn Hàng: {totalOrders.toLocaleString()}</h5>
             </div>
 
             {/* Hiển thị biểu đồ nếu chỉ chọn năm */}

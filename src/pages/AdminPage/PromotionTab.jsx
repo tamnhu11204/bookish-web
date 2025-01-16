@@ -8,6 +8,7 @@ import * as message from "../../components/MessageComponent/MessageComponent";
 import { useMutationHook } from '../../hooks/useMutationHook';
 import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import { Button, Popover } from 'antd';
 
 const PromotionTab = () => {
 
@@ -22,6 +23,60 @@ const PromotionTab = () => {
         queryKey: ['promotions'],
         queryFn: getAllPromotion,
     });
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchType, setSearchType] = useState('value'); 
+
+    // Hàm thay đổi giá trị input tìm kiếm
+    const handleInputChange = (value) => {
+        setSearchTerm(value);
+    };
+
+    // Hàm để tìm kiếm theo giá trị, ngày bắt đầu, ngày kết thúc
+    useEffect(() => {
+        if (searchTerm === '') {
+            setFilteredPromotions(promotions);
+        } else {
+            const filteredPromotions = promotions.filter((promotion) => {
+                const searchTermNumber = Number(searchTerm);
+    
+                if (searchType === 'value' && !isNaN(searchTermNumber) && promotion.value === searchTermNumber) {
+                    return true;
+                }
+    
+                if (searchType === 'start' && formatDate(promotion.start).includes(searchTerm)) {
+                    return true;
+                }
+
+                if (searchType === 'finish' && formatDate(promotion.finish).includes(searchTerm)) {
+                    return true;
+                }
+    
+                return false; 
+            });
+    
+            setFilteredPromotions(filteredPromotions);
+        }
+    }, [searchTerm, searchType, promotions]); 
+    
+    
+    
+
+    // Render content tìm kiếm
+    const popoverContent = (
+        <div>
+            <Button onClick={() => setSearchType('value')}>Tìm theo giá trị</Button>
+            <Button onClick={() => setSearchType('start')}>Tìm theo ngày bắt đầu</Button>
+            <Button onClick={() => setSearchType('finish')}>Tìm theo ngày kết thúc</Button>
+        </div>
+    );
+
+    // State lưu trữ các ưu đãi đã lọc
+    const [filteredPromotions, setFilteredPromotions] = useState(promotions);
+
+    useEffect(() => {
+        setFilteredPromotions(promotions);
+    }, [promotions]);
 
     ////////////////----------Thêm-------------///////////////////
 
@@ -115,26 +170,24 @@ const PromotionTab = () => {
             setErrorMessageEdit("Vui lòng nhập thông tin được yêu cầu!");
             return false;
         }
-        setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
+        setErrorMessage("");
         return true;
     };
 
     const handleEditPromotion = (promotion) => {
         setShowModalEdit(true);
         setSelectedPromotion(promotion);
-        
-        // Chuyển đổi ngày thành định dạng 'YYYY-MM-DD'
         const startDate = new Date(promotion.start).toISOString().split('T')[0];  // Lấy phần ngày của ISO string
         const finishDate = new Date(promotion.finish).toISOString().split('T')[0];
-    
+
         setValueEdit(promotion.value);
-        setStartEdit(startDate);  // Đặt giá trị vào state startEdit
-        setFinishEdit(finishDate);  // Đặt giá trị vào state finishEdit
+        setStartEdit(startDate);  
+        setFinishEdit(finishDate); 
         setQuantityEdit(promotion.quantity);
         setConditionEdit(promotion.condition);
     };
-    
-   
+
+
 
     const handleOnChangeValueEdit = (value) => setValueEdit(value);
     const handleOnChangeStartEdit = (value) => setStartEdit(value);
@@ -171,21 +224,21 @@ const PromotionTab = () => {
         setShowModalEdit(false);
     };
 
-      //////////------------xóa-----------------////////////
+    //////////------------xóa-----------------////////////
 
-      const handleDeletePromotion = async (promotionId) => {
+    const handleDeletePromotion = async (promotionId) => {
         try {
-          // eslint-disable-next-line no-restricted-globals
-          const isConfirmed = confirm("Bạn có chắc chắn muốn xóa ưu đãi này?");
+            // eslint-disable-next-line no-restricted-globals
+            const isConfirmed = confirm("Bạn có chắc chắn muốn xóa ưu đãi này?");
             if (isConfirmed) {
-              await PromotionService.deletePromotion(promotionId);
-              alert("Xóa ưu đãi thành công!");
+                await PromotionService.deletePromotion(promotionId);
+                alert("Xóa ưu đãi thành công!");
             }
         } catch (error) {
-          console.error("Error deleting Promotion: ", error);
-          alert("Đã xảy ra lỗi khi xóa ưu đãi.");
+            console.error("Error deleting Promotion: ", error);
+            alert("Đã xảy ra lỗi khi xóa ưu đãi.");
         }
-      };
+    };
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -205,22 +258,36 @@ const PromotionTab = () => {
                 </div>
             </div>
             <>
-                <div className="col-6">
+                <div className="col-6" style={{ marginBottom: '20px' }}>
                     <FormComponent
                         id="searchInput"
                         type="text"
-                        placeholder="Tìm kiếm theo tên ưu đãi"
+                        placeholder={`Nhập ${searchType}...`}
+                        value={searchTerm}
+                        onChange={handleInputChange}
                     />
+
+                    {/* Popover filter */}
+                    <Popover
+                        content={popoverContent}
+                        title="Chọn trường để tìm"
+                        trigger="click"
+                        placement="bottomLeft"
+                    >
+                        <Button className="btn btn-first">
+                            <i style={{ fontSize: '20px' }} className="bi bi-filter"></i>
+                        </Button>
+                    </Popover>
                 </div>
 
-                <table className="table custom-table" >
+                <table className="table custom-table">
                     <thead className="table-light">
                         <tr>
-                            <th scope="col" style={{ width: '10%' }}>Mã</th>
+                            <th scope="col" style={{ width: '20%' }}>Mã</th>
                             <th scope="col" style={{ width: '10%' }}>Giá trị</th>
-                            <th scope="col" style={{ width: '15%' }}>Ngày bắt đầu</th>
-                            <th scope="col" style={{ width: '15%' }}>Ngày kết thúc</th>
-                            <th scope="col" style={{ width: '20%' }}>Áp dụng cho</th>
+                            <th scope="col" style={{ width: '10%' }}>Ngày bắt đầu</th>
+                            <th scope="col" style={{ width: '10%' }}>Ngày kết thúc</th>
+                            <th scope="col" style={{ width: '15%' }}>Áp dụng cho</th>
                             <th scope="col" style={{ width: '10%' }}>Số lượng</th>
                             <th scope="col" style={{ width: '10%' }}>Đã sử dụng</th>
                             <th scope="col" style={{ width: '10%' }}></th>
@@ -233,8 +300,8 @@ const PromotionTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : promotions && promotions.length > 0 ? (
-                            promotions.map((promotion) => (
+                        ) : filteredPromotions && filteredPromotions.length > 0 ? (
+                            filteredPromotions.map((promotion) => (
                                 <tr key={promotion._id}>
                                     <td>{promotion._id}</td>
                                     <td>{promotion.value}</td>
@@ -245,11 +312,11 @@ const PromotionTab = () => {
                                     <td>{promotion.used}</td>
                                     <td>
                                         <button className="btn btn-sm btn-primary me-2"
-                                        onClick={() => handleEditPromotion(promotion)}>
+                                            onClick={() => handleEditPromotion(promotion)}>
                                             <i className="bi bi-pencil-square"></i>
                                         </button>
                                         <button className="btn btn-sm btn-danger"
-                                        onClick={() => handleDeletePromotion(promotion._id)}>
+                                            onClick={() => handleDeletePromotion(promotion._id)}>
                                             <i className="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -263,7 +330,6 @@ const PromotionTab = () => {
                             </tr>
                         )}
                     </tbody>
-
                 </table>
             </>
 

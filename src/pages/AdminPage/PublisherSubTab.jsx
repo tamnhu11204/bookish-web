@@ -179,8 +179,8 @@ const PublisherSubTab = () => {
                 <table className="table custom-table" style={{ marginTop: '30px' }}>
                     <thead className="table-light">
                         <tr>
-                            <th scope="col" style={{ width: '10%' }}>Mã</th>
-                            <th scope="col" style={{ width: '20%' }}>Hình ảnh</th>
+                            <th scope="col" style={{ width: '20%' }}>Mã</th>
+                            <th scope="col" style={{ width: '10%' }}>Hình ảnh</th>
                             <th scope="col" style={{ width: '20%' }}>Tên nhà xuất bản</th>
                             <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
                             <th scope="col" style={{ width: '10%' }}></th>

@@ -6,7 +6,7 @@ import FormComponent from '../../components/FormComponent/FormComponent';
 import FormSelectComponent from '../../components/FormSelectComponent/FormSelectComponent';
 import * as ListAddressService from '../../services/ListAddressService';
 import * as ShopProfileService from '../../services/ShopProfileService';
-import TextEditor from './partials/TextEditor';
+
 
 const ShopManagementTab = () => {
   const [email, setEmail] = useState('');
@@ -21,8 +21,7 @@ const ShopManagementTab = () => {
   const [selectedCommune, setSelectedCommune] = useState('');
   const [facebook, setFacebook] = useState('');
   const [insta, setInsta] = useState('');
-  const [policy, setPolicy] = useState('');
-  const [instruction, setInstruction] = useState('');
+
   const [bank, setBank] = useState('');
   const [momo, setMomo] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
@@ -116,8 +115,6 @@ const ShopManagementTab = () => {
         setSelectedCommune(data.commune || '');
         setFacebook(data.facebook || '');
         setInsta(data.insta || '');
-        setPolicy(data.policy || '');
-        setInstruction(data.instruction || '');
       } catch (error) {
         console.error('Error fetching shop details:', error);
       }
@@ -130,10 +127,10 @@ const ShopManagementTab = () => {
   const handleOnChangeName = (value) => setName(value);
   const handleOnChangeEmail = (value) => setEmail(value);
   const handleOnChangeSlogan = (value) => setSlogan(value);
-  const handleOnChangePolicy = (value) => setPolicy(value);
+
   const handleOnChangeFacebook = (value) => setFacebook(value);
   const handleOnChangeInsta = (value) => setInsta(value);
-  const handleOnChangeInstruction = (value) => setInstruction(value);
+
   const handleOnChangePhone = (value) => setPhone(value);
   const handleOnChangeDescription = (value) => setDescription(value);
   const handleOnChangeCommune = (e) => setSelectedCommune(e.target.value);
@@ -185,8 +182,6 @@ const ShopManagementTab = () => {
       commune: selectedCommune,
       facebook,
       insta,
-      policy,
-      instruction,
     };
 
     try {
@@ -407,16 +402,6 @@ const ShopManagementTab = () => {
           value={insta}
           onChange={handleOnChangeInsta}
         />
-      </div>
-
-      <h3 className="title-profile">Chính sách và hướng dẫn</h3>
-      <div className="card-profile" style={{ padding: "0 20px" }}>
-        <h3 className="title" style={{ marginTop: "10px" }}>Chính sách</h3>
-        <TextEditor value={policy} onChange={setPolicy} />
-        <div style={{ marginBottom: "10px", marginTop: "20px" }}>
-          <h3 className="title">Hướng dẫn</h3>
-          <TextEditor value={instruction} onChange={setInstruction} />
-        </div>
       </div>
 
       <div className="card-footer" style={{ marginTop: "20px" }}>
