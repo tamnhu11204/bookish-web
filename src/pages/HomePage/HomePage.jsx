@@ -55,6 +55,11 @@ const HomePage = () => {
   });
 
 
+  const handleCategoryClick = (category) => {
+    navigate('/catagory', { state: { selectedCategory: category._id } });
+  };
+
+
   useEffect(() => {
     const fetchNewBooks = async () => {
       try {
@@ -167,7 +172,8 @@ const HomePage = () => {
           categories.map((category) => (
             <MiniCardComponent key={category._id}
               img={category.img}
-              content={category.name} />
+              content={category.name} 
+              onClick={() => handleCategoryClick(category)} />
           ))
         ) : (
           <tr>
@@ -223,6 +229,11 @@ const HomePage = () => {
     queryFn: getAllPublisher,
   });
 
+  const handlePublisherClick = (publisher) => {
+    navigate('/catagory', { state: { selectedPublisher: publisher._id } });
+  };
+
+
   const publisherInfo = (
     <>
       <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
@@ -234,6 +245,7 @@ const HomePage = () => {
               key={publisher._id}
               img={publisher.img}
               content={publisher.name}
+              onClick={() => handlePublisherClick(publisher)} // Xử lý click
             />
           ))
         ) : (

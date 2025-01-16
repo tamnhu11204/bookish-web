@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import { useNavigate } from 'react-router-dom';
 import * as ProductService from '../../services/ProductService'
@@ -11,6 +11,38 @@ const NewBookPage = () => {
     const navigate = useNavigate();
     const [newBooks, setNewBooks] = useState([])
     const [sortOrder, setSortOrder] = useState('desc');
+     const [currentPage, setCurrentPage] = useState(1);
+          const productsPerPage = 20; // Số sản phẩm trên mỗi trang
+          const [totalPages, setTotalPages] = useState(1); // Khởi tạo giá trị totalPages
+    
+          const handlePageChange = (newPage) => {
+            setCurrentPage(newPage); // Cập nhật trang hiện tại
+          };
+    
+          const paginationButtons = (
+                        <div className="pagination">
+                        {currentPage > 1 && (
+                          <button onClick={() => handlePageChange(currentPage - 1)}>Trước</button>
+                        )}
+                        {[...Array(totalPages)].map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handlePageChange(index + 1)}
+                            className={currentPage === index + 1 ? "active" : ""}
+                          >
+                            {index + 1}
+                          </button>
+                        ))}
+                        {currentPage < totalPages && (
+                          <button onClick={() => handlePageChange(currentPage + 1)}>Tiếp theo</button>
+                        )}
+                      </div>
+                    );
+                    const paginatedProducts = useMemo(() => {
+                        const startIndex = (currentPage - 1) * productsPerPage;
+                        return newBooks.slice(startIndex, startIndex + productsPerPage);
+                      }, [currentPage, newBooks]);
+    
 
     useEffect(() => {
         const fetchNewBooks = async () => {
@@ -29,6 +61,10 @@ const NewBookPage = () => {
 
         fetchNewBooks();
     }, [sortOrder]);
+
+    useEffect(() => {
+        setTotalPages(Math.ceil(newBooks.length / productsPerPage));
+    }, [newBooks, productsPerPage]);
 
     const handleOnClickProduct = async (id) => {
         await ProductService.updateView(id)
@@ -49,7 +85,7 @@ const NewBookPage = () => {
                 </button>
             </div>
         </div><div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
-                {newBooks.map((product) => (
+                {paginatedProducts.map((product) => (
                     <CardProductComponent
                         key={product._id}
                         img={product.img[0]}
@@ -61,7 +97,10 @@ const NewBookPage = () => {
                         onClick={() => handleOnClickProduct(product._id)}
                         view={product.view} />
                 ))}
-            </div></>
+            </div>
+             {/* Hiển thị nút phân trang */}
+             {paginationButtons}
+            </>
     );
 
     return (

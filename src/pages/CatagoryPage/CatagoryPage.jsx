@@ -14,6 +14,7 @@ import * as PublisherService from '../../services/OptionService/PublisherService
 import * as ProductService from '../../services/ProductService'
 import * as CategoryService from '../../services/CategoryService'
 import * as FormatService from "../../services/OptionService/FormatService";
+import { useLocation } from 'react-router-dom';
 
 
 const CatagoryPage = () => {
@@ -68,6 +69,16 @@ const CatagoryPage = () => {
           }))
           : [];
 
+          const location = useLocation();
+          //const [selectedCategories, setSelectedCategories] = useState([]);
+        
+          // Nhận danh mục được chọn từ state
+          useEffect(() => {
+            if (location.state && location.state.selectedCategory) {
+              setSelectedCategories([location.state.selectedCategory]);
+            }
+          }, [location.state]);
+
            const getAllPublisher = async () => {
               const res = await PublisherService.getAllPublisher();
               return res.data;
@@ -86,6 +97,13 @@ const CatagoryPage = () => {
                 label: publisher.name,
               }))
               : [];
+
+              // Nhận nhà xuất bản được chọn từ state
+  useEffect(() => {
+    if (location.state && location.state.selectedPublisher) {
+      setSelectedPublishers([location.state.selectedPublisher]);
+    }
+  }, [location.state]);
 
         
          const getAllFormat = async () => {
