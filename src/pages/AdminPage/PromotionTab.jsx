@@ -349,6 +349,7 @@ const PromotionTab = () => {
                             value={value}
                             onChange={handleOnChangeValue}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -359,6 +360,7 @@ const PromotionTab = () => {
                             value={start}
                             onChange={handleOnChangeStart}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -369,6 +371,7 @@ const PromotionTab = () => {
                             value={finish}
                             onChange={handleOnChangeFinish}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -379,6 +382,7 @@ const PromotionTab = () => {
                             value={condition}
                             onChange={handleOnChangeCondition}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -389,6 +393,7 @@ const PromotionTab = () => {
                             value={quantity}
                             onChange={handleOnChangeQuantity}
                             required={true}
+                            enable = {true}
                         />
 
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
@@ -422,6 +427,7 @@ const PromotionTab = () => {
                             value={valueEdit}
                             onChange={handleOnChangeValueEdit}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -432,6 +438,7 @@ const PromotionTab = () => {
                             value={startEdit}
                             onChange={handleOnChangeStartEdit}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -442,6 +449,7 @@ const PromotionTab = () => {
                             value={finishEdit}
                             onChange={handleOnChangeFinishEdit}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -452,6 +460,7 @@ const PromotionTab = () => {
                             value={conditionEdit}
                             onChange={handleOnChangeConditionEdit}
                             required={true}
+                            enable = {true}
                         />
 
                         <FormComponent
@@ -462,6 +471,7 @@ const PromotionTab = () => {
                             value={quantityEdit}
                             onChange={handleOnChangeQuantityEdit}
                             required={true}
+                            enable = {true}
                         />
 
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>

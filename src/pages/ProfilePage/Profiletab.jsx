@@ -144,6 +144,7 @@ const ProfileTab = () => {
             placeholder="Nhập họ và tên"
             value={name}
             onChange={handleOnChangeName}
+            enable = {true}
           />
 
           {/* Email */}
@@ -154,6 +155,7 @@ const ProfileTab = () => {
             placeholder="Nhập email"
             value={email}
             onChange={handleOnChangeEmail}
+            enable = {true}
           />
 
           {/* Số điện thoại */}
@@ -164,6 +166,7 @@ const ProfileTab = () => {
             placeholder="Nhập số điện thoại"
             value={phone}
             onChange={handleOnChangePhone}
+            enable = {true}
           />
 
           {/* Giới tính */}
@@ -220,6 +223,7 @@ const ProfileTab = () => {
             placeholder="Chọn ngày sinh"
             value={birthday}
             onChange={handleOnChangeBirthday}
+            enable = {true}
           />
 
           {data?.status === 'ERR' &&

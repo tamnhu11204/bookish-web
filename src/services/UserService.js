@@ -60,18 +60,13 @@ export const resetPassword = async (id, data, access_token) => {
     }
 };
 
-export const getAllUserByAdmin = async (isAdmin, access_token) => {
+export const getAllUserByAdmin = async (isAdmin) => {
   try {
       const isAdminString = isAdmin ? 'true' : 'false';
       //console.log('adsasf', isAdminString)
 
       const res = await axiosJWT.get(
-          `${process.env.REACT_APP_API_URL_BACKEND}/user/get-all?isAdmin=${isAdminString}`, 
-          {
-              headers: {
-                  token: `Bearer ${access_token}`,
-              }
-          }
+          `${process.env.REACT_APP_API_URL_BACKEND}/user/get-all?isAdmin=${isAdminString}`
       );
 
       return res.data;

@@ -17,6 +17,8 @@ import PromoCodeSelectionPage from "../pages/PromoSelectionPage/PromoSelectionPa
 import ShoppingCartPage from "../pages/ShoppingCartPage/ShoppingCartPage";
 import SignUpPage from "../pages/SignUpPage/SignUpPage";
 import SearchPage from "../pages/SearchPage/SearchPage";
+import InstructionPage from "../pages/InstructionPage/InstructionPage";
+import PolicyPage from "../pages/PolicyPage/PolicyPage";
 
 export const routes =[
     {
@@ -52,7 +54,7 @@ export const routes =[
     },
 
     {
-        path: '/catagory',
+        path: '/category',
         page: CatagoryPage,
         isShowHeader: true
     },
@@ -119,7 +121,16 @@ export const routes =[
         isShowHeader: true
     },
 
-
+    {
+        path: '/instruction',
+        page: InstructionPage,
+        isShowHeader: true
+    },
+    {
+        path: '/policy',
+        page: PolicyPage,
+        isShowHeader: true
+    },
 
     //////////////////////admin//////////////////////
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ImportModal.css';
 import * as ProductService from '../../services/ProductService';
+import ButtonComponent from '../ButtonComponent/ButtonComponent';
 
 const ImportModal = ({ isOpen, onClose, onSubmit }) => {
   const [products, setProducts] = useState([]);
@@ -78,10 +79,10 @@ const ImportModal = ({ isOpen, onClose, onSubmit }) => {
           <h5 className="modal-title">Nhập Sản Phẩm</h5>
           <button className="btn-close" onClick={onClose}></button>
         </div>
-        <div className="modal-body">
+        <div className="modal-body" style={{fontSize:'16px'}}>
           <div className="mb-3">
             <label className="form-label">Tên Sản Phẩm</label>
-            <input
+            <input style={{fontSize:'16px'}}
               type="text"
               className="form-control"
               value={productName}
@@ -117,7 +118,7 @@ const ImportModal = ({ isOpen, onClose, onSubmit }) => {
                   >
                     -
                   </button>
-                  <input
+                  <input 
                     type="number"
                     className="form-control"
                     value={product.quantity}
@@ -132,7 +133,7 @@ const ImportModal = ({ isOpen, onClose, onSubmit }) => {
                     }
                     min="1"
                     max={product.stock}
-                    style={{ width: '60px', textAlign: 'center' }}
+                    style={{ width: '60px', textAlign: 'center', fontSize:'16px' }}
                   />
                   <button
                     className="btn btn-secondary ms-2"
@@ -147,13 +148,10 @@ const ImportModal = ({ isOpen, onClose, onSubmit }) => {
             ))}
           </div>
 
-          <button
-            type="button"
-            className="btn btn-primary"
+          <ButtonComponent
+          textButton="Nhập hàng"
             onClick={handleAddProduct}
-          >
-            Thêm Sản Phẩm
-          </button>
+          />
         </div>
       </div>
     </div>

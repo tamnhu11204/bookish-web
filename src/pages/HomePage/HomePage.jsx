@@ -56,7 +56,7 @@ const HomePage = () => {
 
 
   const handleCategoryClick = (category) => {
-    navigate('/catagory', { state: { selectedCategory: category._id } });
+    navigate('/category', { state: { selectedCategory: category._id } });
   };
 
 
@@ -230,7 +230,7 @@ const HomePage = () => {
   });
 
   const handlePublisherClick = (publisher) => {
-    navigate('/catagory', { state: { selectedPublisher: publisher._id } });
+    navigate('/category', { state: { selectedPublisher: publisher._id } });
   };
 
 
@@ -310,7 +310,7 @@ const HomePage = () => {
         </div>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
       </div>
-      <div style={{ backgroundColor: '#F9F6F2' }}>
+      {/* <div style={{ backgroundColor: '#F9F6F2' }}>
         <div className="container" style={{ marginTop: '50px' }}>
           <CardComponent
             title="Tất cả sách"
@@ -318,7 +318,7 @@ const HomePage = () => {
             icon="bi bi-graph-up-arrow"
           />
         </div>
-      </div>
+      </div> */}
 
       {/* <div style={{ backgroundColor: '#F9F6F2' }}>
         <div className="container" style={{ marginTop: '50px'}}>

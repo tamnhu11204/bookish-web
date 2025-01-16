@@ -48,12 +48,14 @@ const ImportTab = () => {
                     label="Tên danh mục"
                     type="text"
                     placeholder="Nhập tên danh mục"
+                    enable = {true}
                 />
                 <FormComponent
                     id="descCatagoryInput"
                     label="Mô tả"
                     type="text"
                     placeholder="Nhập mô tả"
+                    enable = {true}
                 />
             </>
         );
@@ -81,12 +83,14 @@ const ImportTab = () => {
                     label="Tên danh mục"
                     type="text"
                     defaultValue={category.name}
+                    enable = {true}
                 />
                 <FormComponent
                     id="descCatagoryInput"
                     label="Mô tả"
                     type="text"
                     defaultValue={category.description}
+                    enable = {true}
                 />
             </>
         );

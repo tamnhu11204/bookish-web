@@ -86,6 +86,7 @@ const PasswordTab = () => {
                         type="password"
                         value={oldPassword}
                         onChange={handleOnChangeOld}
+                        enable = {true}
                     />
                     <FormComponent
                         id="newPassword"
@@ -94,6 +95,7 @@ const PasswordTab = () => {
                         type="password"
                         value={newPassword}
                         onChange={handleOnChangeNew}
+                        enable = {true}
                     />
                     <FormComponent
                         id="confirmPassword"
@@ -102,6 +104,7 @@ const PasswordTab = () => {
                         type="password"
                         value={confirmPassword}
                         onChange={handleOnChangeConfirm}
+                        enable = {true}
                     />
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
                         {errorMessage && (

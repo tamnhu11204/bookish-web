@@ -258,6 +258,7 @@ const CatagoryTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
+                            enable = {true}
                         />
                         <FormComponent
                             id="noteCategoryInput"
@@ -266,6 +267,7 @@ const CatagoryTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
+                            enable = {true}
                         />
                         <div className="mb-3">
                             <label htmlFor="image" className="form-label">Hình ảnh</label>

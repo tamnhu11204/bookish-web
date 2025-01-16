@@ -12,7 +12,7 @@ const SliderComponent = ({ arrImages }) => {
         autoplaySpeed: 1000,
     };
     return (
-        <Slider {...settings} style={{ marginTop: '20px' }}>
+        <Slider {...settings}>
             {arrImages.map((img)=>{
                 return(
                     <img src={img} alt="slider" preview={false} width="100%" height="200px"/>

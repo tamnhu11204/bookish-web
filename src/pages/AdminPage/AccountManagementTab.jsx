@@ -117,18 +117,17 @@ const AccountManagementTab = () => {
         const fetchUsers = async () => {
             try {
                 setIsLoadingAccountUser(true); 
-                const res = await UserService.getAllUserByAdmin(isAdminFalse, getUser?.access_token);
+                const res = await UserService.getAllUserByAdmin(isAdminFalse);
                 setAllUsers(res.data); 
+                console.log('nbb', res.data)
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu:", error); 
             } finally {
                 setIsLoadingAccountUser(false); 
             }
         };
-
-        if (getUser?.access_token) {
             fetchUsers(); 
-        }
+
     }, [isAdminFalse, getUser?.access_token]);
 
     //////////////--------Hien thi danh sach admin-------//////////
@@ -141,7 +140,7 @@ const AccountManagementTab = () => {
         const fetchAdmin = async () => {
             try {
                 setIsLoadingAccountAdmin(true);
-                const res = await UserService.getAllUserByAdmin(isAdminTrue, getUser?.access_token);
+                const res = await UserService.getAllUserByAdmin(isAdminTrue);
                 setAllAdmin(res.data); 
             } catch (error) {
                 console.error("Lỗi khi lấy dữ liệu:", error); 
@@ -150,9 +149,7 @@ const AccountManagementTab = () => {
             }
         };
 
-        if (getUser?.access_token) {
             fetchAdmin(); 
-        }
     }, [isAdminTrue, getUser?.access_token]);
 
     //////////////--------Them admin----------////////////////
@@ -269,6 +266,7 @@ const AccountManagementTab = () => {
                     placeholder={`Nhập ${searchType}...`}
                     value={searchTerm}
                     onChange={handleInputChange}
+                    enable={true}
                 />
 
                 {/* Popover filter */}
@@ -373,6 +371,7 @@ const AccountManagementTab = () => {
                     placeholder={`Nhập ${searchTypeAdmin}...`}
                     value={searchTermAdmin}
                     onChange={handleInputChangeAdmin}
+                    enable={true}
                 />
 
                 {/* Popover filter */}
@@ -517,6 +516,7 @@ const AccountManagementTab = () => {
                             value={email}
                             onChange={handleOnChangeEmail}
                             required={true}
+                            enable={true}
                         />
 
                         <FormComponent
@@ -527,6 +527,7 @@ const AccountManagementTab = () => {
                             value={password}
                             onChange={handleOnChangePassword}
                             required={true}
+                            enable={true}
                         />
 
                         <FormComponent
@@ -537,6 +538,7 @@ const AccountManagementTab = () => {
                             value={confirmPassword}
                             onChange={handleOnChangeConfirmPassword}
                             required={true}
+                            enable={true}
                         />
 
                         <FormComponent
@@ -547,6 +549,7 @@ const AccountManagementTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
+                            enable={true}
                         />
 
                         <FormComponent
@@ -557,6 +560,7 @@ const AccountManagementTab = () => {
                             value={phone}
                             onChange={handleOnChangePhone}
                             required={true}
+                            enable={true}
                         />
 
                         <FormComponent
@@ -567,6 +571,7 @@ const AccountManagementTab = () => {
                             value={birthday}
                             onChange={handleOnChangeBirth}
                             required={true}
+                            enable={true}
                         />
 
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>

@@ -45,21 +45,6 @@ const DiscountPage = () => {
               queryKey: ['promotions'],
               queryFn: getAllPromotion,
           });
-
-      const timeDiscounts = [
-        {
-          title: "Giảm 20k phí vận chuyển",
-          description: "Đơn hàng từ 200k, nhận ngay",
-          code: "ABC1234560R",
-          time: "27/02/2024 10:00",
-        },
-        {
-          title: "Giảm 20k phí vận chuyển",
-          description: "Đơn hàng từ 200k, số lượng có hạn",
-          code: "DEF1234567X",
-          time: "27/02/2024 21:00",
-        },
-      ];
     
       // Lọc và sắp xếp các ưu đãi
   const validPromotions = promotions
@@ -76,14 +61,10 @@ const DiscountPage = () => {
     return (
         <div className="container my-5" style={formStyle}>
       <header className="text-center mb-5">
-        <h1 className="text-success fw-bold" style={formStyle}>Bookish</h1>
+        <h1 className="text-success fw-bold" style={{fontSize:'30px'}}>Bookish</h1>
         <h3>Ưu Đãi Tháng 1</h3>
         <div className="d-flex justify-content-center gap-3 my-3">
-          <button className="btn btn-outline-success" style={formStyle}>Giảm Giá Sốc</button>
-          <button className="btn btn-outline-success" style={formStyle}>Mã Freeship</button>
-          <button className="btn btn-outline-success" style={formStyle}>Quà Tặng</button>
         </div>
-        <button className="btn btn-success" style={formStyle}>Khám Phá Ngay</button>
       </header>
 
       <section className="mb-5">

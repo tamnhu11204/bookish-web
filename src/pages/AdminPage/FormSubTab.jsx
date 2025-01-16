@@ -220,6 +220,7 @@ const FormSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
+                            enable = {true}
                         />
                         <FormComponent
                             id="noteUnitInput"
@@ -228,6 +229,7 @@ const FormSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
+                            enable = {true}
                         />
                         {/* Hiển thị lỗi nếu có */}
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>

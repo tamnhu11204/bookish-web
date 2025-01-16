@@ -224,6 +224,7 @@ const UnitSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
+                            enable = {true}
                         />
                         <FormComponent
                             id="noteUnitInput"
@@ -232,6 +233,7 @@ const UnitSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
+                            enable = {true}
                         />
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {errorMessage && (
@@ -263,6 +265,7 @@ const UnitSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
+                            enable = {true}
                         />
                         <FormComponent
                             id="noteUnitInputEdit"
@@ -271,6 +274,7 @@ const UnitSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
+                            enable = {true}
                         />
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {editData?.status === 'ERR' &&

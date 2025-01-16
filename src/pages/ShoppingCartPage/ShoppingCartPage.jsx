@@ -13,6 +13,7 @@ export const ShoppingCartPage = () => {
   const dispatch = useDispatch();
   const [listChecked, setListChecked] = useState([]);
   const navigate=useNavigate()
+  const user = useSelector((state) => state.user);
 
 
   useEffect(() => {
@@ -91,13 +92,18 @@ export const ShoppingCartPage = () => {
     return result;
   }, [order]);
 
-  const handleOrder=()=>{
-    if(!order?.orderItemSelected?.length){
-      alert('Vui lòng chọn sản phẩm')
-    } else{
-    navigate('/order')
-    }
+const handleOrder = () => {
+  if (!user?.active) {
+    alert('Bạn bị admin chặn mua hàng! Hãy liên hệ với shop để biết thêm thông tin.');
+  } else if (!order?.orderItemSelected?.length) {
+    // Kiểm tra nếu user.active là false hoặc không có, hiển thị thông báo lỗi
+    alert('Vui lòng chọn sản phẩm');
+  } else {
+    // Nếu user.active là true và có sản phẩm được chọn, điều hướng đến trang đặt hàng
+    navigate('/order');
   }
+};
+
   
 
   return (

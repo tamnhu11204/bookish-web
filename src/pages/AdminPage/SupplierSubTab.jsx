@@ -180,6 +180,7 @@ const SupplierSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên nhà cung cấp"
+                            enable = {true}
                         />
                     </div>
                     <div className="col-6 text-end">
@@ -260,6 +261,7 @@ const SupplierSubTab = () => {
                             placeholder="Nhập tên nhà cung cấp"
                             value={name}
                             onChange={setName}
+                            enable = {true}
                         />
                         <FormComponent
                             id="noteSupplierInput"
@@ -268,6 +270,7 @@ const SupplierSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={setNote}
+                            enable = {true}
                         />
                         <div className="mb-3">
                             <label htmlFor="image" className="form-label">Hình ảnh</label>
@@ -306,6 +309,7 @@ const SupplierSubTab = () => {
                             placeholder={rowSelected.name}
                             value={name}
                             onChange={setName}
+                            enable = {true}
                         />
                         <FormComponent
                             id="noteSupplierInput"
@@ -314,6 +318,7 @@ const SupplierSubTab = () => {
                             placeholder={rowSelected.note}
                             value={note}
                             onChange={setNote}
+                            enable = {true}
                         />
                         <div className="mb-3">
                             <label htmlFor="image" className="form-label">Hình ảnh</label>

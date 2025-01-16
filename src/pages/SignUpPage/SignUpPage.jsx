@@ -92,6 +92,7 @@ const SignUpPage = () => {
                         value={email}
                         onChange={handleOnChangeEmail}
                         required={true}
+                        enable = {true}
                     />
 
                     <FormComponent
@@ -102,6 +103,7 @@ const SignUpPage = () => {
                         value={password}
                         onChange={handleOnChangePassword}
                         required={true}
+                        enable = {true}
                     />
 
                     <FormComponent
@@ -112,6 +114,7 @@ const SignUpPage = () => {
                         value={confirmPassword}
                         onChange={handleOnChangeConfirmPassword}
                         required={true}
+                        enable = {true}
                     />
 
                     <FormComponent
@@ -122,6 +125,7 @@ const SignUpPage = () => {
                         value={name}
                         onChange={handleOnChangeName}
                         required={true}
+                        enable = {true}
                     />
 
                     <FormComponent
@@ -132,6 +136,7 @@ const SignUpPage = () => {
                         value={phone}
                         onChange={handleOnChangePhone}
                         required={true}
+                        enable = {true}
                     />
 
                     <FormComponent
@@ -142,6 +147,7 @@ const SignUpPage = () => {
                         value={birthday}
                         onChange={handleOnChangeBirth}
                         required={true}
+                        enable = {true}
                     />
 
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>

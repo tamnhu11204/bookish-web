@@ -115,6 +115,8 @@ const ShopManagementTab = () => {
         setSelectedCommune(data.commune || '');
         setFacebook(data.facebook || '');
         setInsta(data.insta || '');
+        setBank(data.bank||'')
+        setMomo(data.momo||'')
       } catch (error) {
         console.error('Error fetching shop details:', error);
       }
@@ -226,7 +228,7 @@ const ShopManagementTab = () => {
       bank,
       momo,
       deliveryFee
-      
+
     };
 
     try {
@@ -307,6 +309,7 @@ const ShopManagementTab = () => {
           value={name}
           onChange={handleOnChangeName}
           required={true}
+          enable={true}
         />
 
         <FormComponent
@@ -317,6 +320,7 @@ const ShopManagementTab = () => {
           value={slogan}
           onChange={handleOnChangeSlogan}
           required={true}
+          enable={true}
         />
 
         <FormComponent
@@ -327,6 +331,7 @@ const ShopManagementTab = () => {
           value={email}
           onChange={handleOnChangeEmail}
           required={true}
+          enable={true}
         />
 
         <FormComponent
@@ -337,6 +342,7 @@ const ShopManagementTab = () => {
           value={phone}
           onChange={handleOnChangePhone}
           required={true}
+          enable={true}
         />
 
         <FormComponent
@@ -346,6 +352,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập giới thiệu cửa hàng"
           value={description}
           onChange={handleOnChangeDescription}
+          enable={true}
         />
 
         <FormSelectComponent
@@ -371,6 +378,7 @@ const ShopManagementTab = () => {
           selectedValue={selectedCommune}
           onChange={handleOnChangeCommune}
           required={true}
+
         />
         <FormComponent
           id="specificAddressInput"
@@ -379,6 +387,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập địa chỉ cụ thể"
           value={specificAddress}
           onChange={handleOnChangeSpecificAddress}
+          enable={true}
         />
       </div>
 
@@ -392,6 +401,7 @@ const ShopManagementTab = () => {
           value={facebook}
           onChange={handleOnChangeFacebook}
           required={true}
+          enable={true}
         />
 
         <FormComponent
@@ -401,6 +411,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập link Instagram"
           value={insta}
           onChange={handleOnChangeInsta}
+          enable={true}
         />
       </div>
 
@@ -436,6 +447,7 @@ const ShopManagementTab = () => {
               accept="image/*"
               style={{ display: 'none' }}
               onChange={handleBankQRCodeUpload}
+              enable={true}
             />
           </div>
         </div>
@@ -477,6 +489,7 @@ const ShopManagementTab = () => {
           placeholder="Nhập phí vận chuyển"
           value={deliveryFee}
           onChange={handleOnChangeDeliveryFee}
+          enable={true}
         />
       </div>
 

@@ -2,7 +2,7 @@
     background-color: #ffffff; /* Màu đỏ */
     border: none;
     border-radius: 10px; /* Góc bo tròn */
-    padding: 10px 20px;
+    padding: 5px 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -10,7 +10,7 @@
   }
   
   .search-button i {
-    font-size: 20px; /* Kích thước icon */
+    font-size: 16px; /* Kích thước icon */
     color: #198754; /* Màu của icon */
   }
   

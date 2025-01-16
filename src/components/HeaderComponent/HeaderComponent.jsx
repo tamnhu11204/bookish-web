@@ -63,7 +63,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                 style={{ width: '500px', height: '35px', fontSize: '14px' }}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button className="search-button" onClick={handleSearch}>
+              <button className="search-button" onClick={handleSearch} style={{ marginLeft:'-100px'}}>
                 <i className="bi bi-search"></i> {/* Đảm bảo class là "fas" */}
               </button>
             </>
@@ -189,7 +189,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
           </ul>
           <ul className="nav nav-underline">
             <li className="nav-item">
-              <a className="nav-link" href="/catagory" style={Styles.textHeader}>
+              <a className="nav-link" href="/category" style={Styles.textHeader}>
                 <i className="bi bi-ui-checks-grid" style={Styles.iconHeader2}></i>
                 Danh mục
               </a>

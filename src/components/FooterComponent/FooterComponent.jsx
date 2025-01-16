@@ -63,7 +63,7 @@ function FooterComponent() {
                         <p style={{fontSize:'20px'}}>{shop.slogan}</p>
                         <p>{shop.description}</p>
                         <p>
-                            Kho hàng: {shop.specifyAddress}, {addressDetails.communeName}, 
+                            Kho hàng: {shop.specificAddress}, {addressDetails.communeName}, 
                             {addressDetails.districtName}, {addressDetails.provinceName}
                         </p>
                     </div>
@@ -74,10 +74,10 @@ function FooterComponent() {
                             <a href={`mailto:${shop.email}`} className="text-white">Email: {shop.email}</a>
                         </p>
                         <p>
-                            <a href="#" className="text-white">Chính sách hỗ trợ</a>
+                            <a href="/policy" className="text-white">Chính sách hỗ trợ hoàn đơn</a>
                         </p>
                         <p>
-                            <a href="#" className="text-white">Hướng dẫn đặt hàng</a>
+                            <a href="/instruction" className="text-white">Hướng dẫn đặt hàng</a>
                         </p>
                     </div>
                     <div className="col-md-4">

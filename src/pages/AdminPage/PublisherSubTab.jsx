@@ -262,6 +262,7 @@ const PublisherSubTab = () => {
                             placeholder="Nhập tên nhà xuất bản"
                             value={name}
                             onChange={setName}
+                            enable = {true}
                         />
                         <FormComponent
                             id="notePublisherInput"
@@ -270,6 +271,7 @@ const PublisherSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={setNote}
+                            enable = {true}
                         />
                         <div className="mb-3">
                             <label htmlFor="image" className="form-label">Hình ảnh</label>
@@ -308,6 +310,7 @@ const PublisherSubTab = () => {
                             placeholder={rowSelected.name}
                             value={name}
                             onChange={setName}
+                            enable = {true}
                         />
                         <FormComponent
                             id="notePublisherInput"
@@ -316,6 +319,7 @@ const PublisherSubTab = () => {
                             placeholder={rowSelected.note}
                             value={note}
                             onChange={setNote}
+                            enable = {true}
                         />
                         <div className="mb-3">
                             <label htmlFor="image" className="form-label">Hình ảnh</label>

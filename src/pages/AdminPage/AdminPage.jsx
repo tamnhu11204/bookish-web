@@ -11,6 +11,7 @@ import OrderTab from './OrderTab';
 import ProductTab from './ProductTab';
 import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import ShopManagementTab from './ShopManagementTab';
+import StaticPageManagement from './StaticPageManagement';
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("shopManagement");
@@ -109,6 +110,16 @@ const AdminPage = () => {
                             <div className="col"><p className="nav-title">Tùy chọn</p></div>
                         </div>
                     </button>
+
+                    <button
+                        className={`nav-link ${activeTab === "staticPage" ? "active" : ""}`}
+                        onClick={() => setActiveTab("staticPage")}
+                    >
+                        <div className="row">
+                            <div className="col-1"><i class="bi-nav bi-gear"></i></div>
+                            <div className="col"><p className="nav-title">Trang hỗ trợ khách hàng</p></div>
+                        </div>
+                    </button>
                 </div>
 
                 <div className="tab-content" style={{ flexGrow: 1 }}>
@@ -122,6 +133,7 @@ const AdminPage = () => {
                         {activeTab === "orderManagement" && <OrderTab />}
                         {activeTab === "productManagement" && <ProductTab />}
                         {activeTab === "shopManagement" && <ShopManagementTab />}
+                        {activeTab === "staticPage" && <StaticPageManagement />}
                     </div>
                 </div>
             </div></>

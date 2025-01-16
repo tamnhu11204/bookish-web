@@ -210,6 +210,7 @@ const AccountTab = () => {
                         placeholder="Nhập họ và tên"
                         value={name}
                         onChange={handleOnChangeName}
+                        enable={true}
                     />
 
                     <FormComponent
@@ -219,6 +220,7 @@ const AccountTab = () => {
                         placeholder="Nhập email"
                         value={email}
                         onChange={handleOnChangeEmail}
+                        enable={true}
                     />
 
                     <FormComponent
@@ -228,6 +230,7 @@ const AccountTab = () => {
                         placeholder="Nhập số điện thoại"
                         value={phone}
                         onChange={handleOnChangePhone}
+                        enable={true}
                     />
 
                     <div className="mb-3">
@@ -282,6 +285,7 @@ const AccountTab = () => {
                         placeholder="Chọn ngày sinh"
                         value={birthday}
                         onChange={handleOnChangeBirthday}
+                        enable={true}
                     />
 
                     {data?.status === 'ERR' && <span style={{ color: 'red', fontSize: '16px' }}>{data?.message}</span>}
@@ -304,6 +308,7 @@ const AccountTab = () => {
                         placeholder="Nhập mật khẩu cũ"
                         value={oldPassword}
                         onChange={handleOnChangeOld}
+                        enable={true}
                     />
 
                     <FormComponent
@@ -313,6 +318,7 @@ const AccountTab = () => {
                         placeholder="Nhập mật khẩu mới"
                         value={newPassword}
                         onChange={handleOnChangeNew}
+                        enable={true}
                     />
 
                     <FormComponent
@@ -322,6 +328,7 @@ const AccountTab = () => {
                         placeholder="Nhập lại mật khẩu mới"
                         value={confirmPassword}
                         onChange={handleOnChangeConfirm}
+                        enable={true}
                     />
 
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
