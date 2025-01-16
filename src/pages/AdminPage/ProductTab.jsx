@@ -128,7 +128,8 @@ useEffect(() => {
             };
 
             //Xử lý danh mục
-            const [selectedCategory, setSelectedCategory] = useState("");
+            const [selectedCategory, setSelectedCategory] = useState("Tất cả danh mục");
+
             
             const handleOnChangeCategory = (e) => {
               setSelectedCategory(e.target.value);
