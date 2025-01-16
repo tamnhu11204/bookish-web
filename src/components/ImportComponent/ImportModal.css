@@ -1,0 +1,59 @@
+.import-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+  }
+  
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .modal-body {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .list-group-item {
+    cursor: pointer;
+  }
+  
+  .list-group-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .selected-products {
+    margin-top: 20px;
+  }
+  
+  .selected-products h6 {
+    font-size: 1.1em;
+    font-weight: bold;
+  }
+  
+  .selected-products .d-flex {
+    margin-bottom: 15px;
+  }
+  
+  .selected-products .form-control {
+    width: 60px;
+    text-align: center;
+  }
+  

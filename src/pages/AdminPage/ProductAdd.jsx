@@ -48,6 +48,9 @@ const AddProductForm = ({isOpen,onCancel}) => {
   const [price, setPrice] = useState(0);
   const [img, setImage] = useState([]); // Đổi img thành mảng
   const [description, setDescription] = useState('');
+  const [discount,setDiscount] = useState(0);
+  const [  priceEntry, setPriceEntry] = useState(0);
+  const handleOnChangePriceEntry = (value) => setPriceEntry(value);
 
   const handleOnChangeName = (value) => setName(value);
   const handleOnChangeDate = (value) => setDate(value);
@@ -58,9 +61,10 @@ const AddProductForm = ({isOpen,onCancel}) => {
   const handleOnChangeWidth = (value) => setWidth(value);
   const handleOnChangeLength = (value) => setLength(value);
   const handleOnChangeDescription = (value) => setDescription(value);
-  const handleOnChangePrice = (value) => {
-    setPrice(value);
-  };
+  const handleOnChangePrice = (value) => {setPrice(value);
+    const calculatedPriceEntry = (value * (100-discount)) / 100;
+    setPriceEntry(calculatedPriceEntry)
+   };
 
   const mutation = useMutationHook(data => ProductService.addProduct(data));
   const { data, isSuccess, isError } = mutation;
@@ -306,7 +310,9 @@ const AddProductForm = ({isOpen,onCancel}) => {
     }))
     : [];
 
-
+    const handleOnChangeDiscount = (value) => { setDiscount(value);
+      const calculatedPriceEntry = (price * (100-value)) / 100;
+      setPriceEntry(calculatedPriceEntry)};
 
 
 
@@ -552,6 +558,32 @@ const AddProductForm = ({isOpen,onCancel}) => {
             onChange={handleOnChangePrice}
             required={true}
             enable={true}
+          />
+        </div>
+        <div className="col-md-4 mb-3">
+          <label className="form-label"></label>
+          <FormComponent
+                  id="discount"
+                  label="Giảm giá"
+                  type="number"
+                  placeholder="Nhập giảm giá"
+                  value={discount}
+                  onChange={handleOnChangeDiscount}
+                  required={true}
+                  enable = {true}
+          />
+        </div>
+        <div className="col-md-4 mb-3">
+          <label className="form-label"></label>
+          <FormComponent
+                  id="PriceEntry"
+                  label="Giá sau giảm"
+                  type="number"
+                  placeholder=""
+                  value={priceEntry}
+                  onChange={handleOnChangePriceEntry}
+                  required={true}
+                  enable = {false}
           />
         </div>
       </div>
