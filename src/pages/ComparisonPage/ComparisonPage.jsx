@@ -174,7 +174,13 @@ const ComparisonPage = () => {
         { criteria: 'Năm xuất bản', product1: selectedProducts[0]?.publishDate || '-', product2: selectedProducts[1]?.publishDate || '-', product3: selectedProducts[2]?.publishDate || '-' },
         { criteria: 'Ngôn ngữ', product1: productDetails1.language?.name  || '-', product2: productDetails2.language?.name  || '-', product3: productDetails3.language?.name  || '-' },
         { criteria: 'Trọng lượng', product1: selectedProducts[0]?.weight || '-', product2: selectedProducts[1]?.weight || '-', product3: selectedProducts[2]?.weight || '-' },
-        { criteria: 'Kích thước', product1: `${selectedProducts[0]?.length}x${selectedProducts[0]?.width}x${selectedProducts[0]?.height}` || '-', product2: `${selectedProducts[1]?.length}x${selectedProducts[1]?.width}x${selectedProducts[1]?.height}` || '-', product3:`${selectedProducts[2]?.length}x${selectedProducts[2]?.width}x${selectedProducts[2]?.height}` || '-' },
+        {
+          criteria: 'Kích thước',
+          product1: `${selectedProducts[0]?.length || '-'}x${selectedProducts[0]?.width || '-'}x${selectedProducts[0]?.height || '-'}`,
+          product2: `${selectedProducts[1]?.length || '-'}x${selectedProducts[1]?.width || '-'}x${selectedProducts[1]?.height || '-'}`,
+          product3: `${selectedProducts[2]?.length || '-'}x${selectedProducts[2]?.width || '-'}x${selectedProducts[2]?.height || '-'}`,
+        },
+        
         { criteria: 'Số trang', product1: selectedProducts[0]?.page || '-', product2: selectedProducts[1]?.page || '-', product3: selectedProducts[2]?.page || '-' },
         { criteria: 'Hình thức', product1: productDetails1.format?.name || '-', product2: productDetails2.format?.name || '-', product3: productDetails3.format?.name || '-' },
       ];
