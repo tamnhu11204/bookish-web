@@ -11,6 +11,8 @@ import LoadingComponent from '../../components/LoadingComponent/LoadingComponent
 import ImportModal from '../../components/ImportComponent/ImportComponent';
 import * as message from "../../components/MessageComponent/MessageComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
+import * as CategoryService from '../../services/CategoryService';
+import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
 
 
 const ProductTab = () => {
@@ -26,7 +28,26 @@ const ProductTab = () => {
     const [onCancel, setOnCancel] = useState(() => () => {});
     const [Type,setType] = useState(false);
 
+     const [searchTerm, setSearchTerm] = useState(''); 
+    const [filteredProducts, setFilteredProducts] = useState([]); 
+
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [categories, setCategories] = useState([]);
+
+const fetchCategories = async () => {
+    try {
+        const response = await CategoryService.getAllCategory();
+        setCategories(response.data);
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+    }
+};
+
+useEffect(() => {
+    fetchCategories();
+}, []);
+
 
   const handleOpenModal = () => setIsModalOpen(true);
   //const handleCloseModal = () => setIsModalOpen(false);
@@ -101,6 +122,50 @@ const ProductTab = () => {
                 deleteMutation.mutate(product.id);
             }
         };
+
+        const handleOnChange = (value) => {
+                setSearchTerm(value);
+            };
+
+            //Xử lý danh mục
+            const [selectedCategory, setSelectedCategory] = useState("");
+            
+            const handleOnChangeCategory = (e) => {
+              setSelectedCategory(e.target.value);
+            };
+          
+            
+          
+            const AllCategory = [
+              { value: "Tất cả danh mục", label: "Tất cả danh mục" }, // Thêm lựa chọn này
+              ...(Array.isArray(categories)
+                  ? categories.map((categorie) => ({
+                      value: categorie._id,
+                      label: categorie.name,
+                  }))
+                  : [])
+          ];
+        
+            useEffect(() => {
+                if (products) {
+                    const filtered = products.filter((product) => {
+                        // Lọc theo tên sản phẩm
+                        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+            
+                        // Lọc theo danh mục
+                        const matchesCategory =
+                            selectedCategory === "Tất cả danh mục" || product.category === selectedCategory;
+            
+                        return matchesSearch && matchesCategory;
+                    });
+            
+                    setFilteredProducts(filtered);
+                }
+            }, [searchTerm, selectedCategory, products]);
+            
+
+            
+            
     
 
      if (showModal === false)return (
@@ -116,11 +181,20 @@ const ProductTab = () => {
                         <FormComponent
                             id="searchInput"
                             type="text"
-                            placeholder="Tìm kiếm theo thời gian đơn hàng"
+                            placeholder="Tìm kiếm theo tên sản phẩm"
+                            enable = {true}
+                            onChange={handleOnChange}
                         />
                     </div>
+                    <div className="col-3">
+                    <FormSelectComponent
+            options={AllCategory}
+            selectedValue={selectedCategory}
+            onChange={handleOnChangeCategory}
+            required={false}
+          /></div>
 
-                    <div className="col-6 text-end">
+                    <div className="col text-end">
                         <ButtonComponent
                             textButton="Nhập hàng "
                             icon={<i className="bi bi-plus-circle"></i>}
@@ -138,9 +212,6 @@ const ProductTab = () => {
                        
                     </div>
 
-                    
-
-                    
                 </div>
 
                 <table className="table custom-table" style={{marginTop:'30px'}}>
@@ -165,8 +236,11 @@ const ProductTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : products && products.length > 0 ? (
-                        products.map((product) => (
+                        ) : filteredProducts && filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => {
+                            // Tìm danh mục dựa trên ID
+                    const category = categories.find(cat => cat._id === product.category);
+                    return(
                             <tr key={product.id}>
                                 <td>{product._id}</td>
                             <td>
@@ -179,7 +253,7 @@ const ProductTab = () => {
                             <td>{product.name}</td>
                             <td>{product.price}</td>
                             <td>{product.discount}</td>
-                            <td>{product.category}</td>
+                            <td>{category ? category.name : "Không xác định"}</td>
                             <td>{product.stock}</td>
                             <td>{product.sold}</td>
                             <td>
@@ -202,7 +276,7 @@ const ProductTab = () => {
                                 
                             </td>
                             </tr>
-                        ))): (
+)})): (
                             <tr>
                                 <td colSpan="4" className="text-center">
                                     Không có dữ liệu để hiển thị.

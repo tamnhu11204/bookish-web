@@ -265,6 +265,7 @@ const PromotionTab = () => {
                         placeholder={`Nhập ${searchType}...`}
                         value={searchTerm}
                         onChange={handleInputChange}
+                        enable = {true}
                     />
 
                     {/* Popover filter */}

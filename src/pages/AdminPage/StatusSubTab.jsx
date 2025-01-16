@@ -17,6 +17,9 @@ const StatusSubTab = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const queryClient = useQueryClient(); // Get query client for manual cache updates
 
+    const [searchTerm, setSearchTerm] = useState(''); 
+    const [filteredStatuses, setFilteredStatuses] = useState([]);
+
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
 
@@ -126,6 +129,18 @@ const StatusSubTab = () => {
         setShowModal(false);
     };
 
+    const handleOnChange = (value) => {
+            setSearchTerm(value);
+        };
+    
+        useEffect(() => {
+                if (statuses) {
+                    setFilteredStatuses(
+                        statuses.filter(status => status.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                }
+            }, [searchTerm, statuses]);
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -135,6 +150,8 @@ const StatusSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên trạng thái đơn hàng"
+                            enable = {true}
+                            onChange={handleOnChange}
                         />
                     </div>
 
@@ -163,8 +180,8 @@ const StatusSubTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : statuses && statuses.length > 0 ? (
-                            statuses.map((status) => (
+                        ) : filteredStatuses && filteredStatuses.length > 0 ? (
+                            filteredStatuses.map((status) => (
                                 <tr key={status._id}>
                                     <td>{status._id}</td>
                                     <td>{status.name}</td>

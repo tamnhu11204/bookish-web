@@ -177,6 +177,7 @@ const CatagoryTab = () => {
                             placeholder="Tìm kiếm theo tên danh mục"
                             value={searchTerm}
                             onChange={handleOnChange}
+                            enable = {true}
                         />
                     </div>
 

@@ -463,17 +463,18 @@ const CatagoryPage = () => {
                   </label>                                </div>
                             </div>
                             {/* Phần chọn giá */}
-              <div className="price-filter">
-                <label>Hoặc chọn mức giá phù hợp</label>
+              <div className="price-filter" style={{ fontSize: '16px' }}>
+                
+                <div className="card-header-catagory">Hoặc tự chọn mức giá</div>
                 <div className="d-flex gap-2 mb-2">
-                  <input
+                  <input style={{ fontSize: '16px' }}
                     type="number"
                     className="form-control"
                     value={minPrice}
                     onChange={(e) => handlePriceChange(e, 'min')}
                   />
                   <span>-</span>
-                  <input
+                  <input style={{ fontSize: '16px' }}
                     type="number"
                     className="form-control"
                     value={maxPrice}
@@ -534,7 +535,7 @@ const CatagoryPage = () => {
 
                     <div className="col-9" >
                     <div className="card-catagory" >
-                    <h4>   Danh mục : </h4>
+                
                     <h4>   Sắp xếp theo : </h4>
                     <div className="col-md-4 mb-3">
                 

@@ -15,6 +15,9 @@ const UnitSubTab = () => {
     const [editModal, setEditModal] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState(null);
 
+    const [searchTerm, setSearchTerm] = useState(''); 
+    const [filteredUnits, setFilteredUnits] = useState([]); 
+
     const resetForm = () => {
         setName('');
         setNote('');
@@ -124,6 +127,19 @@ const UnitSubTab = () => {
         setEditModal(false);
     };
 
+    const handleOnChange = (value) => {
+            setSearchTerm(value);
+        };
+    
+        useEffect(() => {
+                if (units) {
+                    setFilteredUnits(
+                        units.filter(unit => unit.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                }
+            }, [searchTerm, units]);
+    
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -133,6 +149,8 @@ const UnitSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên đơn vị"
+                            enable = {true}
+                            onChange={handleOnChange}
                         />
                     </div>
                     <div className="col-6 text-end">
@@ -159,8 +177,8 @@ const UnitSubTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : units && units.length > 0 ? (
-                            units.map((unit) => (
+                        ) : filteredUnits && filteredUnits.length > 0 ? (
+                            filteredUnits.map((unit) => (
                                 <tr key={unit._id}>
                                     <td>{unit._id}</td>
                                     <td>{unit.name}</td>

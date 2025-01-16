@@ -21,6 +21,9 @@ const PublisherSubTab = () => {
     const [showModal, setShowModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
 
+     const [searchTerm, setSearchTerm] = useState(''); 
+    const [filteredPublishers, setFilteredPublishers] = useState([]);
+
     const resetForm = () => {
         setName('');
         setNote('');
@@ -156,6 +159,18 @@ const PublisherSubTab = () => {
         setEditModal(false);
     };
 
+    const handleOnChange = (value) => {
+            setSearchTerm(value);
+        };
+    
+        useEffect(() => {
+                if (publishers) {
+                    setFilteredPublishers(
+                        publishers.filter(publisher => publisher.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                }
+            }, [searchTerm, publishers]);
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -165,6 +180,8 @@ const PublisherSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên nhà xuất bản"
+                            enable = {true}
+                            onChange={handleOnChange}
                         />
                     </div>
                     <div className="col-6 text-end">
@@ -193,8 +210,8 @@ const PublisherSubTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : publishers && publishers.length > 0 ? (
-                            publishers.map((publisher) => (
+                        ) : filteredPublishers && filteredPublishers.length > 0 ? (
+                            filteredPublishers.map((publisher) => (
                                 <tr key={publisher._id}>
                                     <td>{publisher._id}</td>
                                     <td>

@@ -17,6 +17,10 @@ const LanguageSubTab = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const queryClient = useQueryClient(); // Get query client for manual cache updates
 
+     const [searchTerm, setSearchTerm] = useState(''); 
+    const [filteredLanguages, setFilteredLanguages] = useState([]); 
+    
+
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
 
@@ -109,6 +113,18 @@ const LanguageSubTab = () => {
         setShowModal(false);
     };
 
+    const handleOnChange = (value) => {
+        setSearchTerm(value);
+    };
+
+    useEffect(() => {
+            if (languages) {
+                setFilteredLanguages(
+                    languages.filter(language => language.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+            }
+        }, [searchTerm, languages]);
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -118,6 +134,8 @@ const LanguageSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên ngôn ngữ"
+                            enable = {true}
+                            onChange={handleOnChange}
                         />
                     </div>
 
@@ -146,8 +164,8 @@ const LanguageSubTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : languages && languages.length > 0 ? (
-                            languages.map((language) => (
+                        ) : filteredLanguages && filteredLanguages.length > 0 ? (
+                            filteredLanguages.map((language) => (
                                 <tr key={language._id}>
                                     <td>{language._id}</td>
                                     <td>{language.name}</td>

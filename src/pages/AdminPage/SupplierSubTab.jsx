@@ -21,6 +21,9 @@ const SupplierSubTab = () => {
     const [showModal, setShowModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
 
+    const [searchTerm, setSearchTerm] = useState(''); 
+    const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+
     const resetForm = () => {
         setName('');
         setNote('');
@@ -156,6 +159,18 @@ const SupplierSubTab = () => {
         setEditModal(false);
     };
 
+    const handleOnChange = (value) => {
+            setSearchTerm(value);
+        };
+    
+        useEffect(() => {
+                if (suppliers) {
+                    setFilteredSuppliers(
+                        suppliers.filter(supplier => supplier.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                }
+            }, [searchTerm, suppliers]);
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -193,8 +208,8 @@ const SupplierSubTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : suppliers && suppliers.length > 0 ? (
-                            suppliers.map((supplier) => (
+                        ) : filteredSuppliers && filteredSuppliers.length > 0 ? (
+                            filteredSuppliers.map((supplier) => (
                                 <tr key={supplier._id}>
                                     <td>{supplier._id}</td>
                                     <td>

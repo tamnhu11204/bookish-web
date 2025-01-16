@@ -16,6 +16,9 @@ const FormSubTab = () => {
     const [showModal, setShowModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
+    const [searchTerm, setSearchTerm] = useState(''); 
+        const [filteredFormats, setFilteredFormat] = useState([]); 
+
     // Hàm thay đổi tên hình thức
     const handleOnChangeName = (value) => setName(value);
     
@@ -118,6 +121,19 @@ const FormSubTab = () => {
         }
     };
 
+    const handleOnChange = (value) => {
+            setSearchTerm(value);
+        };
+    
+        useEffect(() => {
+                if (formats) {
+                    setFilteredFormat(
+                        formats.filter(format => format.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    );
+                }
+            }, [searchTerm, formats]);
+    
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -127,6 +143,8 @@ const FormSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên hình thức"
+                            enable = {true}
+                            onChange={handleOnChange}
                         />
                     </div>
 
@@ -155,8 +173,8 @@ const FormSubTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : formats && formats.length > 0 ? (
-                            formats.map((format) => (
+                        ) : filteredFormats && filteredFormats.length > 0 ? (
+                            filteredFormats.map((format) => (
                                 <tr key={format._id}>
                                     <td>{format._id}</td>
                                     <td>{format.name}</td>
