@@ -135,5 +135,15 @@ export const getAllListAddress = async (user) => {
     return res.data;
   };
 
+  export const filterUsers = async (searchParams) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/user/filter`, {
+        params: searchParams,
+      });
+      return response.data;  
+    } catch (error) {
+      throw error;  
+    }
+  };
 
 

@@ -59,7 +59,6 @@ const BestSellingBooksSubTab = () => {
         const itemMonth = (updatedAtDate.getMonth() + 1).toString();
 
         return (
-            item.activeNow === "Đã hoàn thành" &&
             itemYear === filters.year &&
             (filters.month === "" || itemMonth === filters.month)
         );

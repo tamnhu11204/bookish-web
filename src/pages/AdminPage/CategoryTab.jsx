@@ -11,14 +11,16 @@ import LoadingComponent from '../../components/LoadingComponent/LoadingComponent
 import Compressor from 'compressorjs';
 
 const CatagoryTab = () => {
-    // State quản lý modal
+    // State quản lý modal và tìm kiếm
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [img, setImage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const queryClient = useQueryClient(); // Get query client for manual cache updates
+    const [searchTerm, setSearchTerm] = useState(''); 
+    const [filteredCategories, setFilteredCategories] = useState([]); 
+    const queryClient = useQueryClient(); 
 
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
@@ -32,9 +34,9 @@ const CatagoryTab = () => {
                 success(result) {
                     const reader = new FileReader();
                     reader.onload = () => {
-                        setImage(reader.result); // Cập nhật ảnh đã nén dưới dạng base64
+                        setImage(reader.result); 
                     };
-                    reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
+                    reader.readAsDataURL(result); 
                 },
                 error(err) {
                     console.error(err);
@@ -54,7 +56,7 @@ const CatagoryTab = () => {
             setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
             return false;
         }
-        setErrorMessage(""); // Clear error if valid
+        setErrorMessage(""); 
         return true;
     };
 
@@ -89,14 +91,12 @@ const CatagoryTab = () => {
     useEffect(() => {
         if (isSuccess && data?.status !== 'ERR') {
             message.success()
-            //alert("Thêm danh mục mới thành công!");
             resetForm();
             setShowModal(false);
             queryClient.invalidateQueries(['categories']);
         }
         if (isSuccessUpdate && data?.status !== 'ERR') {
             message.success()
-            //alert("Cập nhật danh mục thành công!");
             resetForm();
             setShowModal(false);
             queryClient.invalidateQueries(['categories']);
@@ -111,9 +111,14 @@ const CatagoryTab = () => {
             message.error("Có lỗi xảy ra, vui lòng thử lại!");
         }
     }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status, queryClient]);
-    
-    
-    
+
+    useEffect(() => {
+        if (categories) {
+            setFilteredCategories(
+                categories.filter(category => category.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+    }, [searchTerm, categories]);
 
     const handleAddCategory = () => {
         resetForm();
@@ -124,7 +129,7 @@ const CatagoryTab = () => {
     const handleEditCategory = (category) => {
         setName(category.name);
         setNote(category.note);
-        setImage(category.img || ''); // Hiển thị ảnh nếu có
+        setImage(category.img || ''); 
         setSelectedCategory(category);
         setShowModal(true);
     };
@@ -132,19 +137,18 @@ const CatagoryTab = () => {
     const handleDeleteCategory = (category) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa danh mục "${category.name}" không?`)) {
             setSelectedCategory(category);
-            deleteMutation.mutate();  // Thực hiện xóa danh mục
+            deleteMutation.mutate(); 
         }
     };
-    
 
     const onSave = async () => {
         if (validateForm()) {
             const dataToSave = { name, note, img };
             if (selectedCategory) {
                 dataToSave.id = selectedCategory._id;
-                updateMutation.mutate(dataToSave); // Update category
+                updateMutation.mutate(dataToSave);
             } else {
-                addMutation.mutate(dataToSave); // Add new category
+                addMutation.mutate(dataToSave); 
             }
         }
     };
@@ -153,10 +157,10 @@ const CatagoryTab = () => {
         resetForm();
         setShowModal(false);
     };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
+    const handleOnChange = (value) => {
+        setSearchTerm(value);
     };
+
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -171,6 +175,8 @@ const CatagoryTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên danh mục"
+                            value={searchTerm}
+                            onChange={handleOnChange}
                         />
                     </div>
 
@@ -186,10 +192,10 @@ const CatagoryTab = () => {
                 <table className="table custom-table" style={{ marginTop: '30px' }}>
                     <thead className="table-light">
                         <tr>
-                            <th scope="col" style={{ width: '10%' }}>Mã</th>
+                            <th scope="col" style={{ width: '20%' }}>Mã</th>
                             <th scope="col" style={{ width: '20%' }}>Tên danh mục</th>
                             <th scope="col" style={{ width: '30%' }}>Ảnh</th>
-                            <th scope="col" style={{ width: '30%' }}>Mô tả</th>
+                            <th scope="col" style={{ width: '20%' }}>Mô tả</th>
                             <th scope="col" style={{ width: '10%' }}></th>
                         </tr>
                     </thead>
@@ -200,8 +206,8 @@ const CatagoryTab = () => {
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : categories && categories.length > 0 ? (
-                            categories.map((category) => (
+                        ) : filteredCategories.length > 0 ? (
+                            filteredCategories.map((category) => (
                                 <tr key={category._id}>
                                     <td>{category._id}</td>
                                     <td>{category.name}</td>

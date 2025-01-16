@@ -16,31 +16,26 @@ import { useNavigate } from 'react-router-dom';
 
 const OrderTab = () => {
     const [activeTab, setActiveTab] = useState("all");
-    const navigate=useNavigate()
+    const navigate = useNavigate();
 
     // State quản lý modal
     const [showModal, setShowModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [selectedActive, setSelectedActive] = useState("");
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-    };
-
     const getAllOrder = async () => {
         const res = await OrderService.getAllOrder();
         console.log("Dữ liệu đơn hàng:", res.data); // Thêm log ở đây
         return res.data;
     };
-    
+
     const { isLoading: isLoadingOrder, data: orders } = useQuery({
         queryKey: ['orders'],
         queryFn: getAllOrder,
     });
-    
+
     console.log("Is Loading Orders:", isLoadingOrder);
     console.log("Orders Data:", orders);
-    
 
     const getAllActive = async () => {
         const res = await ActiveService.getAllActive();
@@ -109,9 +104,18 @@ const OrderTab = () => {
         setShowModal(false);
     };
 
-    const handleDetail=(id)=>{
-        navigate(`/order-detail/${id}`)
-    }
+    const handleDetail = (id) => {
+        navigate(`/order-detail/${id}`);
+    };
+
+    // Lọc đơn hàng theo activeTab
+    const filteredOrders = orders?.filter((order) => {
+        if (activeTab === "all") return true;
+        if (activeTab === "delivering" && order.activeNow === "Đang vận chuyển") return true;
+        if (activeTab === "complete" && order.activeNow === "Đã hoàn thành") return true;
+        if (activeTab === "cancel" && order.activeNow === "Đã hủy") return true;
+        return false;
+    });
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -137,7 +141,7 @@ const OrderTab = () => {
                                         className={`nav-link ${activeTab === "delivering" ? "active" : ""}`}
                                         onClick={() => setActiveTab("delivering")}
                                     >
-                                        Đang giao
+                                        Đang vận chuyển
                                     </button>
                                 </li>
                                 <li className="nav-item">
@@ -145,7 +149,7 @@ const OrderTab = () => {
                                         className={`nav-link ${activeTab === "complete" ? "active" : ""}`}
                                         onClick={() => setActiveTab("complete")}
                                     >
-                                        Đã giao
+                                        Đã hoàn thành
                                     </button>
                                 </li>
                                 <li className="nav-item">
@@ -181,8 +185,8 @@ const OrderTab = () => {
                                         <LoadingComponent isLoading={isLoadingOrder} />
                                     </td>
                                 </tr>
-                            ) : orders && orders.length > 0 ? (
-                                orders.map((order) => (
+                            ) : filteredOrders && filteredOrders.length > 0 ? (
+                                filteredOrders.map((order) => (
                                     <tr key={order._id}>
                                         <td>{order._id}</td>
                                         <td>{order.name}</td>
@@ -246,3 +250,4 @@ const OrderTab = () => {
 };
 
 export default OrderTab;
+

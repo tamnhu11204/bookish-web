@@ -54,7 +54,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
             />
           </a>
 
-          {!isHiddenSearch && (
+          {!user?.isAdmin && (
             <>
               <input
                 className="form-control"
@@ -70,7 +70,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
           )}
 
           <div className="row">
-            {!isHiddenCart && (
+            {!user?.isAdmin && (
               <div className="col-3">
                 <button type="button" class="btn position-relative" style={{ width: '40px' }}
                   onClick={handleOnClickCart}>
