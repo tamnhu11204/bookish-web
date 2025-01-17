@@ -27,6 +27,7 @@ import { addSelectedProduct } from '../../redux/slides/ComparisonSlide';
         const bodyContent = (
           <>
             <input
+            style={{ fontSize:'16px' }}
               type="text"
               className="form-control mb-3"
               placeholder="Nhập tên sản phẩm để tìm..."
@@ -35,14 +36,14 @@ import { addSelectedProduct } from '../../redux/slides/ComparisonSlide';
             />
             <div
               className="product-list"
-              style={{ maxHeight: '400px', overflowY: 'auto' }}
+              style={{ maxHeight: '400px', overflowY: 'auto', fontSize:'16px' }}
             >
               {filteredProducts?.length > 0 ? (
                 filteredProducts.map((product) => (
                   <div
                     key={product._id}
                     className="product-item d-flex align-items-center justify-content-between mb-3"
-                    style={{ border: '1px solid #ddd', borderRadius: '5px', padding: '10px' }}
+                    style={{ border: '1px solid #ddd', borderRadius: '5px', padding: '10px', fontSize:'16px' }}
                   >
                     <div className="d-flex align-items-center">
                       <img
@@ -51,8 +52,8 @@ import { addSelectedProduct } from '../../redux/slides/ComparisonSlide';
                         style={{ width: '50px', height: '50px', marginRight: '10px' }}
                       />
                       <div>
-                        <h6 className="mb-1">{product.name}</h6>
-                        <p className="text-danger mb-0">{product.price}đ</p>
+                        <h6 style={{ fontSize:'16px' }} className="mb-1">{product.name}</h6>
+                        <p className="text-danger mb-0">{product.price.toLocaleString()}đ</p>
                       </div>
                     </div>
                     <button
@@ -79,7 +80,7 @@ import { addSelectedProduct } from '../../redux/slides/ComparisonSlide';
             body={bodyContent}
             onClick1={onClose}
             onClick2={onClose}
-            textButton1="Đóng"
+            textButton1="Hoàn thành"
           />
         );
       };

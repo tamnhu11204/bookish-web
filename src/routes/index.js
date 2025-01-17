@@ -38,7 +38,8 @@ export const routes =[
     {
         path: '/login',
         page: LogInPage,
-        isShowFooter: true
+        //isShowFooter: true
+        isShowHeader: false
     },
 
     {

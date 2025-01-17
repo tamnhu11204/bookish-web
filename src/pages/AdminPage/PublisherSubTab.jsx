@@ -222,7 +222,7 @@ const PublisherSubTab = () => {
                                         />
                                     </td>
                                     <td>{publisher.name}</td>
-                                    <td>{publisher.note}</td>
+                                    <td>{publisher.note||'*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"

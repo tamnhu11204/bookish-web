@@ -221,7 +221,7 @@ const SupplierSubTab = () => {
                                         />
                                     </td>
                                     <td>{supplier.name}</td>
-                                    <td>{supplier.note}</td>
+                                    <td>{supplier.note||'*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -251,7 +251,7 @@ const SupplierSubTab = () => {
 
             <ModalComponent
                 isOpen={showModal}
-                title="THÊM nhà cung cấp"
+                title="THÊM NHÀ CUNG CẤP"
                 body={
                     <>
                         <FormComponent
@@ -299,7 +299,7 @@ const SupplierSubTab = () => {
 
             <ModalComponent
                 isOpen={editModal}
-                title={editingSupplier ? "CHỈNH SỬA nhà cung cấp" : "CHỈNH SỬA nhà cung cấp"}
+                title={editingSupplier ? "CHỈNH SỬA NHÀ CUNG CẤP" : "CHỈNH SỬA NHÀ CUNG CẤP"}
                 body={
                     <>
                         <FormComponent

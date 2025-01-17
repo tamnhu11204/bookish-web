@@ -161,7 +161,7 @@ const ComparisonPage = () => {
       const comparisonData = [
         { criteria: 'Giá bìa', product1: selectedProducts[0]?.price || '-', product2: selectedProducts[1]?.price || '-', product3: selectedProducts[2]?.price || '-' },
         { criteria: 'Giá sau sale', product1: selectedProducts[0]?.price || '-', product2: selectedProducts[1]?.price || '-', product3: selectedProducts[2]?.price || '-' },
-        { criteria: 'Lượt yêu thích', product1: selectedProducts[0]?.favorite || '-', product2: selectedProducts[1]?.favorite || '-', product3: selectedProducts[2]?.favorite || '-' },
+        // { criteria: 'Lượt yêu thích', product1: selectedProducts[0]?.favorite || '-', product2: selectedProducts[1]?.favorite || '-', product3: selectedProducts[2]?.favorite || '-' },
         { criteria: 'Lượt bán', product1: selectedProducts[0]?.sold || '-', product2: selectedProducts[1]?.sold || '-', product3: selectedProducts[2]?.sold || '-' },
         { criteria: 'Đánh giá', product1: `${selectedProducts[0]?.star}/5 ⭐ (${selectedProducts[0]?.feedbackCount} đánh giá)` || '-', product2: `${selectedProducts[1]?.star}/5 ⭐ (${selectedProducts[1]?.feedbackCount} đánh giá)` || '-', product3: `${selectedProducts[2]?.star}/5 ⭐ (${selectedProducts[2]?.feedbackCount} đánh giá)` || '-' },
         { criteria: 'Lượt xem', product1: selectedProducts[0]?.view || '-', product2: selectedProducts[1]?.view || '-', product3: selectedProducts[2]?.view || '-' },

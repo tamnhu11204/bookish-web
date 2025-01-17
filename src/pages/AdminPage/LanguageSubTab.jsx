@@ -74,6 +74,7 @@ const LanguageSubTab = () => {
         }
         if (isError || isErrorUpdate || isErrorDelete) {
             message.error();
+            alert('Xóa ngôn ngữ thành công!');
         }
     }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status, queryClient]);
 
@@ -169,7 +170,7 @@ const LanguageSubTab = () => {
                                 <tr key={language._id}>
                                     <td>{language._id}</td>
                                     <td>{language.name}</td>
-                                    <td>{language.note}</td>
+                                    <td>{language.note||'*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"

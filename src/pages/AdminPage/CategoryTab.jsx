@@ -217,7 +217,7 @@ const CatagoryTab = () => {
                                             alt={category.name}
                                             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                         /></td>
-                                    <td>{category.note}</td>
+                                    <td>{category.note||'*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"

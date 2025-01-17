@@ -93,7 +93,7 @@ export const ShoppingCartPage = () => {
   }, [order]);
 
 const handleOrder = () => {
-  if (!user?.active) {
+  if (user?.active) {
     alert('Bạn bị admin chặn mua hàng! Hãy liên hệ với shop để biết thêm thông tin.');
   } else if (!order?.orderItemSelected?.length) {
     // Kiểm tra nếu user.active là false hoặc không có, hiển thị thông báo lỗi

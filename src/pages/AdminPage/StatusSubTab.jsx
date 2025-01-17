@@ -185,7 +185,7 @@ const StatusSubTab = () => {
                                 <tr key={status._id}>
                                     <td>{status._id}</td>
                                     <td>{status.name}</td>
-                                    <td>{status.note}</td>
+                                    <td>{status.note||'*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -215,7 +215,7 @@ const StatusSubTab = () => {
 
             <ModalComponent
                 isOpen={showModal}
-                title={selectedStatus ? "CẬP NHẬT trạng thái đơn hàng" : "THÊM trạng thái đơn hàng"}
+                title={selectedStatus ? "CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG" : "THÊM TRẠNG THÁI ĐƠN HÀNG"}
                 body={
                     <>
                         <FormComponent

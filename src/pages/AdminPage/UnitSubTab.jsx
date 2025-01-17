@@ -182,7 +182,7 @@ const UnitSubTab = () => {
                                 <tr key={unit._id}>
                                     <td>{unit._id}</td>
                                     <td>{unit.name}</td>
-                                    <td>{unit.note}</td>
+                                    <td>{unit.note||'*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"

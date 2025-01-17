@@ -26,7 +26,7 @@ const AdminPage = () => {
                         onClick={() => setActiveTab("shopManagement")}
                     >
                         <div className="row">
-                            <div className="col-1"><i class="bi-nav bi-person-vcard"></i></div>
+                            <div className="col-1"><i class="bi-nav bi-shop"></i></div>
                             <div className="col"><p className="nav-title">Hồ sơ cửa hàng</p></div>
                         </div>
                     </button>
@@ -116,7 +116,7 @@ const AdminPage = () => {
                         onClick={() => setActiveTab("staticPage")}
                     >
                         <div className="row">
-                            <div className="col-1"><i class="bi-nav bi-gear"></i></div>
+                            <div className="col-1"><i class="bi-nav bi-blockquote-left"></i></div>
                             <div className="col"><p className="nav-title">Trang hỗ trợ khách hàng</p></div>
                         </div>
                     </button>

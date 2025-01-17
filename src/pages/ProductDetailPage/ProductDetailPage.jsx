@@ -31,6 +31,7 @@ const ProductDetailPage = () => {
   const [feedbacks, setFeedbacks] = useState([])
   const [isFavorite, setIsFavorite] = useState(false);
   const [productFavorite, setProductFavorite] = useState('');
+  const [proCategory, setProCategory] = useState([])
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -117,7 +118,40 @@ const ProductDetailPage = () => {
     fetchFeedbackAndUserDetails();
   }, [id]);
 
+  useEffect(() => {
+    const fetchProductsByCategory = async () => {
+        if (product?.category) {
+            try {
+                const params = {
+                    limit: 10,
+                    page: 0,
+                    filter: ["category", product.category], // Định dạng filter theo API
+                };
 
+                const products = await ProductService.getAllProduct(params);
+
+                // Lọc bỏ sản phẩm hiện tại khỏi danh sách
+                const filteredProducts = products.data.filter(
+                    (item) => item._id !== product._id
+                );
+
+                setProCategory(filteredProducts); // Cập nhật danh sách sản phẩm đã loại trừ
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        }
+    };
+
+    fetchProductsByCategory();
+}, [product?.category, product?._id]);
+
+
+
+
+  const handleOnClickProduct = async (id) => {
+    await ProductService.updateView(id)
+    navigate(`/product-detail/${id}`);
+  }
 
   if (!product) {
     return <div>Loading...</div>;
@@ -160,17 +194,27 @@ const ProductDetailPage = () => {
 
   const relatedProductInfo = (
     <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-      {[...Array(5)].map((_, index) => (
-        <CardProductComponent
-          key={index}
-          img={img4}
-          proName="Ngàn mặt trời rực rỡ"
-          currentPrice="120000"
-          sold="12"
-          star="4.5"
-          score="210"
-        />
-      ))}
+      {proCategory && proCategory.length > 0 ? (
+        proCategory.map((product) => (
+          <CardProductComponent
+            key={product._id}
+            img={product.img[0]}
+            proName={product.name}
+            currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+            sold={product.sold}
+            star={product.star}
+            feedbackCount={product.feedbackCount}
+            onClick={() => handleOnClickProduct(product._id)}
+            view={product.view}
+          />
+        ))
+      ) : (
+        <tr>
+          <td colSpan="4" className="text-center">
+            Không có dữ liệu để hiển thị.
+          </td>
+        </tr>
+      )}
     </div>
   );
   const images = product.img || []; // Mảng hình ảnh từ sản phẩm
@@ -236,7 +280,7 @@ const ProductDetailPage = () => {
 
       if (isFavorite) {
         const response = await FavoriteProductService.deleteFavoriteProduct(productFavorite);
-        if (response?.status!=='ERR') {
+        if (response?.status !== 'ERR') {
           alert('Xóa sản phẩm vào danh sách yêu thích!')
           setIsFavorite(false);
           setProductFavorite('');
@@ -244,7 +288,7 @@ const ProductDetailPage = () => {
         }
       } else {
         const response = await FavoriteProductService.addFavoriteProduct(favoriteData);
-        if (response?.status!=='ERR') {
+        if (response?.status !== 'ERR') {
           alert('Thêm sản phẩm vào danh sách yêu thích!')
           setIsFavorite(true);
           setProductFavorite(response?.data?._id);
@@ -326,13 +370,13 @@ const ProductDetailPage = () => {
                       onClick={handleOnBuyNow} /> */}
                   </div>
 
-                  <a
+                  {/* <a
                     className="text-decoration-underline"
                     href="./comparison"
                     style={{ color: '#198754', textDecoration: 'none', fontStyle: 'italic', fontSize: '14px' }}
                   >
                     So sánh với sách khác
-                  </a>
+                  </a> */}
                 </div>
               </div>
             </div>
@@ -370,7 +414,7 @@ const ProductDetailPage = () => {
                 </p>
                 <div className="row">
                   <div className="col-4">
-                    <p style={{ color: 'red', fontSize: '25px' }}>{priceCurrent}đ</p>
+                    <p style={{ color: 'red', fontSize: '25px' }}>{priceCurrent.toLocaleString()}đ</p>
                   </div>
                   <div className="col-2">
                     <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '16px', backgroundColor: '#E4F7CB', marginTop: '5px', color: '#198754' }}>
@@ -383,7 +427,7 @@ const ProductDetailPage = () => {
                     </div>
                   </div>
                 </div>
-                <p className="text-decoration-line-through" style={{ fontSize: '16px', marginTop: '-20px' }}>{product.price}đ</p>
+                <p className="text-decoration-line-through" style={{ fontSize: '16px', marginTop: '-20px' }}>{product.price.toLocaleString()}đ</p>
                 <div className="mt-3 text-muted" style={{ fontSize: "14px" }}>
                   <span>
                     <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán | {product.view} lượt xem
@@ -398,7 +442,7 @@ const ProductDetailPage = () => {
             </div>
             <div style={{ backgroundColor: '#F9F6F2' }}>
               <div className="container" style={{ marginTop: '30px' }}>
-                <CardComponent title="Mô tả sản phẩm" bodyContent={<><p style={{ fontSize: '20px', fontWeight: 'bold' }}>{product.name}</p><div style={{ fontSize: '16px' }}>{product.description ? parse(product.description) : 'Không có mô tả.'}</div></>} icon="bi bi-card-list" />
+                <CardComponent title="Mô tả sản phẩm" bodyContent={<><p style={{ fontSize: '20px', fontWeight: 'bold' }}>{product.name}</p><div style={{ fontSize: '16px' }}>{product.description ? parse(product.description) : 'Không có mô tả.'}</div></>} icon="bi bi-blockquote-left" />
               </div>
             </div>
           </div>

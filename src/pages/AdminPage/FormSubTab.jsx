@@ -178,7 +178,7 @@ const FormSubTab = () => {
                                 <tr key={format._id}>
                                     <td>{format._id}</td>
                                     <td>{format.name}</td>
-                                    <td>{format.note}</td>
+                                    <td>{format.note||'*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
