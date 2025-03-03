@@ -257,7 +257,7 @@ const OrderTab = () => {
                                     Tất cả
                                 </button>
                             </li>
-                            <li className="nav-item">
+                            {/* <li className="nav-item">
                                 <button
                                     className={`nav-link ${activeTab === "complete" ? "active" : ""}`}
                                     onClick={() => setActiveTab("complete")}
@@ -272,7 +272,7 @@ const OrderTab = () => {
                                 >
                                     Đã hủy
                                 </button>
-                            </li>
+                            </li> */}
                         </ul>
                     </div>
                 </div>

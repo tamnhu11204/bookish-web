@@ -1,117 +1,117 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
-import './AdminPage.css';
-import FormComponent from '../../components/FormComponent/FormComponent';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import FormComponent from '../../components/FormComponent/FormComponent';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import * as message from "../../components/MessageComponent/MessageComponent";
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as CategoryService from '../../services/CategoryService';
-import * as message from "../../components/MessageComponent/MessageComponent";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
-import Compressor from 'compressorjs';
+import './AdminPage.css';
 
 const CatagoryTab = () => {
     // State quản lý modal và tìm kiếm
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const [img, setImage] = useState('');
+    const [img, setImage] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(''); 
-    const [filteredCategories, setFilteredCategories] = useState([]); 
-    const queryClient = useQueryClient(); 
-
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredCategories, setFilteredCategories] = useState([]);
+    const queryClient = useQueryClient();
+    const [previewImage, setPreviewImage] = useState(null);
+    
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
-    const handleImageChange = (event) => {
+    
+    const handleChangeImg = (event) => {
         const file = event.target.files[0];
         if (file) {
-            new Compressor(file, {
-                quality: 0.6,
-                maxWidth: 800,
-                maxHeight: 800,
-                success(result) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        setImage(reader.result); 
-                    };
-                    reader.readAsDataURL(result); 
-                },
-                error(err) {
-                    console.error(err);
-                }
-            });
+            setImage(file);
+            setPreviewImage(URL.createObjectURL(file));
+        } else {
+            console.error("Không có file hợp lệ được chọn!");
         }
     };
-
+    
     const resetForm = () => {
         setName('');
         setNote('');
-        setImage('');
+        setImage(null);
+        setPreviewImage(null);
+        setSelectedCategory(null);
     };
-
+    
     const validateForm = () => {
         if (!name) {
             setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
             return false;
         }
-        setErrorMessage(""); 
+        setErrorMessage("");
         return true;
     };
-
-    const addMutation = useMutationHook(data => CategoryService.addCategory(data));
-    const updateMutation = useMutationHook(data => {
-        if (!selectedCategory) {
-            return;
-        }
-        return CategoryService.updateCategory(selectedCategory._id, data);
-    });
-    const deleteMutation = useMutationHook(data => {
-        if (!selectedCategory) {
-            return;
-        }
-        return CategoryService.deleteCategory(selectedCategory._id);
-    });
-
+    
     const getAllCategory = async () => {
         const res = await CategoryService.getAllCategory();
         return res.data;
     };
-
+    
     const { isLoading: isLoadingCategory, data: categories } = useQuery({
         queryKey: ['categories'],
         queryFn: getAllCategory,
     });
-
-    const { data, isSuccess, isError } = addMutation;
-    const { isSuccess: isSuccessUpdate, isError: isErrorUpdate } = updateMutation;
-    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
-
-    useEffect(() => {
-        if (isSuccess && data?.status !== 'ERR') {
-            message.success()
-            resetForm();
-            setShowModal(false);
-            queryClient.invalidateQueries(['categories']);
-        }
-        if (isSuccessUpdate && data?.status !== 'ERR') {
-            message.success()
-            resetForm();
-            setShowModal(false);
-            queryClient.invalidateQueries(['categories']);
-        }
-        if (isSuccessDelete && data?.status !== 'ERR') {
-            message.success("Xóa danh mục thành công!");
-            resetForm();
-            setSelectedCategory(null);
-            queryClient.invalidateQueries(['categories']);
-        }
-        if (isError || isErrorUpdate || isErrorDelete) {
+    
+    const addMutation = useMutation({
+        mutationFn: (data) => CategoryService.addCategory(data),
+        onSuccess: (response) => {
+            if (response.status !== 'ERR') {
+                alert("Thêm danh mục thành công!");
+                resetForm();
+                setShowModal(false);
+                queryClient.invalidateQueries(['categories']);
+            } else {
+                message.error("Thêm danh mục thất bại!");
+            }
+        },
+        onError: () => {
             message.error("Có lỗi xảy ra, vui lòng thử lại!");
         }
-    }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status, queryClient]);
-
+    });
+    
+    const updateMutation = useMutation({
+        mutationFn: ({ id, formData }) => CategoryService.updateCategory(id, formData),
+        onSuccess: (response) => {
+            if (response.status !== 'ERR') {
+                alert("Cập nhật danh mục thành công!");
+                resetForm();
+                setShowModal(false);
+                queryClient.invalidateQueries(['categories']);
+            } else {
+                message.error("Cập nhật danh mục thất bại!");
+            }
+        },
+        onError: () => {
+            message.error("Có lỗi xảy ra khi cập nhật!");
+        }
+    });
+    
+    const deleteMutation = useMutation({
+        mutationFn: (id) => CategoryService.deleteCategory(id),
+        onSuccess: (response) => {
+            if (response.status !== 'ERR') {
+                alert("Xóa danh mục thành công!");
+                resetForm();
+                queryClient.invalidateQueries(['categories']);
+            } else {
+                message.error("Xóa danh mục thất bại!");
+            }
+        },
+        onError: () => {
+            message.error("Có lỗi xảy ra khi xóa!");
+        }
+    });
+    
     useEffect(() => {
         if (categories) {
             setFilteredCategories(
@@ -119,49 +119,56 @@ const CatagoryTab = () => {
             );
         }
     }, [searchTerm, categories]);
-
+    
     const handleAddCategory = () => {
         resetForm();
         setShowModal(true);
-        setSelectedCategory(null);
     };
-
+    
     const handleEditCategory = (category) => {
         setName(category.name);
         setNote(category.note);
-        setImage(category.img || ''); 
+        setImage(null); // Tránh lỗi gán nhầm giá trị ảnh
+        setPreviewImage(category.img || null);
         setSelectedCategory(category);
         setShowModal(true);
     };
-
+    
     const handleDeleteCategory = (category) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa danh mục "${category.name}" không?`)) {
-            setSelectedCategory(category);
-            deleteMutation.mutate(); 
+            deleteMutation.mutate(category._id);
         }
     };
-
+    
     const onSave = async () => {
-        if (validateForm()) {
-            const dataToSave = { name, note, img };
-            if (selectedCategory) {
-                dataToSave.id = selectedCategory._id;
-                updateMutation.mutate(dataToSave);
-            } else {
-                addMutation.mutate(dataToSave); 
-            }
+        if (!validateForm()) return;
+    
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("note", note);
+    
+        if (img instanceof File) {
+            formData.append("img", img);
+        } else if (typeof img === "string" && img.startsWith("http")) {
+            formData.append("existingImg", img);
+        }
+    
+        if (selectedCategory) {
+            updateMutation.mutate({ id: selectedCategory._id, formData });
+        } else {
+            addMutation.mutate(formData);
         }
     };
-
+    
     const onCancel = () => {
         resetForm();
         setShowModal(false);
     };
+    
     const handleOnChange = (value) => {
         setSearchTerm(value);
     };
-
-
+    
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="title-section">
@@ -195,9 +202,9 @@ const CatagoryTab = () => {
                         <tr>
                             <th scope="col" style={{ width: '20%' }}>Mã</th>
                             <th scope="col" style={{ width: '20%' }}>Tên danh mục</th>
-                            <th scope="col" style={{ width: '30%' }}>Ảnh</th>
+                            <th scope="col" style={{ width: '20%' }}>Ảnh</th>
                             <th scope="col" style={{ width: '20%' }}>Mô tả</th>
-                            <th scope="col" style={{ width: '10%' }}></th>
+                            <th scope="col" style={{ width: '20%' }}>Sửa/Xóa</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
@@ -210,14 +217,15 @@ const CatagoryTab = () => {
                         ) : filteredCategories.length > 0 ? (
                             filteredCategories.map((category) => (
                                 <tr key={category._id}>
-                                    <td>{category._id}</td>
-                                    <td>{category.name}</td>
+                                    <td>{category.code}</td>
+                                    <td>{category.name.length > 20 ? category.name.slice(0, 20) + '...' : category.name}</td>
+
                                     <td><img
                                             src={category.img}
                                             alt={category.name}
-                                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            style={{ width: '80px', height: '100px', objectFit: 'cover' }}
                                         /></td>
-                                    <td>{category.note||'*'}</td>
+                                    <td>{category.note && category.note.length > 30 ? category.note.slice(0, 30) + '...' : category.note || 'Không có'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -270,21 +278,27 @@ const CatagoryTab = () => {
                             enable = {true}
                         />
                         <div className="mb-3">
-                            <label htmlFor="image" className="form-label">Hình ảnh</label>
-                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
-                                {img ? (
-                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
-                                ) : (
-                                    <span className="text-muted">Chọn hình ảnh</span>
-                                )}
-                            </div>
-                            <input
-                                type="file"
-                                id="image"
-                                className="form-control mt-2"
-                                accept="image/*"
-                                onChange={handleImageChange}
+                        <input
+                        // className="product__image"
+                        type="file"
+                        onChange={handleChangeImg}
+                        accept="image/*"
+                        required
+                    />
+                    <div className="news__image">
+                        {previewImage && (
+                            <img
+                                src={previewImage}
+                                alt="Preview"
+                                className="product-preview"
+                                style={{
+                                    width: "36rem",
+                                    height: "40rem",
+                                    borderRadius: "15px"
+                                }}
                             />
+                        )}
+                    </div>
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {errorMessage && (
