@@ -87,7 +87,7 @@ const SupplierSubTab = () => {
     useEffect(() => {
         if (isEditSuccess && editData?.status !== 'ERR') {
             message.success();
-            alert('Chỉnh sửa nhà cung cấp thành công!');
+            alert('Cập nhật nhà cung cấp thành công!');
             resetForm();
             setEditModal(false);
         }
@@ -299,7 +299,7 @@ const SupplierSubTab = () => {
 
             <ModalComponent
                 isOpen={editModal}
-                title={editingSupplier ? "CHỈNH SỬA NHÀ CUNG CẤP" : "CHỈNH SỬA NHÀ CUNG CẤP"}
+                title={editingSupplier ? "CẬP NHẬT NHÀ CUNG CẤP" : "CẬP NHẬT NHÀ CUNG CẤP"}
                 body={
                     <>
                         <FormComponent

@@ -13,11 +13,6 @@ export const addCategory=async(data)=>{
       return res.data;
 }
 
-export const getAllCategory=async(data)=>{
-    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/category/get-all`, data)
-    return res.data
-}
-
 export const updateCategory = async (id, formData) => {
   console.log("Gửi request update:", id, [...formData.entries()]);
 
@@ -34,6 +29,11 @@ export const updateCategory = async (id, formData) => {
   console.log("Kết quả response:", res.data);
   return res.data;
 };
+
+export const getAllCategory=async(data)=>{
+    const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/category/get-all`, data)
+    return res.data
+}
 
 
 export const deleteCategory=async(id)=>{

@@ -6,7 +6,7 @@ import './AdminPage.css';
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as message from "../../components/MessageComponent/MessageComponent";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 
 const LanguageSubTab = () => {
@@ -15,11 +15,9 @@ const LanguageSubTab = () => {
     const [selectedLanguage, setSelectedLanguage] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const queryClient = useQueryClient(); // Get query client for manual cache updates
-
-     const [searchTerm, setSearchTerm] = useState(''); 
-    const [filteredLanguages, setFilteredLanguages] = useState([]); 
-    
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredLanguages, setFilteredLanguages] = useState([]);
+    const queryClient = useQueryClient();
 
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
@@ -27,6 +25,7 @@ const LanguageSubTab = () => {
     const resetForm = () => {
         setName('');
         setNote('');
+        setSelectedLanguage(null);
     };
 
     const validateForm = () => {
@@ -34,13 +33,46 @@ const LanguageSubTab = () => {
             setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
             return false;
         }
-        setErrorMessage(""); // Clear error if valid
+        setErrorMessage("");
         return true;
     };
 
-    const addMutation = useMutationHook(data => LanguageService.addLanguage(data));
-    const updateMutation = useMutationHook(data => LanguageService.updateLanguage(selectedLanguage._id, data));
-    const deleteMutation = useMutationHook(data => LanguageService.deleteLanguage(selectedLanguage._id));
+    const addMutation = useMutation(data => LanguageService.addLanguage(data), {
+        onSuccess: () => {
+            alert("Thêm ngôn ngữ mới thành công!");
+            resetForm();
+            setShowModal(false);
+            queryClient.invalidateQueries(['languages']);
+        },
+        onError: () => {
+            message.error("Thêm ngôn ngữ thất bại!");
+        }
+    });
+
+    const updateMutation = useMutation(data => {
+        if (!selectedLanguage) return;
+        return LanguageService.updateLanguage(selectedLanguage._id, data);
+    }, {
+        onSuccess: () => {
+            alert("Cập nhật ngôn ngữ thành công!");
+            resetForm();
+            setShowModal(false);
+            queryClient.invalidateQueries(['languages']);
+        },
+        onError: () => {
+            message.error("Cập nhật thất bại!");
+        }
+    });
+
+    const deleteMutation = useMutation(id => LanguageService.deleteLanguage(id), {
+        onSuccess: () => {
+            alert("Xóa ngôn ngữ thành công!");
+            queryClient.invalidateQueries(['languages']);
+        },
+        onError: () => {
+            message.error("Xóa thất bại!");
+        }
+    });
 
     const getAllLanguage = async () => {
         const res = await LanguageService.getAllLanguage();
@@ -52,31 +84,15 @@ const LanguageSubTab = () => {
         queryFn: getAllLanguage,
     });
 
-    const { data, isSuccess, isError } = addMutation;
-    const { isSuccess: isSuccessUpdate, isError: isErrorUpdate } = updateMutation;
-    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
-
     useEffect(() => {
-        
-        if (isSuccess && data?.status !== 'ERR') {
-            message.success();
-            alert('Thêm ngôn ngữ mới thành công!');
-            resetForm();
-            setShowModal(false);
-            queryClient.invalidateQueries(['languages']); // Invalidate the cache to refetch languages
+        if (languages) {
+            setFilteredLanguages(
+                languages.filter(language =>
+                    language.name.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+            );
         }
-        if (isSuccessUpdate && data?.status !== 'ERR') {
-            message.success();
-            alert('Cập nhật ngôn ngữ thành công!');
-            resetForm();
-            setShowModal(false);
-            queryClient.invalidateQueries(['languages']); // Invalidate the cache to refetch languages
-        }
-        if (isError || isErrorUpdate || isErrorDelete) {
-            message.error();
-            alert('Xóa ngôn ngữ thành công!');
-        }
-    }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status, queryClient]);
+    }, [searchTerm, languages]);
 
     const handleAddLanguage = () => {
         resetForm();
@@ -85,6 +101,7 @@ const LanguageSubTab = () => {
     };
 
     const handleEditLanguage = (language) => {
+        if (!language) return;
         setName(language.name);
         setNote(language.note);
         setSelectedLanguage(language);
@@ -92,19 +109,19 @@ const LanguageSubTab = () => {
     };
 
     const handleDeleteLanguage = (language) => {
+        if (!language || !language._id) return;
         if (window.confirm(`Bạn có chắc chắn muốn xóa ngôn ngữ "${language.name}" không?`)) {
             deleteMutation.mutate(language._id);
         }
     };
 
-    const onSave = async () => {
+    const onSave = () => {
         if (validateForm()) {
             const dataToSave = { name, note };
-            if (selectedLanguage) {
-                dataToSave.id = selectedLanguage._id;
-                updateMutation.mutate(dataToSave); // Update language
+            if (selectedLanguage && selectedLanguage._id) {
+                updateMutation.mutate(dataToSave);
             } else {
-                addMutation.mutate(dataToSave); // Add new language
+                addMutation.mutate(dataToSave);
             }
         }
     };
@@ -118,14 +135,6 @@ const LanguageSubTab = () => {
         setSearchTerm(value);
     };
 
-    useEffect(() => {
-            if (languages) {
-                setFilteredLanguages(
-                    languages.filter(language => language.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                );
-            }
-        }, [searchTerm, languages]);
-
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="content-section" style={{ marginTop: '30px' }}>
@@ -135,7 +144,7 @@ const LanguageSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên ngôn ngữ"
-                            enable = {true}
+                            enable={true}
                             onChange={handleOnChange}
                         />
                     </div>
@@ -155,7 +164,7 @@ const LanguageSubTab = () => {
                             <th scope="col" style={{ width: '30%' }}>Mã</th>
                             <th scope="col" style={{ width: '20%' }}>Tên ngôn ngữ</th>
                             <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}>Hành động</th>
+                            <th scope="col" style={{ width: '10%' }}>Sửa/Xóa</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
@@ -168,9 +177,9 @@ const LanguageSubTab = () => {
                         ) : filteredLanguages && filteredLanguages.length > 0 ? (
                             filteredLanguages.map((language) => (
                                 <tr key={language._id}>
-                                    <td>{language._id}</td>
-                                    <td>{language.name}</td>
-                                    <td>{language.note||'*'}</td>
+                                    <td>{language.code}</td>
+                                    <td>{language.name.length > 20 ? language.name.slice(0, 20) + '...' : language.name}</td>
+                                    <td>{language.note && language.note.length > 30 ? language.note.slice(0, 30) + '...' : language.note || 'Không có'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -211,7 +220,7 @@ const LanguageSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteLanguageInput"
@@ -220,7 +229,7 @@ const LanguageSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {errorMessage && (

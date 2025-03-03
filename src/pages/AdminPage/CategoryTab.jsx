@@ -21,10 +21,10 @@ const CatagoryTab = () => {
     const [filteredCategories, setFilteredCategories] = useState([]);
     const queryClient = useQueryClient();
     const [previewImage, setPreviewImage] = useState(null);
-    
+
     const handleOnChangeName = (value) => setName(value);
     const handleOnChangeNote = (value) => setNote(value);
-    
+
     const handleChangeImg = (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -34,7 +34,7 @@ const CatagoryTab = () => {
             console.error("Không có file hợp lệ được chọn!");
         }
     };
-    
+
     const resetForm = () => {
         setName('');
         setNote('');
@@ -42,7 +42,7 @@ const CatagoryTab = () => {
         setPreviewImage(null);
         setSelectedCategory(null);
     };
-    
+
     const validateForm = () => {
         if (!name) {
             setErrorMessage("Vui lòng nhập thông tin được yêu cầu!");
@@ -51,17 +51,17 @@ const CatagoryTab = () => {
         setErrorMessage("");
         return true;
     };
-    
+
     const getAllCategory = async () => {
         const res = await CategoryService.getAllCategory();
         return res.data;
     };
-    
+
     const { isLoading: isLoadingCategory, data: categories } = useQuery({
         queryKey: ['categories'],
         queryFn: getAllCategory,
     });
-    
+
     const addMutation = useMutation({
         mutationFn: (data) => CategoryService.addCategory(data),
         onSuccess: (response) => {
@@ -78,7 +78,7 @@ const CatagoryTab = () => {
             message.error("Có lỗi xảy ra, vui lòng thử lại!");
         }
     });
-    
+
     const updateMutation = useMutation({
         mutationFn: ({ id, formData }) => CategoryService.updateCategory(id, formData),
         onSuccess: (response) => {
@@ -95,7 +95,7 @@ const CatagoryTab = () => {
             message.error("Có lỗi xảy ra khi cập nhật!");
         }
     });
-    
+
     const deleteMutation = useMutation({
         mutationFn: (id) => CategoryService.deleteCategory(id),
         onSuccess: (response) => {
@@ -111,7 +111,7 @@ const CatagoryTab = () => {
             message.error("Có lỗi xảy ra khi xóa!");
         }
     });
-    
+
     useEffect(() => {
         if (categories) {
             setFilteredCategories(
@@ -119,12 +119,12 @@ const CatagoryTab = () => {
             );
         }
     }, [searchTerm, categories]);
-    
+
     const handleAddCategory = () => {
         resetForm();
         setShowModal(true);
     };
-    
+
     const handleEditCategory = (category) => {
         setName(category.name);
         setNote(category.note);
@@ -133,42 +133,42 @@ const CatagoryTab = () => {
         setSelectedCategory(category);
         setShowModal(true);
     };
-    
+
     const handleDeleteCategory = (category) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa danh mục "${category.name}" không?`)) {
             deleteMutation.mutate(category._id);
         }
     };
-    
+
     const onSave = async () => {
         if (!validateForm()) return;
-    
+
         const formData = new FormData();
         formData.append("name", name);
         formData.append("note", note);
-    
+
         if (img instanceof File) {
             formData.append("img", img);
         } else if (typeof img === "string" && img.startsWith("http")) {
             formData.append("existingImg", img);
         }
-    
+
         if (selectedCategory) {
             updateMutation.mutate({ id: selectedCategory._id, formData });
         } else {
             addMutation.mutate(formData);
         }
     };
-    
+
     const onCancel = () => {
         resetForm();
         setShowModal(false);
     };
-    
+
     const handleOnChange = (value) => {
         setSearchTerm(value);
     };
-    
+
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="title-section">
@@ -184,7 +184,7 @@ const CatagoryTab = () => {
                             placeholder="Tìm kiếm theo tên danh mục"
                             value={searchTerm}
                             onChange={handleOnChange}
-                            enable = {true}
+                            enable={true}
                         />
                     </div>
 
@@ -201,8 +201,8 @@ const CatagoryTab = () => {
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '20%' }}>Mã</th>
-                            <th scope="col" style={{ width: '20%' }}>Tên danh mục</th>
                             <th scope="col" style={{ width: '20%' }}>Ảnh</th>
+                            <th scope="col" style={{ width: '20%' }}>Tên danh mục</th>
                             <th scope="col" style={{ width: '20%' }}>Mô tả</th>
                             <th scope="col" style={{ width: '20%' }}>Sửa/Xóa</th>
                         </tr>
@@ -218,13 +218,12 @@ const CatagoryTab = () => {
                             filteredCategories.map((category) => (
                                 <tr key={category._id}>
                                     <td>{category.code}</td>
-                                    <td>{category.name.length > 20 ? category.name.slice(0, 20) + '...' : category.name}</td>
-
                                     <td><img
-                                            src={category.img}
-                                            alt={category.name}
-                                            style={{ width: '80px', height: '100px', objectFit: 'cover' }}
-                                        /></td>
+                                        src={category.img}
+                                        alt={category.name}
+                                        style={{ width: '80px', height: '100px', objectFit: 'cover' }}
+                                    /></td>
+                                    <td>{category.name.length > 20 ? category.name.slice(0, 20) + '...' : category.name}</td>
                                     <td>{category.note && category.note.length > 30 ? category.note.slice(0, 30) + '...' : category.note || 'Không có'}</td>
                                     <td>
                                         <button
@@ -266,7 +265,7 @@ const CatagoryTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteCategoryInput"
@@ -275,30 +274,29 @@ const CatagoryTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div className="mb-3">
-                        <input
-                        // className="product__image"
-                        type="file"
-                        onChange={handleChangeImg}
-                        accept="image/*"
-                        required
-                    />
-                    <div className="news__image">
-                        {previewImage && (
-                            <img
-                                src={previewImage}
-                                alt="Preview"
-                                className="product-preview"
-                                style={{
-                                    width: "36rem",
-                                    height: "40rem",
-                                    borderRadius: "15px"
-                                }}
+                            <input
+                                type="file"
+                                onChange={handleChangeImg}
+                                accept="image/*"
+                                required
                             />
-                        )}
-                    </div>
+                            <div className="news__image">
+                                {previewImage && (
+                                    <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="product-preview"
+                                        style={{
+                                            width: "36rem",
+                                            height: "40rem",
+                                            borderRadius: "15px"
+                                        }}
+                                    />
+                                )}
+                            </div>
                         </div>
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {errorMessage && (

@@ -1,30 +1,36 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import FormComponent from '../../components/FormComponent/FormComponent';
-import ModalComponent from '../../components/ModalComponent/ModalComponent';
-import './AdminPage.css';
-import { useMutationHook } from "../../hooks/useMutationHook";
-import * as FormatService from '../../services/OptionService/FormatService';
-import * as message from "../../components/MessageComponent/MessageComponent";
-import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import ModalComponent from '../../components/ModalComponent/ModalComponent';
+import * as FormatService from '../../services/OptionService/FormatService';
+import './AdminPage.css';
 
 const FormSubTab = () => {
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
-    const [selectedFormat, setSelectedFormat] = useState(null); // Lưu trữ format đang được chọn
+    const [selectedFormat, setSelectedFormat] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-
-    const [searchTerm, setSearchTerm] = useState(''); 
-        const [filteredFormats, setFilteredFormat] = useState([]); 
-
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredFormats, setFilteredFormats] = useState([]);
+    const queryClient = useQueryClient();
+    
     // Hàm thay đổi tên hình thức
     const handleOnChangeName = (value) => setName(value);
     
     // Hàm thay đổi ghi chú
     const handleOnChangeNote = (value) => setNote(value);
-
+    
+    // Reset form
+    const resetForm = () => {
+        setName('');
+        setNote('');
+        setSelectedFormat(null);
+    };
+    
     // Kiểm tra form có hợp lệ không
     const validateForm = () => {
         if (!name) {
@@ -34,105 +40,117 @@ const FormSubTab = () => {
         setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
         return true;
     };
-
-    // Gọi hook để thêm hình thức
-    const addMutation = useMutationHook(data => FormatService.addFormat(data));
-    const updateMutation = useMutationHook(data => FormatService.updateFormat(selectedFormat._id, data)); // Sửa format
-    const deleteMutation = useMutationHook(data => FormatService.deleteFormat(data)); // Xóa format
-
+    
+    // Hook thêm hình thức
+    const addMutation = useMutation(data => FormatService.addFormat(data), {
+        onSuccess: () => {
+            alert("Thêm hình thức mới thành công!");
+            resetForm();
+            setShowModal(false);
+            queryClient.invalidateQueries(['formats']);
+        },
+        onError: () => {
+            message.error("Thêm hình thức thất bại!");
+        }
+    });
+    
+    // Hook cập nhật hình thức
+    const updateMutation = useMutation(data => {
+        if (!selectedFormat) return;
+        return FormatService.updateFormat(selectedFormat._id, data);
+    }, {
+        onSuccess: () => {
+            alert("Cập nhật hình thức thành công!");
+            resetForm();
+            setShowModal(false);
+            queryClient.invalidateQueries(['formats']);
+        },
+        onError: () => {
+            message.error("Cập nhật thất bại!");
+        }
+    });
+    
+    // Hook xóa hình thức
+    const deleteMutation = useMutation(id => FormatService.deleteFormat(id), {
+        onSuccess: () => {
+            alert("Xóa hình thức thành công!");
+            queryClient.invalidateQueries(['formats']);
+        },
+        onError: () => {
+            message.error("Xóa thất bại!");
+        }
+    });
+    
     // Lấy danh sách hình thức từ API
-    const getAllFormat = async () => {
+    const getAllFormats = async () => {
         const res = await FormatService.getAllFormat();
         return res.data;
     };
-
+    
     const { isLoading: isLoadingFormat, data: formats } = useQuery({
         queryKey: ['formats'],
-        queryFn: getAllFormat,
+        queryFn: getAllFormats,
     });
-
-    const { data, isSuccess, isError } = addMutation;
-    const { isSuccess: isSuccessUpdate, isError: isErrorUpdate } = updateMutation;
-    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
-
-    // Reset form sau khi thêm hoặc sửa
-    const resetForm = () => {
-        setName('');
-        setNote('');
-        setSelectedFormat(null);
-    };
-
+    
+    // Tìm kiếm hình thức theo tên
     useEffect(() => {
-        if (isSuccess && data?.status !== 'ERR') {
-            message.success();
-            alert('Thêm hình thức mới thành công!');
-            resetForm();
-            setShowModal(false);
+        if (formats) {
+            setFilteredFormats(
+                formats.filter(format =>
+                    format.name.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+            );
         }
-        if (isSuccessUpdate && data?.status !== 'ERR') {
-            message.success();
-            alert('Cập nhật hình thức thành công!');
-            resetForm();
-            setShowModal(false);
-        }
-        if (isError || isErrorUpdate || isErrorDelete) {
-            message.error();
-        }
-    }, [isSuccess, isError, isSuccessUpdate, isErrorUpdate, isSuccessDelete, isErrorDelete, data?.status]);
-
+    }, [searchTerm, formats]);
+    
     // Mở modal để thêm hình thức
     const handleAddFormat = () => {
+        resetForm();
         setShowModal(true);
         setSelectedFormat(null);
     };
-
+    
     // Mở modal để sửa hình thức
     const handleEditFormat = (format) => {
+        if (!format) return;
         setName(format.name);
         setNote(format.note);
         setSelectedFormat(format);
         setShowModal(true);
     };
-
-    // Xử lý lưu hình thức
-    const onSave = async () => {
-       if (validateForm()) {
+    
+    // Xử lý xóa hình thức
+    const handleDeleteFormat = (format) => {
+        if (!format || !format._id) return;
+        if (window.confirm(`Bạn có chắc chắn muốn xóa hình thức "${format.name}" không?`)) {
+            deleteMutation.mutate(format._id);
+        }
+    };
+    
+    // Xử lý lưu hình thức (thêm mới hoặc cập nhật)
+    const onSave = () => {
+        if (validateForm()) {
             const dataToSave = { name, note };
-            if (selectedFormat) {
-                dataToSave.id = selectedFormat._id;
-                updateMutation.mutate(dataToSave); // Cập nhật hình thức
+            if (selectedFormat && selectedFormat._id) {
+                updateMutation.mutate(dataToSave);
             } else {
-                addMutation.mutate(dataToSave); // Thêm mới hình thức
+                addMutation.mutate(dataToSave);
             }
         }
     };
-
-    // Hủy thao tác thêm hoặc sửa hình thức
+    
+    // Hủy thao tác thêm/sửa hình thức
     const onCancel = () => {
-        alert('Hủy thao tác!');
         resetForm();
         setShowModal(false);
     };
-
-    // Xử lý xóa hình thức
-    const handleDeleteFormat = (formatId) => {
-        if (window.confirm(`Bạn có chắc chắn muốn xóa hình thức này không?`)) {
-            deleteMutation.mutate(formatId);
-        }
-    };
-
+    
+    // Xử lý thay đổi ô tìm kiếm
     const handleOnChange = (value) => {
-            setSearchTerm(value);
-        };
+        setSearchTerm(value);
+    };
     
-        useEffect(() => {
-                if (formats) {
-                    setFilteredFormat(
-                        formats.filter(format => format.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                    );
-                }
-            }, [searchTerm, formats]);
-    
+
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -143,7 +161,7 @@ const FormSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên hình thức"
-                            enable = {true}
+                            enable={true}
                             onChange={handleOnChange}
                         />
                     </div>
@@ -163,7 +181,7 @@ const FormSubTab = () => {
                             <th scope="col" style={{ width: '30%' }}>Mã</th>
                             <th scope="col" style={{ width: '20%' }}>Tên hình thức</th>
                             <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}>Hành động</th>
+                            <th scope="col" style={{ width: '10%' }}>Sửa/Xóa</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
@@ -176,9 +194,9 @@ const FormSubTab = () => {
                         ) : filteredFormats && filteredFormats.length > 0 ? (
                             filteredFormats.map((format) => (
                                 <tr key={format._id}>
-                                    <td>{format._id}</td>
-                                    <td>{format.name}</td>
-                                    <td>{format.note||'*'}</td>
+                                    <td>{format.code}</td>
+                                    <td>{format.name.length > 20 ? format.name.slice(0, 20) + '...' : format.name}</td>
+                                    <td>{format.note && format.note.length > 30 ? format.note.slice(0, 30) + '...' : format.note || 'Không có'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -188,7 +206,7 @@ const FormSubTab = () => {
                                         </button>
                                         <button
                                             className="btn btn-sm btn-danger"
-                                            onClick={() => handleDeleteFormat(format._id)}
+                                            onClick={() => handleDeleteFormat(format)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -220,7 +238,7 @@ const FormSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteUnitInput"
@@ -229,7 +247,7 @@ const FormSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
-                            enable = {true}
+                            enable={true}
                         />
                         {/* Hiển thị lỗi nếu có */}
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
@@ -238,8 +256,6 @@ const FormSubTab = () => {
                                     {errorMessage}
                                 </div>
                             )}
-                            {data?.status === 'ERR' &&
-                                <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
                         </div>
                     </>
                 }

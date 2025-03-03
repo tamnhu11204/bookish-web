@@ -66,7 +66,7 @@ const UnitSubTab = () => {
     useEffect(() => {
         if (isEditSuccess && editData?.status !== 'ERR') {
             message.success();
-            alert('Chỉnh sửa đơn vị thành công!');
+            alert('Cập nhật đơn vị thành công!');
             resetForm();
             setEditModal(false);
         } else if (isEditError) {
@@ -167,7 +167,7 @@ const UnitSubTab = () => {
                             <th scope="col" style={{ width: '30%' }}>Mã</th>
                             <th scope="col" style={{ width: '20%' }}>Tên đơn vị</th>
                             <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}>Hành động</th>
+                            <th scope="col" style={{ width: '10%' }}>Sửa/Xóa</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
@@ -180,9 +180,9 @@ const UnitSubTab = () => {
                         ) : filteredUnits && filteredUnits.length > 0 ? (
                             filteredUnits.map((unit) => (
                                 <tr key={unit._id}>
-                                    <td>{unit._id}</td>
-                                    <td>{unit.name}</td>
-                                    <td>{unit.note||'*'}</td>
+                                    <td>{unit.code}</td>
+                                    <td>{unit.name.length > 20 ? unit.name.slice(0, 20) + '...' : unit.name}</td>
+                                    <td>{unit.note && unit.note.length > 30 ? unit.note.slice(0, 30) + '...' : unit.note || 'Không có'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -254,7 +254,7 @@ const UnitSubTab = () => {
             {/* Modal Chỉnh Sửa Đơn Vị */}
             <ModalComponent
                 isOpen={editModal}
-                title="CHỈNH SỬA ĐƠN VỊ"
+                title="CẬP NHẬT ĐƠN VỊ"
                 body={
                     <>
                         <FormComponent

@@ -350,7 +350,7 @@ const ProductDetailForm = ({isOpen, IDProduct,onCancel}) => {
   if (!isOpen) return null;
   return (
     <div className="container my-4">
-      <h4>Chỉnh sửa sản phẩm</h4>
+      <h4>Cập nhật sản phẩm</h4>
       
       <div className="row">
         <div className="col-md-6 mb-3">

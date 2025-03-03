@@ -14,20 +14,23 @@ const PublisherSubTab = () => {
     // State quản lý modal
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
-    const [img, setImage] = useState('');
+    const [img, setImage] = useState(null);
     const [id, setID] = useState('');
     const [editingPublisher, setEditingPublisher] = useState(null);
     const [rowSelected, setRowSelected] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
 
-     const [searchTerm, setSearchTerm] = useState(''); 
+    const [previewImage, setPreviewImage] = useState(null);
+
+    const [searchTerm, setSearchTerm] = useState('');
     const [filteredPublishers, setFilteredPublishers] = useState([]);
 
     const resetForm = () => {
         setName('');
         setNote('');
-        setImage('');
+        setImage(null);
+        setPreviewImage(null);
         setEditingPublisher(null);
     };
 
@@ -51,24 +54,13 @@ const PublisherSubTab = () => {
     const { data: deleteData, isSuccess: isDeleteSuccess, isError: isDeleteError } = mutationDelete;
 
     // Xử lý chọn ảnh và nén ảnh
-    const handleImageChange = (event) => {
+    const handleChangeImg = (event) => {
         const file = event.target.files[0];
         if (file) {
-            new Compressor(file, {
-                quality: 0.6,
-                maxWidth: 800,
-                maxHeight: 800,
-                success(result) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        setImage(reader.result); // Cập nhật ảnh đã nén dưới dạng base64
-                    };
-                    reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
-                },
-                error(err) {
-                    console.error(err);
-                }
-            });
+            setImage(file);
+            setPreviewImage(URL.createObjectURL(file));
+        } else {
+            console.error("Không có file hợp lệ được chọn!");
         }
     };
 
@@ -87,7 +79,7 @@ const PublisherSubTab = () => {
     useEffect(() => {
         if (isEditSuccess && editData?.status !== 'ERR') {
             message.success();
-            alert('Chỉnh sửa nhà xuất bản thành công!');
+            alert('Cập nhật nhà xuất bản thành công!');
             resetForm();
             setEditModal(false);
         }
@@ -118,6 +110,7 @@ const PublisherSubTab = () => {
         setName(publisher.name);
         setNote(publisher.note);
         setImage(publisher.img);
+        setPreviewImage(publisher.img);
     };
 
     const handleDeletePublisher = async (publisher) => {
@@ -131,17 +124,43 @@ const PublisherSubTab = () => {
     };
 
     const onSave = async () => {
-        if (editingPublisher) {
-            await mutationEdit.mutateAsync({ id: editingPublisher._id, name, note, img });
-        } else {
-            await mutation.mutateAsync({ name, note, img });
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("note", note);
+
+        if (img instanceof File) {
+            formData.append("img", img);
+        } else if (typeof img === "string" && img.startsWith("http")) {
+            formData.append("existingImg", img);
         }
+
+        mutation.mutate(formData);
     };
 
     const onSave2 = async () => {
-        await mutationEdit.mutateAsync({ id, name, note, img });
-        getAllPublisher();
+        if (!id) {
+            console.error("Lỗi: ID không hợp lệ!");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("note", note);
+
+        if (img instanceof File) {
+            formData.append("img", img);
+        } else if (typeof img === "string" && img.startsWith("http")) {
+            formData.append("existingImg", img);
+        }
+
+        // Kiểm tra dữ liệu form trước khi gửi
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        mutationEdit.mutate(formData);
     };
+
 
     const onDelete = async () => {
         await mutationDelete.mutateAsync({ id });
@@ -160,16 +179,16 @@ const PublisherSubTab = () => {
     };
 
     const handleOnChange = (value) => {
-            setSearchTerm(value);
-        };
-    
-        useEffect(() => {
-                if (publishers) {
-                    setFilteredPublishers(
-                        publishers.filter(publisher => publisher.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                    );
-                }
-            }, [searchTerm, publishers]);
+        setSearchTerm(value);
+    };
+
+    useEffect(() => {
+        if (publishers) {
+            setFilteredPublishers(
+                publishers.filter(publisher => publisher.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+    }, [searchTerm, publishers]);
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -180,7 +199,7 @@ const PublisherSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên nhà xuất bản"
-                            enable = {true}
+                            enable={true}
                             onChange={handleOnChange}
                         />
                     </div>
@@ -197,10 +216,10 @@ const PublisherSubTab = () => {
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '20%' }}>Mã</th>
-                            <th scope="col" style={{ width: '10%' }}>Hình ảnh</th>
+                            <th scope="col" style={{ width: '20%' }}>Hình ảnh</th>
                             <th scope="col" style={{ width: '20%' }}>Tên nhà xuất bản</th>
-                            <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}></th>
+                            <th scope="col" style={{ width: '20%' }}>Ghi chú</th>
+                            <th scope="col" style={{ width: '20%' }}>Sửa/Xóa</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
@@ -213,16 +232,16 @@ const PublisherSubTab = () => {
                         ) : filteredPublishers && filteredPublishers.length > 0 ? (
                             filteredPublishers.map((publisher) => (
                                 <tr key={publisher._id}>
-                                    <td>{publisher._id}</td>
+                                    <td>{publisher.code}</td>
                                     <td>
                                         <img
                                             src={publisher.img}
                                             alt={publisher.name}
-                                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            style={{ width: '80px', height: '100px', objectFit: 'cover' }}
                                         />
                                     </td>
-                                    <td>{publisher.name}</td>
-                                    <td>{publisher.note||'*'}</td>
+                                    <td>{publisher.name.length > 20 ? publisher.name.slice(0, 20) + '...' : publisher.name}</td>
+                                    <td>{publisher.note && publisher.note.length > 30 ? publisher.note.slice(0, 30) + '...' : publisher.note || 'Không có'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -262,7 +281,7 @@ const PublisherSubTab = () => {
                             placeholder="Nhập tên nhà xuất bản"
                             value={name}
                             onChange={setName}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="notePublisherInput"
@@ -271,24 +290,29 @@ const PublisherSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={setNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div className="mb-3">
-                            <label htmlFor="image" className="form-label">Hình ảnh</label>
-                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
-                                {img ? (
-                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
-                                ) : (
-                                    <span className="text-muted">Chọn hình ảnh</span>
-                                )}
-                            </div>
                             <input
                                 type="file"
-                                id="image"
-                                className="form-control mt-2"
+                                onChange={handleChangeImg}
                                 accept="image/*"
-                                onChange={handleImageChange}
+                                required
                             />
+                            <div className="news__image">
+                                {previewImage && (
+                                    <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="product-preview"
+                                        style={{
+                                            width: "36rem",
+                                            height: "40rem",
+                                            borderRadius: "15px"
+                                        }}
+                                    />
+                                )}
+                            </div>
                         </div>
                         {data?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
                     </>
@@ -300,7 +324,7 @@ const PublisherSubTab = () => {
 
             <ModalComponent
                 isOpen={editModal}
-                title={editingPublisher ? "CHỈNH SỬA NHÀ XUẤT BẢN" : "CHỈNH SỬA NHÀ XUẤT BẢN"}
+                title={editingPublisher ? "CẬP NHẬT NHÀ XUẤT BẢN" : "CẬP NHẬT NHÀ XUẤT BẢN"}
                 body={
                     <>
                         <FormComponent
@@ -310,7 +334,7 @@ const PublisherSubTab = () => {
                             placeholder={rowSelected.name}
                             value={name}
                             onChange={setName}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="notePublisherInput"
@@ -319,24 +343,29 @@ const PublisherSubTab = () => {
                             placeholder={rowSelected.note}
                             value={note}
                             onChange={setNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div className="mb-3">
-                            <label htmlFor="image" className="form-label">Hình ảnh</label>
-                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
-                                {img ? (
-                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
-                                ) : (
-                                    <span className="text-muted">Chọn hình ảnh</span>
-                                )}
-                            </div>
                             <input
                                 type="file"
-                                id="image"
-                                className="form-control mt-2"
+                                onChange={handleChangeImg}
                                 accept="image/*"
-                                onChange={handleImageChange}
+                                required
                             />
+                            <div className="news__image">
+                                {previewImage && (
+                                    <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="product-preview"
+                                        style={{
+                                            width: "36rem",
+                                            height: "40rem",
+                                            borderRadius: "15px"
+                                        }}
+                                    />
+                                )}
+                            </div>
                         </div>
                         {editData?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{editData?.message}</span>}
                     </>
