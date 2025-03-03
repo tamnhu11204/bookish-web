@@ -43,7 +43,8 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
 
   return (
     <>
-      <nav className="navbar" style={{ backgroundColor: '#198754', height: '60px' }}>
+      <nav className="navbar sticky-header">
+
         <div className="container">
           <a className="navbar-brand" href="/">
             {/* Hiển thị logo từ Redux hoặc logo mặc định nếu không có */}
@@ -177,7 +178,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
         </div>
       </nav>
 
-      <nav className="navbar" style={{ height: '60px' }}>
+      <nav className="navbar" style={{ height: '60px' , position: 'sticky', top: '55px', zIndex: 999, backgroundColor: '#fff'}}>
         <div className="container">
           <ul className="nav nav-underline">
             <li className="nav-item">

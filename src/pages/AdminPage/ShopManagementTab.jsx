@@ -117,6 +117,7 @@ const ShopManagementTab = () => {
         setInsta(data.insta || '');
         setBank(data.bank||'')
         setMomo(data.momo||'')
+        setDeliveryFee(data.deliveryFee )
       } catch (error) {
         console.error('Error fetching shop details:', error);
       }

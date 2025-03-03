@@ -153,7 +153,7 @@ const ProductTab = () => {
         return (
             <div style={{ padding: '0 20px' }}>
                 <div className="title-section">
-                    <h3 className="text mb-0">DANH SÁCH ĐƠN HÀNG</h3>
+                    <h3 className="text mb-0">DANH SÁCH SẢN PHẨM</h3>
                 </div>
 
                 <div className="content-section" style={{ marginTop: '30px' }}>

@@ -65,7 +65,7 @@ const ImportTab = () => {
             setShowModal(false);
         });
         setOnCancel(() => () => {
-            alert('Hủy thêm danh mục!');
+            alert('Trở về trang nhập hàng');
             setShowModal(false);
         });
         setShowModal(true);
@@ -100,7 +100,7 @@ const ImportTab = () => {
             setShowModal(false);
         });
         setOnCancel(() => () => {
-            alert('Hủy cập nhật danh mục!');
+            alert('Trở về trang nhập hàng!');
             setShowModal(false);
         });
         setShowModal(true);
@@ -124,6 +124,7 @@ const ImportTab = () => {
         setShowModal(true);
     };
     
+   
 
      if (showModal == false)return (
         <div style={{ padding: '0 20px' }}>
@@ -133,6 +134,7 @@ const ImportTab = () => {
 
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center mb-3">
+                    
                     <div className="col-6">
                         <FormComponent
                             id="searchInput"
@@ -196,12 +198,14 @@ const ImportTab = () => {
     );
     if(Type== false) return(
         <ImportDetails
-            isOpen={showModal}/>
+            isOpen={showModal}
+            onCancel={onCancel}/>
     );
     if(Type== true) return(
         <AddImport
         isOpen={showModal}
-        type={Type}/>
+        type={Type}
+        onCancel={onCancel}/>
     );
    
 };

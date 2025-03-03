@@ -1,6 +1,7 @@
 import React from "react";
+import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 
-const ImportDetails = ({isOpen,type}) => {
+const ImportDetails = ({isOpen,type,onCancel}) => {
   // Dữ liệu mẫu
   const supplier = {
     name: "An Nam",
@@ -124,6 +125,12 @@ const ImportDetails = ({isOpen,type}) => {
         <h5 className="text-danger">
           Tổng tiền: {total.toLocaleString()}đ
         </h5>
+      </div>
+      <div className="text-end">
+      <ButtonComponent
+              textButton="Trở về"
+              onClick={onCancel}
+           />
       </div>
     </div>
     </div>

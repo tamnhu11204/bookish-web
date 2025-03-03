@@ -17,4 +17,13 @@
   .search-button:hover {
     background-color: #b71c1c; /* Màu khi hover */
   }
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #198754; /* Đảm bảo màu nền */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Tùy chọn: tạo bóng */
+  }
+  
   

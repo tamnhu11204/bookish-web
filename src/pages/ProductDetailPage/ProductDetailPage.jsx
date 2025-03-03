@@ -418,7 +418,7 @@ const ProductDetailPage = () => {
                   </div>
                   <div className="col-2">
                     <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '16px', backgroundColor: '#E4F7CB', marginTop: '5px', color: '#198754' }}>
-                      -{product.discount}%
+                      -{product.discount||0}%
                     </div>
                   </div>
                   <div className="col">

@@ -28,7 +28,7 @@ const SearchPage = () => {
   const [selectedFormats, setSelectedFormats] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 16; // Số sản phẩm trên mỗi trang
+  const productsPerPage = 12; // Số sản phẩm trên mỗi trang
   const [totalPages, setTotalPages] = useState(1); // Khởi tạo giá trị totalPages
 
   const getAllProduct = async () => {
