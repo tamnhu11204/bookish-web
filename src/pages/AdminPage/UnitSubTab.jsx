@@ -15,8 +15,8 @@ const UnitSubTab = () => {
     const [editModal, setEditModal] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState(null);
 
-    const [searchTerm, setSearchTerm] = useState(''); 
-    const [filteredUnits, setFilteredUnits] = useState([]); 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredUnits, setFilteredUnits] = useState([]);
 
     const resetForm = () => {
         setName('');
@@ -128,17 +128,17 @@ const UnitSubTab = () => {
     };
 
     const handleOnChange = (value) => {
-            setSearchTerm(value);
-        };
-    
-        useEffect(() => {
-                if (units) {
-                    setFilteredUnits(
-                        units.filter(unit => unit.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                    );
-                }
-            }, [searchTerm, units]);
-    
+        setSearchTerm(value);
+    };
+
+    useEffect(() => {
+        if (units) {
+            setFilteredUnits(
+                units.filter(unit => unit.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+    }, [searchTerm, units]);
+
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -149,7 +149,7 @@ const UnitSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên đơn vị"
-                            enable = {true}
+                            enable={true}
                             onChange={handleOnChange}
                         />
                     </div>
@@ -224,7 +224,7 @@ const UnitSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteUnitInput"
@@ -233,7 +233,7 @@ const UnitSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {errorMessage && (
@@ -265,7 +265,7 @@ const UnitSubTab = () => {
                             value={name}
                             onChange={handleOnChangeName}
                             required={true}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteUnitInputEdit"
@@ -274,7 +274,7 @@ const UnitSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={handleOnChangeNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div style={{ display: "flex", justifyContent: "center", marginTop: "10px", }}>
                             {editData?.status === 'ERR' &&

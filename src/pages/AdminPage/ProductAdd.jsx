@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import Compressor from 'compressorjs';
 import React, { useEffect, useState } from "react";
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import FormComponent from '../../components/FormComponent/FormComponent';
@@ -15,7 +14,7 @@ import * as UnitService from "../../services/OptionService/UnitService";
 import * as ProductService from "../../services/ProductService";
 import TextEditor from "./partials/TextEditor";
 
-const AddProductForm = ({isOpen,onCancel}) => {
+const AddProductForm = ({ isOpen, onCancel }) => {
 
   // State lưu trữ thông tin sản phẩm
   const [product1, setProduct] = useState({
@@ -46,10 +45,11 @@ const AddProductForm = ({isOpen,onCancel}) => {
   const [width, setWidth] = useState(0);
   const [length, setLength] = useState(0);
   const [price, setPrice] = useState(0);
-  const [img, setImage] = useState([]); // Đổi img thành mảng
+  const [img, setImage] = useState([]);
+  const [previewImage, setPreviewImage] = useState([]);
   const [description, setDescription] = useState('');
-  const [discount,setDiscount] = useState(0);
-  const [  priceEntry, setPriceEntry] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  const [priceEntry, setPriceEntry] = useState(0);
   const handleOnChangePriceEntry = (value) => setPriceEntry(value);
 
   const handleOnChangeName = (value) => setName(value);
@@ -61,10 +61,11 @@ const AddProductForm = ({isOpen,onCancel}) => {
   const handleOnChangeWidth = (value) => setWidth(value);
   const handleOnChangeLength = (value) => setLength(value);
   const handleOnChangeDescription = (value) => setDescription(value);
-  const handleOnChangePrice = (value) => {setPrice(value);
-    const calculatedPriceEntry = (value * (100-discount)) / 100;
+  const handleOnChangePrice = (value) => {
+    setPrice(value);
+    const calculatedPriceEntry = (value * (100 - discount)) / 100;
     setPriceEntry(calculatedPriceEntry)
-   };
+  };
 
   const mutation = useMutationHook(data => ProductService.addProduct(data));
   const { data, isSuccess, isError } = mutation;
@@ -82,70 +83,63 @@ const AddProductForm = ({isOpen,onCancel}) => {
   }, [isSuccess, isError, data?.status]);
 
   const onSave = async () => {
-    if (
-      author === "" || name === "" || price === ""
-    ) {
+    if (!author || !name || !price) {
       alert('Cần nhập đầy đủ thông tin!');
+      return;
     }
-    else {
-      const productData = {
-        name,
-        author,
-        publishDate: pubdate,
-        weight,
-        height,
-        width,
-        length,
-        page,
-        description,
-        price,
-        img,
-        star: 0,
-        favorite: 0,
-        score: 0,
-        hot: false,
-        view: 0,
-        publisher: selectedPublisher,
-        supplier: selectedSupplier,
-        language: selectedLanguage,
-        format: selectedFormat,
-        unit: selectedUnit,
-        category: selectedCategory,
-      };
-      setProduct(name, author, pubdate, weight, "", "", "", page, "", price, img, "", "", "", "", "");
-      mutation.mutate(productData); // Add new product
-      alert('Thêm sản phẩm mới thành công!');
-      onCancel();
-    }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("author", author);
+    formData.append("publishDate", pubdate);
+    formData.append("weight", weight);
+    formData.append("height", height);
+    formData.append("width", width);
+    formData.append("length", length);
+    formData.append("page", page);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("star", 0);
+    formData.append("favorite", 0);
+    formData.append("score", 0);
+    formData.append("hot", false);
+    formData.append("view", 0);
+    formData.append("publisher", selectedPublisher);
+    formData.append("supplier", selectedSupplier);
+    formData.append("language", selectedLanguage);
+    formData.append("format", selectedFormat);
+    formData.append("unit", selectedUnit);
+    formData.append("category", selectedCategory);
+
+    // Thêm danh sách ảnh vào FormData
+    img.forEach((imageFile, index) => {
+      formData.append(`img`, imageFile);
+    });
+
+    mutation.mutate(formData); // Gửi dữ liệu lên server
+    alert('Thêm sản phẩm mới thành công!');
+    onCancel();
   };
+
 
   // Xử lý chọn ảnh và nén ảnh
-  const handleImageChange = (event) => {
-    const files = Array.from(event.target.files); // Lấy nhiều file ảnh
+  const handleChangeImg = (event) => {
+    const files = Array.from(event.target.files);
     if (files.length > 0) {
-      files.forEach((file) => {
-        new Compressor(file, {
-          quality: 0.6,
-          maxWidth: 800,
-          maxHeight: 800,
-          success(result) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              setImage((prevImg) => [...prevImg, reader.result]); // Thêm ảnh vào mảng
-            };
-            reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
-          },
-          error(err) {
-            console.error(err);
-          }
-        });
-      });
+        setImage((prev) => [...prev, ...files]); // Lưu file ảnh để gửi lên server
+        setPreviewImage((prev) => [...prev, ...files.map(file => URL.createObjectURL(file))]); // Hiển thị ảnh preview
+    } else {
+        console.error("Không có file hợp lệ được chọn!");
     }
-  };
+};
 
-  const handleRemoveImage = (imageIndex) => {
-    setImage((prevImg) => prevImg.filter((_, index) => index !== imageIndex)); // Xóa ảnh khi nhấn
-  };
+
+
+const handleRemoveImage = (index) => {
+  setImage((prev) => prev.filter((_, i) => i !== index));
+  setPreviewImage((prev) => prev.filter((_, i) => i !== index));
+};
+
 
 
   //Xử lý nhà xuất bản
@@ -196,13 +190,13 @@ const AddProductForm = ({isOpen,onCancel}) => {
 
   });
 
-    const AllLang = Array.isArray(languages) && languages.length > 0
+  const AllLang = Array.isArray(languages) && languages.length > 0
     ? languages.map((language) => ({
-        value: language._id,
-        label: language.name,
-      }))
+      value: language._id,
+      label: language.name,
+    }))
     : [];
-  
+
 
   //Xử lý Format
   const [selectedFormat, setSelectedFormat] = useState("");
@@ -310,9 +304,11 @@ const AddProductForm = ({isOpen,onCancel}) => {
     }))
     : [];
 
-    const handleOnChangeDiscount = (value) => { setDiscount(value);
-      const calculatedPriceEntry = (price * (100-value)) / 100;
-      setPriceEntry(calculatedPriceEntry)};
+  const handleOnChangeDiscount = (value) => {
+    setDiscount(value);
+    const calculatedPriceEntry = (price * (100 - value)) / 100;
+    setPriceEntry(calculatedPriceEntry)
+  };
 
 
 
@@ -513,8 +509,8 @@ const AddProductForm = ({isOpen,onCancel}) => {
         <div className="mb-3">
           <label htmlFor="image" className="form-label" style={{ fontSize: '16px' }}>Hình ảnh</label>
           <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "200px", overflow: "hidden" }}>
-            {img.length > 0 ? (
-              img.map((image, index) => (
+            {previewImage.length > 0 ? (
+              previewImage.map((image, index) => (
                 <div key={index} className="position-relative d-inline-block me-2" style={{ width: '100px', height: '100px', margin: '5px' }}>
                   <img
                     src={image}
@@ -542,7 +538,7 @@ const AddProductForm = ({isOpen,onCancel}) => {
             className="form-control mt-2"
             accept="image/*"
             multiple
-            onChange={handleImageChange}
+            onChange={handleChangeImg}
           />
         </div>
 
@@ -563,27 +559,27 @@ const AddProductForm = ({isOpen,onCancel}) => {
         <div className="col-md-4 mb-3">
           <label className="form-label"></label>
           <FormComponent
-                  id="discount"
-                  label="Giảm giá"
-                  type="number"
-                  placeholder="Nhập giảm giá"
-                  value={discount}
-                  onChange={handleOnChangeDiscount}
-                  required={true}
-                  enable = {true}
+            id="discount"
+            label="Giảm giá"
+            type="number"
+            placeholder="Nhập giảm giá"
+            value={discount}
+            onChange={handleOnChangeDiscount}
+            required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-4 mb-3">
           <label className="form-label"></label>
           <FormComponent
-                  id="PriceEntry"
-                  label="Giá sau giảm"
-                  type="number"
-                  placeholder=""
-                  value={priceEntry}
-                  onChange={handleOnChangePriceEntry}
-                  required={true}
-                  enable = {false}
+            id="PriceEntry"
+            label="Giá sau giảm"
+            type="number"
+            placeholder=""
+            value={priceEntry}
+            onChange={handleOnChangePriceEntry}
+            required={true}
+            enable={false}
           />
         </div>
       </div>

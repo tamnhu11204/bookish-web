@@ -14,20 +14,21 @@ const SupplierSubTab = () => {
     // State quản lý modal
     const [name, setName] = useState('');
     const [note, setNote] = useState('');
-    const [img, setImage] = useState('');
+    const [img, setImage] = useState(null);
     const [id, setID] = useState('');
     const [editingSupplier, setEditingSupplier] = useState(null);
     const [rowSelected, setRowSelected] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
-
-    const [searchTerm, setSearchTerm] = useState(''); 
+    const [previewImage, setPreviewImage] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [filteredSuppliers, setFilteredSuppliers] = useState([]);
 
     const resetForm = () => {
         setName('');
         setNote('');
-        setImage('');
+        setImage(null);
+        setPreviewImage(null);
         setEditingSupplier(null);
     };
 
@@ -51,24 +52,13 @@ const SupplierSubTab = () => {
     const { data: deleteData, isSuccess: isDeleteSuccess, isError: isDeleteError } = mutationDelete;
 
     // Xử lý chọn ảnh và nén ảnh
-    const handleImageChange = (event) => {
+    const handleChangeImg = (event) => {
         const file = event.target.files[0];
         if (file) {
-            new Compressor(file, {
-                quality: 0.6,
-                maxWidth: 800,
-                maxHeight: 800,
-                success(result) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        setImage(reader.result); // Cập nhật ảnh đã nén dưới dạng base64
-                    };
-                    reader.readAsDataURL(result); // Đọc ảnh đã nén dưới dạng base64
-                },
-                error(err) {
-                    console.error(err);
-                }
-            });
+            setImage(file);
+            setPreviewImage(URL.createObjectURL(file));
+        } else {
+            console.error("Không có file hợp lệ được chọn!");
         }
     };
 
@@ -118,6 +108,7 @@ const SupplierSubTab = () => {
         setName(supplier.name);
         setNote(supplier.note);
         setImage(supplier.img);
+        setPreviewImage(supplier.img);
     };
 
     const handleDeleteSupplier = async (supplier) => {
@@ -131,16 +122,41 @@ const SupplierSubTab = () => {
     };
 
     const onSave = async () => {
-        if (editingSupplier) {
-            await mutationEdit.mutateAsync({ id: editingSupplier._id, name, note, img });
-        } else {
-            await mutation.mutateAsync({ name, note, img });
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("note", note);
+
+        if (img instanceof File) {
+            formData.append("img", img);
+        } else if (typeof img === "string" && img.startsWith("http")) {
+            formData.append("existingImg", img);
         }
+
+        mutation.mutate(formData);
     };
 
     const onSave2 = async () => {
-        await mutationEdit.mutateAsync({ id, name, note, img });
-        getAllSupplier();
+        if (!id) {
+            console.error("Lỗi: ID không hợp lệ!");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("note", note);
+
+        if (img instanceof File) {
+            formData.append("img", img);
+        } else if (typeof img === "string" && img.startsWith("http")) {
+            formData.append("existingImg", img);
+        }
+
+        // Kiểm tra dữ liệu form trước khi gửi
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        mutationEdit.mutate(formData);
     };
 
     const onDelete = async () => {
@@ -160,16 +176,16 @@ const SupplierSubTab = () => {
     };
 
     const handleOnChange = (value) => {
-            setSearchTerm(value);
-        };
-    
-        useEffect(() => {
-                if (suppliers) {
-                    setFilteredSuppliers(
-                        suppliers.filter(supplier => supplier.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                    );
-                }
-            }, [searchTerm, suppliers]);
+        setSearchTerm(value);
+    };
+
+    useEffect(() => {
+        if (suppliers) {
+            setFilteredSuppliers(
+                suppliers.filter(supplier => supplier.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+    }, [searchTerm, suppliers]);
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -180,7 +196,8 @@ const SupplierSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên nhà cung cấp"
-                            enable = {true}
+                            enable={true}
+                            onChange={handleOnChange}
                         />
                     </div>
                     <div className="col-6 text-end">
@@ -221,7 +238,7 @@ const SupplierSubTab = () => {
                                         />
                                     </td>
                                     <td>{supplier.name}</td>
-                                    <td>{supplier.note||'*'}</td>
+                                    <td>{supplier.note || '*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
@@ -261,7 +278,7 @@ const SupplierSubTab = () => {
                             placeholder="Nhập tên nhà cung cấp"
                             value={name}
                             onChange={setName}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteSupplierInput"
@@ -270,24 +287,29 @@ const SupplierSubTab = () => {
                             placeholder="Nhập ghi chú"
                             value={note}
                             onChange={setNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div className="mb-3">
-                            <label htmlFor="image" className="form-label">Hình ảnh</label>
-                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
-                                {img ? (
-                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
-                                ) : (
-                                    <span className="text-muted">Chọn hình ảnh</span>
-                                )}
-                            </div>
                             <input
                                 type="file"
-                                id="image"
-                                className="form-control mt-2"
+                                onChange={handleChangeImg}
                                 accept="image/*"
-                                onChange={handleImageChange}
+                                required
                             />
+                            <div className="news__image">
+                                {previewImage && (
+                                    <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="product-preview"
+                                        style={{
+                                            width: "36rem",
+                                            height: "40rem",
+                                            borderRadius: "15px"
+                                        }}
+                                    />
+                                )}
+                            </div>
                         </div>
                         {data?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{data?.message}</span>}
                     </>
@@ -309,7 +331,7 @@ const SupplierSubTab = () => {
                             placeholder={rowSelected.name}
                             value={name}
                             onChange={setName}
-                            enable = {true}
+                            enable={true}
                         />
                         <FormComponent
                             id="noteSupplierInput"
@@ -318,24 +340,29 @@ const SupplierSubTab = () => {
                             placeholder={rowSelected.note}
                             value={note}
                             onChange={setNote}
-                            enable = {true}
+                            enable={true}
                         />
                         <div className="mb-3">
-                            <label htmlFor="image" className="form-label">Hình ảnh</label>
-                            <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "150px" }}>
-                                {img ? (
-                                    <img src={img} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%" }} />
-                                ) : (
-                                    <span className="text-muted">Chọn hình ảnh</span>
-                                )}
-                            </div>
                             <input
                                 type="file"
-                                id="image"
-                                className="form-control mt-2"
+                                onChange={handleChangeImg}
                                 accept="image/*"
-                                onChange={handleImageChange}
+                                required
                             />
+                            <div className="news__image">
+                                {previewImage && (
+                                    <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="product-preview"
+                                        style={{
+                                            width: "36rem",
+                                            height: "40rem",
+                                            borderRadius: "15px"
+                                        }}
+                                    />
+                                )}
+                            </div>
                         </div>
                         {editData?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{editData?.message}</span>}
                     </>

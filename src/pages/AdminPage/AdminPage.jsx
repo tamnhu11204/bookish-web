@@ -1,17 +1,16 @@
-import React, { useState } from 'react'
-import './AdminPage.css'
-import CategoryTab from './CategoryTab';
-import PromotionTab from './PromotionTab';
+import React, { useState } from 'react';
+import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
 import AccountManagementTab from './AccountManagementTab';
-import OptionTab from './OptionTab';
-import StatisticTab from './StatisticTab';
-import AccountTab from './AccountTab';
+import './AdminPage.css';
+import CategoryTab from './CategoryTab';
 import ImportTab from './ImportTab';
+import OptionTab from './OptionTab';
 import OrderTab from './OrderTab';
 import ProductTab from './ProductTab';
-import HeaderComponent from '../../components/HeaderComponent/HeaderComponent';
+import PromotionTab from './PromotionTab';
 import ShopManagementTab from './ShopManagementTab';
 import StaticPageManagement from './StaticPageManagement';
+import StatisticTab from './StatisticTab';
 
 const AdminPage = () => {
     const [activeTab, setActiveTab] = useState("shopManagement");

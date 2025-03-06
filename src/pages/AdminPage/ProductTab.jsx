@@ -217,15 +217,15 @@ const ProductTab = () => {
                                     const category = categories.find(cat => cat._id === product.category);
                                     return (
                                         <tr key={product.id}>
-                                            <td>{product._id}</td>
+                                            <td>{product.code}</td>
                                             <td>
                                                 <img
                                                     src={product.img[0]}
                                                     alt={product.name}
-                                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                                    style={{ width: '80px', height: '100px', objectFit: 'cover' }}
                                                 />
                                             </td>
-                                            <td>{product.name}</td>
+                                            <td>{product.name.length > 20 ? product.name.slice(0, 20) + '...' : product.name}</td>
                                             <td>{product.price}</td>
                                             <td>{product.discount}</td>
                                             <td>{category ? category.name : "Không xác định"}</td>
