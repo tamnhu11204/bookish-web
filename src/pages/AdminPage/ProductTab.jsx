@@ -13,29 +13,40 @@ import { useMutationHook } from "../../hooks/useMutationHook";
 import * as CategoryService from '../../services/CategoryService';
 import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
 
+// Hàm làm phẳng danh mục thành dạng cây
+const flattenCategoryTree = (categories, level = 0) => {
+    let result = [];
+    categories.forEach((category) => {
+        result.push({
+            value: category._id,
+            label: "-".repeat(level * 2) + " " + category.name, // Thêm dấu "-" để biểu thị cấp
+        });
+        if (category.children && category.children.length > 0) {
+            result = result.concat(flattenCategoryTree(category.children, level + 1));
+        }
+    });
+    return result;
+};
+
 const ProductTab = () => {
     const [activeTab, setActiveTab] = useState("all");
     const [productID, setProductID] = useState("");
-
-    // State quản lý modal
     const [showModal, setShowModal] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalBody, setModalBody] = useState(null);
-    const [textButton1, setTextButton1] = useState(''); // Nút Lưu/Cập nhật
+    const [textButton1, setTextButton1] = useState('');
     const [onSave, setOnSave] = useState(() => () => { });
     const [onCancel, setOnCancel] = useState(() => () => { });
     const [Type, setType] = useState(false);
-
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState("Tất cả danh mục");
 
     const fetchCategories = async () => {
         try {
-            const response = await CategoryService.getAllCategory();
+            const response = await CategoryService.getTreeCategory();
             setCategories(response.data);
         } catch (error) {
             console.error("Error fetching categories:", error);
@@ -68,7 +79,6 @@ const ProductTab = () => {
         queryFn: getAllProduct,
     });
 
-    // Hàm mở modal thêm danh mục
     const handleAddProduct = () => {
         setShowModal(true);
         setType(true);
@@ -78,7 +88,6 @@ const ProductTab = () => {
         setShowModal(false);
     };
 
-    // Hàm mở modal sửa danh mục
     const handleEditProduct = (product) => {
         setOnCancel(() => () => {
             setShowModal(false);
@@ -88,7 +97,6 @@ const ProductTab = () => {
         setProductID(product._id);
     };
 
-    // Xóa sản phẩm 
     const [selectedProduct, setSelectedProduct] = useState("");
     const deleteMutation = useMutationHook(data => ProductService.deleteProduct(selectedProduct._id));
     const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
@@ -115,36 +123,24 @@ const ProductTab = () => {
         setSearchTerm(value);
     };
 
-    // Xử lý danh mục
-    const [selectedCategory, setSelectedCategory] = useState("Tất cả danh mục");
-
     const handleOnChangeCategory = (e) => {
         setSelectedCategory(e.target.value);
     };
 
+    // Tạo danh sách tùy chọn dạng cây
     const AllCategory = [
         { value: "Tất cả danh mục", label: "Tất cả danh mục" },
-        ...(Array.isArray(categories)
-            ? categories.map((categorie) => ({
-                value: categorie._id,
-                label: categorie.name,
-            }))
-            : [])
+        ...(categories.length > 0 ? flattenCategoryTree(categories) : [])
     ];
 
     useEffect(() => {
         if (products) {
             const filtered = products.filter((product) => {
-                // Lọc theo tên sản phẩm
                 const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-                // Lọc theo danh mục
                 const matchesCategory =
                     selectedCategory === "Tất cả danh mục" || product.category === selectedCategory;
-
                 return matchesSearch && matchesCategory;
             });
-
             setFilteredProducts(filtered);
         }
     }, [searchTerm, selectedCategory, products]);
@@ -181,12 +177,12 @@ const ProductTab = () => {
                                 icon={<i className="bi bi-plus-circle"></i>}
                                 onClick={handleOpenModal}
                             />
-                            <div style={{marginTop:'10px'}}>
-                            <ButtonComponent
-                                textButton="Thêm sản phẩm"
-                                icon={<i className="bi bi-plus-circle"></i>}
-                                onClick={handleAddProduct}
-                            />
+                            <div style={{ marginTop: '10px' }}>
+                                <ButtonComponent
+                                    textButton="Thêm sản phẩm"
+                                    icon={<i className="bi bi-plus-circle"></i>}
+                                    onClick={handleAddProduct}
+                                />
                             </div>
                         </div>
                     </div>

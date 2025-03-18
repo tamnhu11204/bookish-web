@@ -13,6 +13,20 @@ import * as SupplierService from "../../services/OptionService/SupplierService";
 import * as UnitService from "../../services/OptionService/UnitService";
 import * as ProductService from "../../services/ProductService";
 
+const flattenCategoryTree = (categories, level = 0) => {
+  let result = [];
+  categories.forEach((category) => {
+    result.push({
+      value: category._id,
+      label: "-".repeat(level * 2) + " " + category.name, // Thêm dấu "-" để biểu thị cấp
+    });
+    if (category.children && category.children.length > 0) {
+      result = result.concat(flattenCategoryTree(category.children, level + 1));
+    }
+  });
+  return result;
+};
+
 const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   // Xử lý khi thay đổi trường
   const [name, setName] = useState('');
@@ -333,24 +347,21 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
     setSelectedCategory(e.target.value);
   };
 
-  const getAllCategory = async () => {
-    const res = await CategoryService.getAllCategory();
+  const getTreeCategory = async () => {
+    const res = await CategoryService.getTreeCategory();
     return res.data;
   };
 
 
   const { isLoading: isLoadingCategory, data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: getAllCategory,
+    queryFn: getTreeCategory,
 
   });
 
   const AllCategory = Array.isArray(categories)
-    ? categories.map((categorie) => ({
-      value: categorie._id,
-      label: categorie.name,
-    }))
-    : [];
+  ? flattenCategoryTree(categories) // Chuyển cây thành danh sách phẳng
+  : [];
 
   // Xử lý khi nhấn nút Lưu sản phẩm
 

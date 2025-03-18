@@ -50,4 +50,17 @@
     object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
   }
   
+  .custom-img-container {
+    position: relative;
+    width: 100%; /* hoặc một giá trị cố định như 400px */
+    height: 400px; /* Chiều cao cố định cho khung ảnh */
+    overflow: hidden; /* Ẩn phần ảnh vượt ra ngoài khung */
+  }
+  
+  .custom-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Giữ tỷ lệ ảnh, không cắt */
+    /* Hoặc dùng object-fit: cover nếu muốn ảnh lấp đầy khung và bị cắt */
+  }
   

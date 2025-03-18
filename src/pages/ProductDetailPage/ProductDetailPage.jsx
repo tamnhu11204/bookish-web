@@ -19,38 +19,37 @@ import * as ProductService from '../../services/ProductService';
 import * as UserService from '../../services/UserService';
 import './ProductDetailPage.css';
 
-
 const ProductDetailPage = () => {
-  const user = useSelector((state) => state.user)
-  const navigate = useNavigate()
-  const location = useLocation()
+  const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [amount, setAmount] = useState(1);
-  const [feedbacks, setFeedbacks] = useState([])
+  const [feedbacks, setFeedbacks] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [productFavorite, setProductFavorite] = useState('');
-  const [proCategory, setProCategory] = useState([])
+  const [proCategory, setProCategory] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
       if (id) {
         const data = await ProductService.getDetailProduct(id);
-        setProduct(data?.data || null);  // Add null check for data
+        setProduct(data?.data || null);
       }
     };
     fetchProduct();
   }, [id]);
-
 
   const fetchFavoriteProducts = async () => {
     if (user?.id) {
       const favoriteData = await FavoriteProductService.getAllFavoriteProductByUser(user.id);
       if (favoriteData?.data) {
         const favoriteProduct = favoriteData.data.find(fav => fav.product === id);
-        setProductFavorite(favoriteProduct?._id || '');  // Store the _id of the favorite product
-        setIsFavorite(favoriteProduct ? true : false);  // Update the favorite state
+        setProductFavorite(favoriteProduct?._id || '');
+        setIsFavorite(favoriteProduct ? true : false);
       }
     }
   };
@@ -58,7 +57,6 @@ const ProductDetailPage = () => {
   useEffect(() => {
     fetchFavoriteProducts();
   }, [id, user?.id]);
-
 
   const { data: publisher } = useQuery({
     queryKey: ['publisher', product?.publisher],
@@ -120,45 +118,37 @@ const ProductDetailPage = () => {
 
   useEffect(() => {
     const fetchProductsByCategory = async () => {
-        if (product?.category) {
-            try {
-                const params = {
-                    limit: 10,
-                    page: 0,
-                    filter: ["category", product.category], // Định dạng filter theo API
-                };
-
-                const products = await ProductService.getAllProduct(params);
-
-                // Lọc bỏ sản phẩm hiện tại khỏi danh sách
-                const filteredProducts = products.data.filter(
-                    (item) => item._id !== product._id
-                );
-
-                setProCategory(filteredProducts); // Cập nhật danh sách sản phẩm đã loại trừ
-            } catch (error) {
-                console.error("Error fetching products:", error);
-            }
+      if (product?.category) {
+        try {
+          const params = {
+            limit: 10,
+            page: 0,
+            filter: ["category", product.category],
+          };
+          const products = await ProductService.getAllProduct(params);
+          const filteredProducts = products.data.filter(
+            (item) => item._id !== product._id
+          );
+          setProCategory(filteredProducts);
+        } catch (error) {
+          console.error("Error fetching products:", error);
         }
+      }
     };
-
     fetchProductsByCategory();
-}, [product?.category, product?._id]);
-
-
-
+  }, [product?.category, product?._id]);
 
   const handleOnClickProduct = async (id) => {
-    await ProductService.updateView(id)
+    await ProductService.updateView(id);
     navigate(`/product-detail/${id}`);
-  }
+  };
 
   if (!product) {
     return <div>Loading...</div>;
   }
 
   const detailData = [
-    { criteria: 'Mã hàng', detail: product?._id || 'N/A' },
+    { criteria: 'Mã hàng', detail: product?.code || 'N/A' },
     { criteria: 'Tác giả', detail: product?.author || 'N/A' },
     { criteria: 'Nhà xuất bản', detail: publisher?.name || 'N/A' },
     { criteria: 'Năm xuất bản', detail: product?.publishDate || 'N/A' },
@@ -171,7 +161,7 @@ const ProductDetailPage = () => {
     { criteria: 'Đơn vị', detail: unit?.name || 'N/A' },
   ];
 
-  const priceCurrent = (product.price * (100 - product.discount)) / 100;
+  const priceCurrent = (product.price * (100 - (product.discount || 0))) / 100;
 
   const detailInfo = (
     <div className="container mt-5">
@@ -181,9 +171,7 @@ const ProductDetailPage = () => {
             <tr key={index}>
               <td className="col-4">{row.criteria}</td>
               <td className="col-8">
-                <span className={row.detail}>
-                  {row.detail}
-                </span>
+                <span className={row.detail}>{row.detail}</span>
               </td>
             </tr>
           ))}
@@ -200,7 +188,7 @@ const ProductDetailPage = () => {
             key={product._id}
             img={product.img[0]}
             proName={product.name}
-            currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+            currentPrice={(product.price * (100 - (product.discount || 0)) / 100).toLocaleString()}
             sold={product.sold}
             star={product.star}
             feedbackCount={product.feedbackCount}
@@ -217,14 +205,28 @@ const ProductDetailPage = () => {
       )}
     </div>
   );
-  const images = product.img || []; // Mảng hình ảnh từ sản phẩm
-  const mainImage = images[0]; // Ảnh bìa
-  const secondaryImages = images.slice(1); // Ảnh phụ
+
+  const images = product.img || [];
+  const mainImage = images[currentImageIndex] || img4;
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : images.length - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex < images.length - 1 ? prevIndex + 1 : 0
+    );
+  };
 
   const handleOnAddToCart = () => {
     if (!user?.id) {
-      alert('Hãy đăng nhập để tiếp tục mua sắm!')
-      navigate('/login', { state: location?.pathname })
+      alert('Hãy đăng nhập để tiếp tục mua sắm!');
+      navigate('/login', { state: location?.pathname });
+    } else if (amount > product.stock) {
+      alert(`Số lượng sản phẩm trong kho chỉ còn ${product.stock}. Vui lòng chọn số lượng nhỏ hơn hoặc bằng số lượng tồn kho!`);
     } else {
       dispatch(addOrderProduct({
         orderItem: {
@@ -232,9 +234,10 @@ const ProductDetailPage = () => {
           price: priceCurrent,
           amount: amount
         }
-      }))
+      }));
+      alert('Sản phẩm đã được thêm vào giỏ hàng thành công!');
     }
-  }
+  };
 
   const feedbackProduct = (
     <div>
@@ -268,6 +271,7 @@ const ProductDetailPage = () => {
       )}
     </div>
   );
+
   const handleAddToFavorite = async () => {
     if (!user?.id) {
       alert('Hãy đăng nhập để tiếp tục sử dụng tính năng này!');
@@ -281,7 +285,7 @@ const ProductDetailPage = () => {
       if (isFavorite) {
         const response = await FavoriteProductService.deleteFavoriteProduct(productFavorite);
         if (response?.status !== 'ERR') {
-          alert('Xóa sản phẩm vào danh sách yêu thích!')
+          alert('Xóa sản phẩm khỏi danh sách yêu thích!');
           setIsFavorite(false);
           setProductFavorite('');
           fetchFavoriteProducts();
@@ -289,7 +293,7 @@ const ProductDetailPage = () => {
       } else {
         const response = await FavoriteProductService.addFavoriteProduct(favoriteData);
         if (response?.status !== 'ERR') {
-          alert('Thêm sản phẩm vào danh sách yêu thích!')
+          alert('Thêm sản phẩm vào danh sách yêu thích!');
           setIsFavorite(true);
           setProductFavorite(response?.data?._id);
           fetchFavoriteProducts();
@@ -301,47 +305,51 @@ const ProductDetailPage = () => {
     }
   };
 
-
-
-
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
-      <div className="container" >
-        <div className="row" >
+      <div className="container">
+        <div className="row">
           <div className="col-4">
             <div className="sticky-card" style={{ marginTop: '20px' }}>
               <div className="card p-3" style={{ maxWidth: '400px', margin: 'auto' }}>
-                <img
-                  src={mainImage || img4} // Hiển thị ảnh bìa hoặc ảnh mặc định nếu không có
-                  className="custom-img"
-                  alt="Product"
-                  style={{ objectFit: 'cover' }}
-                />
+                <div className="custom-img-container position-relative">
+                  <img
+                    src={mainImage}
+                    className="custom-img"
+                    alt="Product"
+                  />
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        className="btn btn-outline-secondary position-absolute"
+                        style={{ left: '10px', top: '50%', transform: 'translateY(-50%)' }}
+                        onClick={handlePrevImage}
+                      >
+                        <i className="bi bi-chevron-left"></i>
+                      </button>
+                      <button
+                        className="btn btn-outline-secondary position-absolute"
+                        style={{ right: '10px', top: '50%', transform: 'translateY(-50%)' }}
+                        onClick={handleNextImage}
+                      >
+                        <i className="bi bi-chevron-right"></i>
+                      </button>
+                    </>
+                  )}
+                </div>
                 <div className="card-body text-center">
-                  {secondaryImages.length > 0 && (
-                    <div className="d-flex justify-content-center my-2">
-                      {secondaryImages.slice(0, 3).map((image, index) => (
+                  {images.length > 0 && (
+                    <div className="d-flex justify-content-center my-2 flex-wrap">
+                      {images.map((image, index) => (
                         <img
                           key={index}
                           src={image}
                           alt={`Thumbnail ${index + 1}`}
-                          className="img-thumbnail mx-1"
-                          style={{ width: '50px', height: '50px' }}
+                          className={`img-thumbnail mx-1 ${index === currentImageIndex ? 'border border-primary' : ''}`}
+                          style={{ width: '50px', height: '50px', cursor: 'pointer' }}
+                          onClick={() => setCurrentImageIndex(index)}
                         />
                       ))}
-                      {secondaryImages.length > 3 && (
-                        <div
-                          className="img-thumbnail d-flex align-items-center justify-content-center mx-1"
-                          style={{
-                            width: '50px',
-                            height: '50px',
-                            backgroundColor: '#d6c7c7',
-                            color: '#fff',
-                          }}
-                        >
-                          +{secondaryImages.length - 3}
-                        </div>
-                      )}
                     </div>
                   )}
                   <div className="col-6">
@@ -364,19 +372,8 @@ const ProductDetailPage = () => {
                   </div>
 
                   <div className="d-flex justify-content-between mt-3">
-                    <ButtonComponent textButton="Thêm vào giỏ hàng"
-                      onClick={handleOnAddToCart} />
-                    {/* <ButtonComponent2 textButton="Mua ngay"
-                      onClick={handleOnBuyNow} /> */}
+                    <ButtonComponent textButton="Thêm vào giỏ hàng" onClick={handleOnAddToCart} />
                   </div>
-
-                  {/* <a
-                    className="text-decoration-underline"
-                    href="./comparison"
-                    style={{ color: '#198754', textDecoration: 'none', fontStyle: 'italic', fontSize: '14px' }}
-                  >
-                    So sánh với sách khác
-                  </a> */}
                 </div>
               </div>
             </div>
@@ -399,8 +396,6 @@ const ProductDetailPage = () => {
                         style={{ fontSize: '20px', color: isFavorite ? 'white' : 'red' }}
                       ></i>
                     </button>
-
-
                   </div>
                 </div>
                 <p className="card-text-detail mb-2">
@@ -416,18 +411,33 @@ const ProductDetailPage = () => {
                   <div className="col-4">
                     <p style={{ color: 'red', fontSize: '25px' }}>{priceCurrent.toLocaleString()}đ</p>
                   </div>
-                  <div className="col-2">
-                    <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '16px', backgroundColor: '#E4F7CB', marginTop: '5px', color: '#198754' }}>
-                      -{product.discount||0}%
+                  {product.discount > 0 && (
+                    <>
+                      <div className="col-2">
+                        <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '16px', backgroundColor: '#E4F7CB', marginTop: '5px', color: '#198754' }}>
+                          -{product.discount}%
+                        </div>
+                      </div>
+                      <div className="col">
+                        <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '12px', backgroundColor: '#FFFFFF', border: '1px solid #198754', marginTop: '8px', color: '#198754' }}>
+                          Còn {product.stock} sản phẩm
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {!product.discount && (
+                    <div className="col">
+                      <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '12px', backgroundColor: '#FFFFFF', border: '1px solid #198754', marginTop: '8px', color: '#198754' }}>
+                        Còn {product.stock} sản phẩm
+                      </div>
                     </div>
-                  </div>
-                  <div className="col">
-                    <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '12px', backgroundColor: '#FFFFFF', border: '1px solid #198754', marginTop: '8px', color: '#198754' }}>
-                      Còn {product.stock} sản phẩm
-                    </div>
-                  </div>
+                  )}
                 </div>
-                <p className="text-decoration-line-through" style={{ fontSize: '16px', marginTop: '-20px' }}>{product.price.toLocaleString()}đ</p>
+                {product.discount > 0 && (
+                  <p className="text-decoration-line-through" style={{ fontSize: '16px', marginTop: '-20px' }}>
+                    {product.price.toLocaleString()}đ
+                  </p>
+                )}
                 <div className="mt-3 text-muted" style={{ fontSize: "14px" }}>
                   <span>
                     <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán | {product.view} lượt xem
@@ -459,9 +469,7 @@ const ProductDetailPage = () => {
         <div className="row">
           <div style={{ backgroundColor: '#F9F6F2' }}>
             <div className="container" style={{ marginTop: '30px' }}>
-              <CardComponent title="Đánh giá"
-                bodyContent={feedbackProduct}
-                icon="bi bi-bookmark-star" />
+              <CardComponent title="Đánh giá" bodyContent={feedbackProduct} icon="bi bi-bookmark-star" />
             </div>
           </div>
         </div>
@@ -470,5 +478,4 @@ const ProductDetailPage = () => {
   );
 };
 
-
-export default ProductDetailPage
+export default ProductDetailPage;

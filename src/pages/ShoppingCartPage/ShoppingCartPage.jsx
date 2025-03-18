@@ -8,13 +8,11 @@ import "../ShoppingCartPage/ShoppingCartPage.css";
 
 export const ShoppingCartPage = () => {
   const order = useSelector((state) => state.order);
-  //const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user);
   const [productDetails, setProductDetails] = useState([]);
   const dispatch = useDispatch();
   const [listChecked, setListChecked] = useState([]);
-  const navigate=useNavigate()
-  const user = useSelector((state) => state.user);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -73,14 +71,14 @@ export const ShoppingCartPage = () => {
   };
 
   useEffect(() => {
-    dispatch(seletedOrder({listChecked}))
-  }, [listChecked])
+    dispatch(seletedOrder({ listChecked }));
+  }, [listChecked]);
 
   const handleOnClickDeleteAll = () => {
     if (listChecked && listChecked.length > 0) {
       dispatch(removeAllOrderProduct({ listChecked }));
     }
-  }
+  };
 
   const priceMemo = useMemo(() => {
     if (!order?.orderItemSelected) return 0; // Early return if orderItemSelected is undefined
@@ -92,19 +90,29 @@ export const ShoppingCartPage = () => {
     return result;
   }, [order]);
 
-const handleOrder = () => {
-  if (user?.active) {
-    alert('Bạn bị admin chặn mua hàng! Hãy liên hệ với shop để biết thêm thông tin.');
-  } else if (!order?.orderItemSelected?.length) {
-    // Kiểm tra nếu user.active là false hoặc không có, hiển thị thông báo lỗi
-    alert('Vui lòng chọn sản phẩm');
-  } else {
-    // Nếu user.active là true và có sản phẩm được chọn, điều hướng đến trang đặt hàng
-    navigate('/order');
-  }
-};
+  const handleOrder = () => {
+    if (user?.active) {
+      alert('Bạn bị admin chặn mua hàng! Hãy liên hệ với shop để biết thêm thông tin.');
+    } else if (!order?.orderItemSelected?.length) {
+      alert('Vui lòng chọn sản phẩm');
+    } else {
+      // Kiểm tra số lượng tồn kho cho từng sản phẩm được chọn
+      const outOfStockItems = order.orderItemSelected.filter((orderItem) => {
+        const productDetail = productDetails.find((product) => product._id === orderItem.product);
+        return productDetail && orderItem.amount > productDetail.stock;
+      });
 
-  
+      if (outOfStockItems.length > 0) {
+        const errorMessages = outOfStockItems.map((item) => {
+          const productDetail = productDetails.find((product) => product._id === item.product);
+          return `${productDetail.name}: Số lượng yêu cầu (${item.amount}) vượt quá tồn kho (${productDetail.stock}).`;
+        });
+        alert(`Không thể đặt hàng:\n${errorMessages.join('\n')}`);
+      } else {
+        navigate('/order');
+      }
+    }
+  };
 
   return (
     <div className="container">
@@ -239,9 +247,8 @@ const handleOrder = () => {
           <div className="d-flex justify-content-between">
             <span>Tổng tiền:</span>
             <span>{priceMemo.toLocaleString()}đ</span>
-            {/* Hiển thị tổng tiền giỏ hàng */}
           </div>
-          <div style={{marginBottom:'30px', marginTop:'20px'}} >
+          <div style={{ marginBottom: '30px', marginTop: '20px' }}>
             <ButtonComponent textButton="Đặt hàng" onClick={handleOrder} />
           </div>
         </div>

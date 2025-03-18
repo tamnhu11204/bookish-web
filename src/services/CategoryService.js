@@ -45,3 +45,8 @@ export const getDetailCategory=async(id)=>{
     const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/category/get-detail/${id}`)
     return res.data
 }
+
+export const getTreeCategory=async(id)=>{
+  const res =await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/category/get-tree`)
+  return res.data
+}
