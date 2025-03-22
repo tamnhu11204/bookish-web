@@ -5,242 +5,236 @@ import { useQuery } from "@tanstack/react-query";
 import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
 import FormComponent from '../../components/FormComponent/FormComponent';
 import * as ProductService from '../../services/ProductService';
+import * as ImportService from '../../services/ImportService';
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as message from "../../components/MessageComponent/MessageComponent";
 
-
-const AddImport= ({isOpen,type,onCancel}) => {
-  // Dữ liệu mẫu
+const AddImport = ({ isOpen, type, onCancel }) => {
   const [supplier, setSupplier] = useState("");
   const [orderDate, setOrderDate] = useState("");
   const [selectedProduct, setSelectedProduct] = useState("");
   const [importPrice, setImportPrice] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [items, setItems] = useState([]);
+  const [importItems, setImportItems] = useState([]);
 
   const handleOnChangeDate = (value) => setOrderDate(value);
+  const handleOnChangeImportPrice = (value) => setImportPrice(value);
+  const handleOnChangeQuantity = (value) => setQuantity(value);
 
   const [products, setProducts] = useState([]);
-    const [productName, setProductName] = useState('');
-    const [selectedProducts, setSelectedProducts] = useState([]); // Danh sách sản phẩm đã chọn
-  
-    useEffect(() => {
-      const fetchProducts = async () => {
-        try {
-          const res = await ProductService.getAllProduct();
-          setProducts(res.data); // Cập nhật danh sách sản phẩm từ API
-        } catch (error) {
-          console.error('Error fetching products:', error);
-        }
-      };
-      fetchProducts();
-    }, []);
-  
-    const handleProductSelect = (product) => {
-      if (!selectedProducts.find((p) => p._id === product._id)) {
-        setSelectedProducts([
-          ...selectedProducts,
-          { ...product, quantity: 1 },
-        ]); // Thêm sản phẩm vào danh sách đã chọn
-      }
-      setProductName(''); // Reset ô tìm kiếm
-    };
-  
-    const handleQuantityChange = (productId, change) => {
-      setSelectedProducts((prevProducts) =>
-        prevProducts.map((product) =>
-          product._id === productId
-            ? {
-                ...product,
-                quantity: Math.max(1, product.quantity + change), // Điều chỉnh số lượng, không dưới 1
-              }
-            : product
-        )
-      );
-    };
-  
-    const handleAddProduct = async () => {
-      if (selectedProducts.length > 0) {
-        // Gọi API để cập nhật số lượng sản phẩm
-        try {
-          for (const product of selectedProducts) {
-            await ProductService.updateProductStock(product._id, {
-              quantityChange: product.quantity,
-            });
-          }
-  
-          //onSubmit(selectedProducts); // Gửi tất cả các sản phẩm đã chọn
-          setSelectedProducts([]); // Reset danh sách sản phẩm đã chọn
-          setProductName('');
-          //onClose(); // Đóng modal
-        } catch (error) {
-          alert('Lỗi khi cập nhật sản phẩm');
-          console.error('Error updating product stock:', error);
-        }
-      } else {
-        alert('Vui lòng chọn ít nhất một sản phẩm.');
-      }
-    };
-  
-    const filteredProducts = products.filter((product) =>
-      product.name.toLowerCase().includes(productName.toLowerCase())
-    );
-  
 
-  //Xử lý nhà cung cấp
-    const [selectedSupplier, setSelectedSupplier] = useState("");
-  
-    const handleOnChangeSupplier = (e) => {
-      setSelectedSupplier(e.target.value);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await ProductService.getAllProduct();
+        setProducts(res.data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
     };
-  
-    const getAllSupplier = async () => {
-      const res = await SupplierService.getAllSupplier();
-      return res.data;
-    };
-  
-  
-    const { isLoading: isLoadingSupplier, data: suppliers } = useQuery({
-      queryKey: ['suppliers'],
-      queryFn: getAllSupplier,
-  
-    });
-  
-    const AllSupplier = Array.isArray(suppliers)
-      ? suppliers.map((supplier) => ({
+    fetchProducts();
+  }, []);
+
+  const [selectedSupplier, setSelectedSupplier] = useState("");
+  const handleOnChangeSupplier = (e) => setSelectedSupplier(e.target.value);
+
+  const getAllSupplier = async () => {
+    const res = await SupplierService.getAllSupplier();
+    return res.data;
+  };
+
+  const { isLoading: isLoadingSupplier, data: suppliers } = useQuery({
+    queryKey: ['suppliers'],
+    queryFn: getAllSupplier,
+  });
+
+  const AllSupplier = Array.isArray(suppliers)
+    ? suppliers.map((supplier) => ({
         value: supplier._id,
         label: supplier.name,
       }))
-      : [];
-  
+    : [];
 
-  // Thêm sản phẩm vào danh sách
+  const productOptions = products.map((product) => ({
+    value: product._id,
+    label: product.name,
+  }));
+
+  const handleProductChange = (e) => {
+    console.log("Selected product ID:", e.target.value);
+    setSelectedProduct(e.target.value || "");
+  };
+
   const handleAddItem = () => {
-    if (!selectedProduct || !importPrice || !quantity) return;
-    const product = products.find((p) => p.id === parseInt(selectedProduct));
+    console.log("selectedProduct:", selectedProduct);
+    console.log("importPrice:", importPrice);
+    console.log("quantity:", quantity);
+    if (!selectedProduct || !importPrice || !quantity) {
+      alert("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+    const price = parseInt(importPrice);
+    const qty = parseInt(quantity);
+    if (price <= 0 || qty <= 0) {
+      alert("Giá nhập và số lượng phải lớn hơn 0!");
+      return;
+    }
+    const product = products.find((p) => p._id === selectedProduct);
+    if (!product) return;
     const newItem = {
-      id: product.id,
+      id: product._id,
+      code: product.code,
       name: product.name,
       priceOriginal: product.price,
-      priceImport: parseInt(importPrice),
-      quantity: parseInt(quantity),
+      priceImport: price,
+      quantity: qty,
+      image: product.image,
     };
-    setItems([...items, newItem]);
+    setImportItems([...importItems, newItem]);
     setImportPrice("");
     setQuantity("");
+    setSelectedProduct("");
   };
 
-  // Xóa sản phẩm khỏi danh sách
   const handleDeleteItem = (index) => {
-    const newItems = [...items];
+    const newItems = [...importItems];
     newItems.splice(index, 1);
-    setItems(newItems);
+    setImportItems(newItems);
   };
 
-  // Tính tổng tiền
-  const total = items.reduce(
+  const total = importItems.reduce(
     (sum, item) => sum + item.priceImport * item.quantity,
     0
   );
+
+  // Sử dụng useMutationHook để tạo nhập hàng
+  const mutation = useMutationHook(data => ImportService.createImport(data));
+  const { data, isLoading, isSuccess, isError } = mutation;
+
+  // Xử lý sau khi tạo nhập hàng
+  useEffect(() => {
+    if (isSuccess && data?.status !== 'ERR') {
+      message.success();
+      alert('Nhập hàng thành công!');
+      setImportItems([]);
+      setSelectedSupplier("");
+      setOrderDate("");
+      onCancel();
+    } else if (isError) {
+      message.error();
+      alert('Có lỗi xảy ra khi nhập hàng! Vui lòng kiểm tra lại.');
+    }
+  }, [isSuccess, isError, data?.status]);
+
+  const handleConfirmImport = () => {
+    if (!selectedSupplier || !orderDate || importItems.length === 0) {
+      alert("Vui lòng chọn nhà cung cấp, ngày nhập hàng và thêm ít nhất một sản phẩm!");
+      return;
+    }
+
+    // Lấy userId từ localStorage hoặc context (thay thế logic thực tế của bạn)
+    const userId = localStorage.getItem('userId') || '6711c5e1f2b1e2a4b5c6d7e8'; // Thay bằng ObjectId hợp lệ từ collection User
+
+    const importData = {
+      importItems: importItems.map(item => ({
+        product: item.id,
+        importPrice: item.priceImport,
+        quantity: item.quantity
+      })),
+      supplier: selectedSupplier,
+      importDate: orderDate,
+      totalImportPrice: total,
+      user: userId, // Sử dụng ObjectId hợp lệ
+      note: 'Nhập hàng từ giao diện',
+      status: 'completed'
+    };
+
+    mutation.mutate(importData);
+  };
+
   if (!isOpen) return null;
 
-   if (type)return (
+  if (type) return (
     <div className="container my-4">
       <div className="title-section">
         <h3 className="text mb-0">NHẬP HÀNG</h3>
-    </div>
-      {/* Thông tin nhập hàng */}
+      </div>
       <div className="row">
         <div className="col-md-6">
-        
           <div className="mb-3">
-          <label className="form-label"></label>
-          <FormSelectComponent
-            label="Nhà cung cấp"
-            placeholder={"Chọn nhà cung cấp"}
-            options={AllSupplier}
-            selectedValue={selectedSupplier}
-            onChange={handleOnChangeSupplier}
-            required={true}
-          />
+            <FormSelectComponent
+              label="Nhà cung cấp"
+              placeholder={"Chọn nhà cung cấp"}
+              options={AllSupplier}
+              selectedValue={selectedSupplier}
+              onChange={handleOnChangeSupplier}
+              required={true}
+            />
           </div>
           <div className="mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-            id="nameLanguageInput"
-            label="Ngày nhập hàng"
-            type="date"
-            placeholder="Chọn ngày nhập hàng"
-            value={orderDate}
-            onChange={handleOnChangeDate}
-            required={true}
-            enable={true}
-          />
+            <FormComponent
+              id="nameLanguageInput"
+              label="Ngày nhập hàng"
+              type="date"
+              placeholder="Chọn ngày nhập hàng"
+              value={orderDate}
+              onChange={handleOnChangeDate}
+              required={true}
+              enable={true}
+            />
           </div>
         </div>
         <div className="col-md-6">
           <div className="mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-                  id="PriceEntry"
-                  label="Tổng tiền"
-                  type="number"
-                  placeholder=""
-                  //value={priceEntry}
-                  //onChange={handleOnChangePriceEntry}
-                  required={true}
-                  enable = {false}
-          />
+            <FormComponent
+              id="PriceEntry"
+              label="Tổng tiền"
+              type="number"
+              placeholder=""
+              value={total}
+              required={true}
+              enable={false}
+            />
           </div>
         </div>
       </div>
 
       <hr />
 
-      {/* Thêm sản phẩm */}
       <div className="row">
         <div className="col-md-3">
-        <label className="form-label">Tên Sản Phẩm</label>
-            <input style={{fontSize:'16px'}}
-              type="text"
-              className="form-control"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              placeholder="Tìm kiếm sản phẩm"
-            />
-            {productName && (
-              <ul className="list-group mt-2">
-                {filteredProducts.map((product) => (
-                  <li
-                    key={product._id}
-                    className="list-group-item"
-                    onClick={() => handleProductSelect(product)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {product.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-        </div>
-        <div className="col-md-3">
-          
-           <FormComponent
-                  id="Price"
-                  label="Giá nhập"
-                  type="number"
-                  placeholder="Nhập giá nhập"
-                  value={importPrice}
-                  onChange={(e) => setImportPrice(e.target.value)}
-                  required={true}
-                  enable = {true}
+          <FormSelectComponent
+            label="Tên Sản Phẩm"
+            placeholder="Tìm kiếm và chọn sản phẩm"
+            options={productOptions}
+            selectedValue={selectedProduct}
+            onChange={handleProductChange}
+            required={true}
+            isSearchable={true}
           />
         </div>
         <div className="col-md-3">
-          <label className="form-label"><strong>Số lượng</strong></label>
-          <input
+          <FormComponent
+            id="Price"
+            label="Giá nhập"
             type="number"
-            className="form-control"
+            placeholder="Nhập giá nhập"
+            value={importPrice}
+            onChange={handleOnChangeImportPrice}
+            required={true}
+            enable={true}
+          />
+        </div>
+        <div className="col-md-3">
+          <FormComponent
+            id="Quantity"
+            label="Số lượng"
+            type="number"
+            placeholder="Nhập số lượng"
             value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
+            onChange={handleOnChangeQuantity}
+            required={true}
+            enable={true}
           />
         </div>
         <div className="col-md-3 d-flex align-items-end">
@@ -252,7 +246,6 @@ const AddImport= ({isOpen,type,onCancel}) => {
 
       <hr />
 
-      {/* Danh sách sản phẩm */}
       <h5 className="bg-light p-2">Mã nhập hàng: 103</h5>
       <table className="table table-bordered">
         <thead>
@@ -268,23 +261,22 @@ const AddImport= ({isOpen,type,onCancel}) => {
           </tr>
         </thead>
         <tbody>
-          {items.map((item, index) => (
+          {importItems.map((item, index) => (
             <tr key={index}>
-              <td>{item.id}</td>
+              <td>{item.code}</td>
               <td>
                 <img
-                  src="https://via.placeholder.com/80"
+                  src={item.image}
                   alt={item.name}
                   className="img-thumbnail"
+                  style={{ width: "80px" }}
                 />
               </td>
               <td>{item.name}</td>
               <td>{item.priceOriginal.toLocaleString()}đ</td>
               <td>{item.priceImport.toLocaleString()}đ</td>
               <td>{item.quantity}</td>
-              <td>
-                {(item.priceImport * item.quantity).toLocaleString()}đ
-              </td>
+              <td>{(item.priceImport * item.quantity).toLocaleString()}đ</td>
               <td>
                 <button
                   className="btn btn-danger btn-sm"
@@ -298,21 +290,17 @@ const AddImport= ({isOpen,type,onCancel}) => {
         </tbody>
       </table>
 
-      {/* Xác nhận thanh toán */}
       <div className="text-end">
-      <ButtonComponent
-              textButton="Xác nhận thanh toán"
-              onClick={onCancel}
-           />
+        <ButtonComponent
+          textButton={isLoading ? "Đang xử lý..." : "Xác nhận thanh toán"}
+          onClick={handleConfirmImport}
+          disabled={isLoading}
+        />
       </div>
       <div> -</div>
       <div className="text-end">
-      <ButtonComponent
-              textButton="Hủy bỏ"
-              onClick={onCancel}
-           />
+        <ButtonComponent textButton="Hủy bỏ" onClick={onCancel} />
       </div>
-     
     </div>
   );
 };
