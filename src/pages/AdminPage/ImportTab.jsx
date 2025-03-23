@@ -4,22 +4,20 @@ import FormComponent from '../../components/FormComponent/FormComponent';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import ImportDetails from './ImportDetailTab';
 import AddImport from './AddImportTab';
-import * as ImportService from '../../services/ImportService'; // Import service cho nhập hàng
+import DeleteImportModal from './DeleteImportModal'; // Import modal mới
+import * as ImportService from '../../services/ImportService';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import { useMutationHook } from "../../hooks/useMutationHook";
 
 const ImportTab = () => {
-    const [imports, setImports] = useState([]); // State lưu danh sách nhập hàng
-    const [loading, setLoading] = useState(true); // State quản lý trạng thái tải dữ liệu
-    const [searchTerm, setSearchTerm] = useState(''); // State cho tìm kiếm
+    const [imports, setImports] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
-    // State quản lý modal
     const [showModal, setShowModal] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [modalBody, setModalBody] = useState(null);
-    const [textButton1, setTextButton1] = useState('');
-    const [onSave, setOnSave] = useState(() => () => {});
-    const [onCancel, setOnCancel] = useState(() => () => {});
-    const [type, setType] = useState(false);
-    const [selectedImportId, setSelectedImportId] = useState(null); // State lưu ID nhập hàng được chọn
+    const [modalType, setModalType] = useState(null); // 'add', 'details', hoặc 'delete'
+    const [selectedImportId, setSelectedImportId] = useState(null);
+    const [selectedImportData, setSelectedImportData] = useState(null); // Dữ liệu của lần nhập hàng được chọn để xóa
 
     // Lấy danh sách nhập hàng từ backend
     useEffect(() => {
@@ -40,30 +38,51 @@ const ImportTab = () => {
 
     const handleCloseModal = () => {
         setShowModal(false);
-        setSelectedImportId(null); // Reset ID khi đóng modal
+        setModalType(null);
+        setSelectedImportId(null);
+        setSelectedImportData(null);
     };
 
-    // Hàm mở modal thêm nhập hàng
     const handleAddImport = () => {
-        setModalTitle('THÊM NHẬP HÀNG');
-        setType(true);
+        setModalType('add');
         setShowModal(true);
     };
 
-    // Hàm mở modal chi tiết nhập hàng
     const handleViewImportDetails = (importItem) => {
-        setSelectedImportId(importItem._id); // Lưu ID của lần nhập hàng
-        setModalTitle('CHI TIẾT NHẬP HÀNG');
-        setType(false);
+        setSelectedImportId(importItem._id);
+        setModalType('details');
         setShowModal(true);
     };
 
-    // Hàm xử lý tìm kiếm
+    // Xử lý xóa lần nhập hàng
+    const mutationDelete = useMutationHook((id) => ImportService.deleteImport(id));
+
+    const handleDeleteImport = (importItem) => {
+        setSelectedImportData(importItem); // Lưu dữ liệu của lần nhập hàng để hiển thị trong modal
+        setModalType('delete');
+        setShowModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        try {
+            await mutationDelete.mutateAsync(selectedImportData._id);
+            if (mutationDelete.isSuccess && mutationDelete.data?.status === 'OK') {
+                message.success('Xóa lần nhập hàng thành công!');
+                setImports(imports.filter(item => item._id !== selectedImportData._id));
+            } else {
+                message.error('Có lỗi xảy ra khi xóa lần nhập hàng!');
+            }
+            handleCloseModal();
+        } catch (error) {
+            message.error('Có lỗi xảy ra khi xóa lần nhập hàng!');
+            handleCloseModal();
+        }
+    };
+
     const handleSearchChange = (value) => {
         setSearchTerm(value);
     };
 
-    // Lọc danh sách nhập hàng theo tìm kiếm
     const filteredImports = imports.filter((importItem) =>
         importItem.importDate.toLowerCase().includes(searchTerm.toLowerCase()) ||
         importItem.supplier?.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -103,7 +122,7 @@ const ImportTab = () => {
                             <th scope="col" style={{ width: '20%' }}>Nhà cung cấp</th>
                             <th scope="col" style={{ width: '30%' }}>Ngày nhập hàng</th>
                             <th scope="col" style={{ width: '15%' }}>Tổng số tiền</th>
-                            <th scope="col" style={{ width: '10%' }}></th>
+                            <th scope="col" style={{ width: '10%' }}>Hành động</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
@@ -114,10 +133,10 @@ const ImportTab = () => {
                         ) : filteredImports.length > 0 ? (
                             filteredImports.map((importItem) => (
                                 <tr key={importItem._id}>
-                                    <td>{importItem._id.slice(-6)}</td> {/* Hiển thị 6 ký tự cuối của _id */}
+                                    <td>{importItem._id.slice(-6)}</td>
                                     <td>
                                         <img
-                                            src={importItem.importItems[0]?.product?.image || 'https://via.placeholder.com/50'}
+                                            src={importItem.importItems[0]?.product?.image || 'https://placehold.co/50x50'}
                                             alt={importItem.supplier?.name || 'Nhập hàng'}
                                             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                         />
@@ -131,6 +150,12 @@ const ImportTab = () => {
                                             onClick={() => handleViewImportDetails(importItem)}
                                         >
                                             <i className="bi bi-eye"></i>
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => handleDeleteImport(importItem)}
+                                        >
+                                            <i className="bi bi-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -146,18 +171,27 @@ const ImportTab = () => {
         </div>
     );
 
-    if (type === false) return (
+    if (modalType === 'details') return (
         <ImportDetails
             isOpen={showModal}
-            importId={selectedImportId} // Truyền ID nhập hàng vào ImportDetails
+            importId={selectedImportId}
             onCancel={handleCloseModal}
         />
     );
 
-    if (type === true) return (
+    if (modalType === 'add') return (
         <AddImport
             isOpen={showModal}
-            type={type}
+            type={true}
+            onCancel={handleCloseModal}
+        />
+    );
+
+    if (modalType === 'delete') return (
+        <DeleteImportModal
+            isOpen={showModal}
+            importData={selectedImportData}
+            onConfirm={handleConfirmDelete}
             onCancel={handleCloseModal}
         />
     );
