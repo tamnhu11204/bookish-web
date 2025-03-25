@@ -19,6 +19,9 @@ import SignUpPage from "../pages/SignUpPage/SignUpPage";
 import SearchPage from "../pages/SearchPage/SearchPage";
 import InstructionPage from "../pages/InstructionPage/InstructionPage";
 import PolicyPage from "../pages/PolicyPage/PolicyPage";
+import ForgotPassword from "../pages/ForgotPasswordPage/ForgotPassword";
+import EnterOTP from "../pages/ForgotPasswordPage/EnterOTP";
+import EnterNewPassword from "../pages/ForgotPasswordPage/EnterNewPassword";
 
 export const routes =[
     {
@@ -147,6 +150,25 @@ export const routes =[
         page: AccountTab,
         isPrivate: true
     },
-
+    {
+        path: "/forgot-password",
+        page: ForgotPassword,
+        isShowHeader: true,
+        isShowFooter: true,
+      },
+    
+      {
+        path: "/forgot-password/enter-otp",
+        page: EnterOTP,
+        isShowHeader: true,
+        isShowFooter: true,
+      },
+    
+      {
+        path: "/forgot-password/new-password",
+        page: EnterNewPassword,
+        isShowHeader: true,
+        isShowFooter: true,
+      },
 ]
 

@@ -54,7 +54,7 @@ const LogInPage = () => {
 
   return (
     <div
-      className="login-container"
+      className="container-xl container-new-password"
       style={{
         display: "flex",
         justifyContent: "center",
@@ -109,7 +109,7 @@ const LogInPage = () => {
             enable={true}
           ></FormComponent>
           <a
-            href="/"
+            href="/forgot-password"
             className="forgot-password"
             style={{ textAlign: "right", fontSize: "14px", color: "#198754", textDecoration: "none", }}>
             Quên mật khẩu?
