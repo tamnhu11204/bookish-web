@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from "react";
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import * as ImportService from '../../services/ImportService';
+import './AdminPage.css';
+import * as message from "../../components/MessageComponent/MessageComponent";
+
+// Hàm tiện ích để lấy URL ảnh
+const getImageUrl = (imgField) => {
+  if (Array.isArray(imgField) && imgField.length > 0) return imgField[0];
+  if (typeof imgField === 'string') return imgField;
+  return 'https://placehold.co/80x80';
+};
 
 const ImportDetails = ({ isOpen, importId, onCancel }) => {
   const [importDetails, setImportDetails] = useState(null);
+  const [originalDetails, setOriginalDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedItems, setEditedItems] = useState([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Lấy chi tiết lần nhập hàng từ backend
   useEffect(() => {
     const fetchImportDetails = async () => {
       if (!importId) return;
@@ -17,6 +29,8 @@ const ImportDetails = ({ isOpen, importId, onCancel }) => {
         const response = await ImportService.getImportById(importId);
         if (response.status === 'OK') {
           setImportDetails(response.data);
+          setOriginalDetails(response.data);
+          setEditedItems(response.data.importItems.map(item => ({ ...item })));
         } else {
           setError('Không thể tải chi tiết lần nhập hàng.');
         }
@@ -31,16 +45,98 @@ const ImportDetails = ({ isOpen, importId, onCancel }) => {
     fetchImportDetails();
   }, [importId]);
 
-  // Tính tổng tiền
-  const total = importDetails?.importItems?.reduce(
+  const total = editedItems?.reduce(
     (sum, item) => sum + (item.importPrice * item.quantity),
     0
   ) || 0;
 
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleUndo = () => {
+    setEditedItems(originalDetails.importItems.map(item => ({ ...item })));
+    setIsEditing(false);
+  };
+
+  const handleImportPriceChange = (index, value) => {
+    const newItems = [...editedItems];
+    newItems[index].importPrice = parseInt(value) || 0;
+    setEditedItems(newItems);
+  };
+
+  const handleQuantityChange = (index, value) => {
+    const newItems = [...editedItems];
+    newItems[index].quantity = parseInt(value) || 0;
+    setEditedItems(newItems);
+  };
+
+  const getChanges = () => {
+    const changes = [];
+    editedItems.forEach((item, index) => {
+      const originalItem = originalDetails.importItems[index];
+      if (item.importPrice !== originalItem.importPrice || item.quantity !== originalItem.quantity) {
+        changes.push({
+          productName: item.product?.name || 'Không xác định',
+          originalImportPrice: originalItem.importPrice,
+          newImportPrice: item.importPrice,
+          originalQuantity: originalItem.quantity,
+          newQuantity: item.quantity,
+        });
+      }
+    });
+    return changes;
+  };
+
+  const handleConfirm = () => {
+    const changes = getChanges();
+    if (changes.length === 0) {
+      message.warn("Không có thay đổi để xác nhận!");
+      setIsEditing(false);
+      return;
+    }
+    setShowConfirmModal(true);
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      const updatedImport = {
+        ...importDetails,
+        importItems: editedItems.map(item => ({
+          product: item.product._id,
+          importPrice: item.importPrice,
+          quantity: item.quantity,
+        })),
+        totalImportPrice: total,
+      };
+      const response = await ImportService.updateImport(importId, updatedImport);
+      if (response.status === 'OK') {
+        setImportDetails({ ...importDetails, importItems: editedItems, totalImportPrice: total });
+        setOriginalDetails({ ...importDetails, importItems: editedItems, totalImportPrice: total });
+        setIsEditing(false);
+        setShowConfirmModal(false);
+        message.success("Cập nhật lần nhập hàng thành công!");
+      } else {
+        message.error("Không thể cập nhật lần nhập hàng!");
+      }
+    } catch (err) {
+      if (err.response?.status === 404) {
+        message.error("Không tìm thấy lần nhập hàng để cập nhật!");
+      } else {
+        message.error("Có lỗi xảy ra khi cập nhật lần nhập hàng!");
+      }
+      console.error('Error updating import:', err);
+    }
+  };
+
+  const handleCancelConfirm = () => {
+    setShowConfirmModal(false);
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div style={{ padding: '0 20px' }}>
+    <div className="import-details" style={{ padding: '0 20px' }}>
       <div className="title-section">
         <h3 className="text mb-0">LỊCH SỬ NHẬP HÀNG - Chi tiết</h3>
       </div>
@@ -51,11 +147,10 @@ const ImportDetails = ({ isOpen, importId, onCancel }) => {
           <div className="text-center text-danger">{error}</div>
         ) : importDetails ? (
           <>
-            {/* Thông tin nhà cung cấp */}
             <div className="row">
               <div className="col-md-2">
                 <img
-                  src={importDetails.supplier?.image || 'https://placehold.co/100x100'}
+                  src={getImageUrl(importDetails.supplier?.img)}
                   alt={importDetails.supplier?.name || 'Nhà cung cấp'}
                   className="img-thumbnail"
                 />
@@ -77,7 +172,6 @@ const ImportDetails = ({ isOpen, importId, onCancel }) => {
 
             <hr />
 
-            {/* Thông tin đơn hàng */}
             <h5 className="bg-light p-2">Mã nhập hàng: {importDetails._id.slice(-6)}</h5>
             <table className="table table-bordered">
               <thead>
@@ -92,39 +186,138 @@ const ImportDetails = ({ isOpen, importId, onCancel }) => {
                 </tr>
               </thead>
               <tbody>
-                {importDetails.importItems?.map((item, index) => (
+                {editedItems?.map((item, index) => (
                   <tr key={index}>
                     <td>{item.product?.code || item.product?._id?.slice(-6) || 'N/A'}</td>
                     <td>
                       <img
-                        src={item.product?.image || 'https://placehold.co/80x80'}
-                        alt={item.product?.name || 'Sản phẩm'}
-                        className="img-thumbnail"
-                        style={{ width: "80px" }}
+                        src={getImageUrl(item.product?.img)}
+                        alt={item.product?.name}
+                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                       />
                     </td>
                     <td>{item.product?.name || 'Không xác định'}</td>
                     <td>{(item.product?.price || 0).toLocaleString()}đ</td>
-                    <td>{(item.importPrice || 0).toLocaleString()}đ</td>
-                    <td>{item.quantity}</td>
+                    <td>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={item.importPrice}
+                          onChange={(e) => handleImportPriceChange(index, e.target.value)}
+                          className="form-control"
+                          style={{ width: '120px' }}
+                          min="0"
+                        />
+                      ) : (
+                        (item.importPrice || 0).toLocaleString() + 'đ'
+                      )}
+                    </td>
+                    <td>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => handleQuantityChange(index, e.target.value)}
+                          className="form-control"
+                          style={{ width: '100px' }}
+                          min="0"
+                        />
+                      ) : (
+                        item.quantity
+                      )}
+                    </td>
                     <td>{(item.importPrice * item.quantity).toLocaleString()}đ</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* Tổng tiền */}
             <div className="text-end">
               <h5 className="text-danger">
                 Tổng tiền: {total.toLocaleString()}đ
               </h5>
             </div>
+
             <div className="text-end">
+              {isEditing ? (
+                <>
+                  <ButtonComponent
+                    textButton="Hoàn tác"
+                    className="btn btn-secondary me-3" // Tăng từ me-2 lên me-3
+                    onClick={handleUndo}
+                  />
+                  <ButtonComponent
+                    textButton="Xác nhận"
+                    className="btn btn-success me-3" // Tăng từ me-2 lên me-3
+                    onClick={handleConfirm}
+                  />
+                </>
+              ) : (
+                <ButtonComponent
+                  textButton="Chỉnh sửa"
+                  className="btn btn-primary me-3" // Tăng từ me-2 lên me-3
+                  onClick={handleEdit}
+                />
+              )}
               <ButtonComponent
                 textButton="Trở về"
                 onClick={onCancel}
               />
             </div>
+
+            {showConfirmModal && (
+              <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                <div className="modal-dialog modal-lg">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      <h5 className="modal-title">XÁC NHẬN THAY ĐỔI</h5>
+                      <button type="button" className="btn-close" onClick={handleCancelConfirm}></button>
+                    </div>
+                    <div className="modal-body">
+                      <h6>Danh sách thay đổi:</h6>
+                      {getChanges().length > 0 ? (
+                        <table className="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th>Sản phẩm</th>
+                              <th>Giá nhập (Cũ)</th>
+                              <th>Giá nhập (Mới)</th>
+                              <th>Số lượng (Cũ)</th>
+                              <th>Số lượng (Mới)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {getChanges().map((change, index) => (
+                              <tr key={index}>
+                                <td>{change.productName}</td>
+                                <td>{change.originalImportPrice.toLocaleString()}đ</td>
+                                <td>{change.newImportPrice.toLocaleString()}đ</td>
+                                <td>{change.originalQuantity}</td>
+                                <td>{change.newQuantity}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <p>Không có thay đổi nào.</p>
+                      )}
+                    </div>
+                    <div className="modal-footer">
+                      <ButtonComponent
+                        textButton="Hủy bỏ"
+                        className="btn btn-secondary me-3" // Thêm me-3 để tạo khoảng cách
+                        onClick={handleCancelConfirm}
+                      />
+                      <ButtonComponent
+                        textButton="Lưu thay đổi"
+                        className="btn btn-success"
+                        onClick={handleSaveChanges}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="text-center">Không có dữ liệu để hiển thị.</div>

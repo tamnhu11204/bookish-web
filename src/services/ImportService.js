@@ -35,3 +35,9 @@ export const getAllImportsByUser = async (user) => {
     const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/imports/get-all?user=${user}`);
     return res.data;
 };
+
+// Cập nhật một lần nhập hàng
+export const updateImport = async (id, data) => {
+    const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/imports/update/${id}`, data);
+    return res.data;
+};

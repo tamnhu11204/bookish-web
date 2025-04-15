@@ -136,7 +136,7 @@ const ImportTab = () => {
                                     <td>{importItem._id.slice(-6)}</td>
                                     <td>
                                         <img
-                                            src={importItem.importItems[0]?.product?.image || 'https://placehold.co/50x50'}
+                                            src={importItem.supplier?.img || 'https://placehold.co/50x50'}
                                             alt={importItem.supplier?.name || 'Nhập hàng'}
                                             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                         />
