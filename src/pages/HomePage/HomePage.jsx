@@ -1,25 +1,30 @@
-import { useQuery } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import img1 from '../../assets/img/img1.png'
-import img2 from '../../assets/img/img2.png'
-import CardComponent from '../../components/CardComponent/CardComponent'
-import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
-import LoadingComponent from '../../components/LoadingComponent/LoadingComponent'
-import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent'
-import SliderComponent from '../../components/SliderComponent/SliderComponent'
-import * as CategoryService from '../../services/CategoryService'
-import * as PublisherService from '../../services/OptionService/PublisherService'
-import * as ProductService from '../../services/ProductService'
-import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2'
+import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import img1 from '../../assets/img/img1.png';
+import img2 from '../../assets/img/img2.png';
+import CardComponent from '../../components/CardComponent/CardComponent';
+import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
+import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent';
+import SliderComponent from '../../components/SliderComponent/SliderComponent';
+import * as CategoryService from '../../services/CategoryService';
+import * as PublisherService from '../../services/OptionService/PublisherService';
+import * as ProductService from '../../services/ProductService';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
+import Recommendation from '../../components/Recommendation/recommendation';
+import { useDispatch, useSelector } from 'react-redux';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [newBooks, setNewBooks] = useState([])
-  const [bestSeller, setBestSeller] = useState([])
+  const [newBooks, setNewBooks] = useState([]);
+  const [bestSeller, setBestSeller] = useState([]);
   const [visibleNewBooks, setVisibleNewBooks] = useState(5);
-  const [visibleBestSeller, setVisibleBestSeller] = useState(5)
-
+  const [visibleBestSeller, setVisibleBestSeller] = useState(5);
+  const user = useSelector(state => state.user); // Thay state.user bằng cách bạn lưu user trong Redux
+  const userId = user?.id || null; // Lấy userId từ Redux
+  
+   console.log('User ID in HomePage:', userId);
   const getAllProduct = async () => {
     try {
       const res = await ProductService.getAllProduct();
@@ -35,9 +40,9 @@ const HomePage = () => {
   });
 
   const handleOnClickProduct = async (id) => {
-    await ProductService.updateView(id)
+    await ProductService.updateView(id);
     navigate(`/product-detail/${id}`);
-  }
+  };
 
   const getAllCategory = async () => {
     try {
@@ -48,20 +53,17 @@ const HomePage = () => {
     }
   };
 
-
   const { isLoading: isLoadingCate, data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getAllCategory(),
   });
 
-
   const handleCategoryClick = (category) => {
     navigate('/category', { state: { selectedCategory: category._id } });
   };
 
-
   useEffect(() => {
-    const fetchNewBooks = async () => {
+    const fetchNewBooks = async () => { // Thêm async
       try {
         const params = {
           limit: 10,
@@ -79,7 +81,7 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchBestSeller = async () => {
+    const fetchBestSeller = async () => { // Thêm async
       try {
         const params = {
           limit: 10,
@@ -99,7 +101,7 @@ const HomePage = () => {
   const loadMoreNewBooks = () => {
     navigate('/newbook');
   };
-  
+
   const loadMoreBestSeller = () => {
     navigate('/bookpurchasingtrend');
   };
@@ -130,7 +132,6 @@ const HomePage = () => {
     </div>
   );
 
-
   const bookPurchasingTrendInfo = (
     <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
       {bestSeller.slice(0, visibleBestSeller).map((product) => (
@@ -157,23 +158,19 @@ const HomePage = () => {
     </div>
   );
 
-
   const catagoryInfo = (
     <>
       <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
-        {/* {[...Array(5)].map((_, index) => (
-          <MiniCardComponent key={index}
-            img={img3}
-            content="Văn học" />
-        ))} */}
         {isLoadingCate ? (
           <LoadingComponent />
         ) : categories && categories.length > 0 ? (
           categories.map((category) => (
-            <MiniCardComponent key={category._id}
+            <MiniCardComponent
+              key={category._id}
               img={category.img}
-              content={category.name} 
-              onClick={() => handleCategoryClick(category)} />
+              content={category.name}
+              onClick={() => handleCategoryClick(category)}
+            />
           ))
         ) : (
           <tr>
@@ -184,7 +181,7 @@ const HomePage = () => {
         )}
       </div>
     </>
-  )
+  );
 
   const allBooks = (
     <>
@@ -214,11 +211,8 @@ const HomePage = () => {
         )}
       </div>
     </>
-  )
+  );
 
-  /////////////----------NXB------------///////////
-
-  // Lấy danh sách nhà xb từ API
   const getAllPublisher = async () => {
     const res = await PublisherService.getAllPublisher();
     return res.data;
@@ -233,7 +227,6 @@ const HomePage = () => {
     navigate('/category', { state: { selectedPublisher: publisher._id } });
   };
 
-
   const publisherInfo = (
     <>
       <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
@@ -245,7 +238,7 @@ const HomePage = () => {
               key={publisher._id}
               img={publisher.img}
               content={publisher.name}
-              onClick={() => handlePublisherClick(publisher)} // Xử lý click
+              onClick={() => handlePublisherClick(publisher)}
             />
           ))
         ) : (
@@ -255,7 +248,11 @@ const HomePage = () => {
         )}
       </div>
     </>
-  )
+  );
+
+  const recommendationInfo = (
+    <Recommendation userId={userId} />
+  );
 
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
@@ -269,7 +266,7 @@ const HomePage = () => {
 
       <div style={{ backgroundColor: '#198754', marginTop: '50px' }}>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
-        <div className="container" >
+        <div className="container">
           <CardComponent
             title="Danh mục"
             bodyContent={catagoryInfo}
@@ -292,6 +289,16 @@ const HomePage = () => {
       <div style={{ backgroundColor: '#F9F6F2' }}>
         <div className="container" style={{ marginTop: '50px' }}>
           <CardComponent
+            title="Sách gợi ý cho bạn"
+            bodyContent={recommendationInfo}
+            icon="bi bi-heart"
+          />
+        </div>
+      </div>
+
+      <div style={{ backgroundColor: '#F9F6F2' }}>
+        <div className="container" style={{ marginTop: '50px' }}>
+          <CardComponent
             title="Sách mới"
             bodyContent={newBookInfo}
             icon="bi bi-book"
@@ -301,7 +308,7 @@ const HomePage = () => {
 
       <div style={{ backgroundColor: '#198754', marginTop: '50px', marginBottom: '50px' }}>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
-        <div className="container" >
+        <div className="container">
           <CardComponent
             title="Nhà xuất bản"
             bodyContent={publisherInfo}
@@ -310,27 +317,8 @@ const HomePage = () => {
         </div>
         <div style={{ backgroundColor: '#198754', height: '10px' }}></div>
       </div>
-      {/* <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div className="container" style={{ marginTop: '50px' }}>
-          <CardComponent
-            title="Tất cả sách"
-            bodyContent={allBooks}
-            icon="bi bi-graph-up-arrow"
-          />
-        </div>
-      </div> */}
-
-      {/* <div style={{ backgroundColor: '#F9F6F2' }}>
-        <div className="container" style={{ marginTop: '50px'}}>
-          <CardComponent
-            title="Sách bán chạy trong tháng"
-            bodyContent={monthlyBestSellInfo}
-            icon="bi bi-arrow-up-right-square"
-          />
-        </div>
-      </div> */}
     </div>
-  )
-}
+  );
+};
 
-export default HomePage
+export default HomePage;
