@@ -216,7 +216,7 @@ const ProductTab = () => {
                                             <td>{product.code}</td>
                                             <td>
                                                 <img
-                                                    src={product.img[0]}
+                                                    src={product?.img[0]}
                                                     alt={product.name}
                                                     style={{ width: '80px', height: '100px', objectFit: 'cover' }}
                                                 />

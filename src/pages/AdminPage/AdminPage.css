@@ -128,5 +128,27 @@
   margin-top: 20px;
 }
 
+.import-details {
+  font-size: 16px !important;
+}
 
+.import-details * {
+  font-size: 16px !important;
+}
+
+/* Đảm bảo các phần tử trong bảng cũng có cỡ chữ 16px */
+.import-details table th,
+.import-details table td {
+  font-size: 16px !important;
+}
+
+/* Đảm bảo tiêu đề không bị ảnh hưởng nếu bạn muốn giữ cỡ chữ lớn hơn */
+.import-details .title-section h3 {
+  font-size: 24px !important; /* Giữ cỡ chữ lớn hơn cho tiêu đề nếu muốn */
+}
+
+/* Đảm bảo nút "Trở về" cũng có cỡ chữ 16px */
+.import-details .btn {
+  font-size: 16px !important;
+}
 

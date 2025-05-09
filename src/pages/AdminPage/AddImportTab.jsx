@@ -8,6 +8,7 @@ import * as ProductService from '../../services/ProductService';
 import * as ImportService from '../../services/ImportService';
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as message from "../../components/MessageComponent/MessageComponent";
+import ConfirmAddItemModal from '../../components/AddItemComponent/AddItem'; // Import modal mới
 
 const AddImport = ({ isOpen, type, onCancel }) => {
   const [supplier, setSupplier] = useState("");
@@ -16,6 +17,8 @@ const AddImport = ({ isOpen, type, onCancel }) => {
   const [importPrice, setImportPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [importItems, setImportItems] = useState([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // Trạng thái hiển thị modal xác nhận
+  const [pendingItem, setPendingItem] = useState(null); // Lưu thông tin sản phẩm đang chờ xác nhận
 
   const handleOnChangeDate = (value) => setOrderDate(value);
   const handleOnChangeImportPrice = (value) => setImportPrice(value);
@@ -81,6 +84,8 @@ const AddImport = ({ isOpen, type, onCancel }) => {
     }
     const product = products.find((p) => p._id === selectedProduct);
     if (!product) return;
+
+    // Lưu thông tin sản phẩm vào pendingItem và hiển thị modal xác nhận
     const newItem = {
       id: product._id,
       code: product.code,
@@ -88,12 +93,29 @@ const AddImport = ({ isOpen, type, onCancel }) => {
       priceOriginal: product.price,
       priceImport: price,
       quantity: qty,
-      image: product.image,
+      image: Array.isArray(product.img) ? product.img[0] : product.img || 'https://placehold.co/80x80',
+      stock: product.stock, // Lưu số lượng tồn kho
     };
-    setImportItems([...importItems, newItem]);
-    setImportPrice("");
-    setQuantity("");
-    setSelectedProduct("");
+    setPendingItem(newItem);
+    setShowConfirmModal(true);
+  };
+
+  // Xác nhận thêm sản phẩm
+  const handleConfirmAddItem = () => {
+    if (pendingItem) {
+      setImportItems([...importItems, pendingItem]);
+      setImportPrice("");
+      setQuantity("");
+      setSelectedProduct("");
+    }
+    setShowConfirmModal(false);
+    setPendingItem(null);
+  };
+
+  // Hủy bỏ thêm sản phẩm
+  const handleCancelAddItem = () => {
+    setShowConfirmModal(false);
+    setPendingItem(null);
   };
 
   const handleDeleteItem = (index) => {
@@ -107,11 +129,9 @@ const AddImport = ({ isOpen, type, onCancel }) => {
     0
   );
 
-  // Sử dụng useMutationHook để tạo nhập hàng
   const mutation = useMutationHook(data => ImportService.createImport(data));
   const { data, isLoading, isSuccess, isError } = mutation;
 
-  // Xử lý sau khi tạo nhập hàng
   useEffect(() => {
     if (isSuccess && data?.status !== 'ERR') {
       message.success();
@@ -132,8 +152,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
       return;
     }
 
-    // Lấy userId từ localStorage hoặc context (thay thế logic thực tế của bạn)
-    const userId = localStorage.getItem('userId') || '6711c5e1f2b1e2a4b5c6d7e8'; // Thay bằng ObjectId hợp lệ từ collection User
+    const userId = localStorage.getItem('userId') || '6711c5e1f2b1e2a4b5c6d7e8';
 
     const importData = {
       importItems: importItems.map(item => ({
@@ -144,7 +163,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
       supplier: selectedSupplier,
       importDate: orderDate,
       totalImportPrice: total,
-      user: userId, // Sử dụng ObjectId hợp lệ
+      user: userId,
       note: 'Nhập hàng từ giao diện',
       status: 'completed'
     };
@@ -154,7 +173,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
 
   if (!isOpen) return null;
 
-  if (type) return (
+  return (
     <div className="container my-4">
       <div className="title-section">
         <h3 className="text mb-0">NHẬP HÀNG</h3>
@@ -246,7 +265,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
 
       <hr />
 
-      <h5 className="bg-light p-2">Mã nhập hàng: 103</h5>
+      
       <table className="table table-bordered">
         <thead>
           <tr className="table-success">
@@ -265,12 +284,11 @@ const AddImport = ({ isOpen, type, onCancel }) => {
             <tr key={index}>
               <td>{item.code}</td>
               <td>
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="img-thumbnail"
-                  style={{ width: "80px" }}
-                />
+              <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                      />
               </td>
               <td>{item.name}</td>
               <td>{item.priceOriginal.toLocaleString()}đ</td>
@@ -301,6 +319,16 @@ const AddImport = ({ isOpen, type, onCancel }) => {
       <div className="text-end">
         <ButtonComponent textButton="Hủy bỏ" onClick={onCancel} />
       </div>
+
+      {/* Modal xác nhận thêm sản phẩm */}
+      <ConfirmAddItemModal
+        isOpen={showConfirmModal}
+        product={pendingItem}
+        importPrice={importPrice}
+        quantity={quantity}
+        onConfirm={handleConfirmAddItem}
+        onCancel={handleCancelAddItem}
+      />
     </div>
   );
 };
