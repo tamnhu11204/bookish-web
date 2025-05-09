@@ -23,6 +23,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
     setLoading(true);
     await UserService.logoutUser();
     dispatch(resetUser());
+    localStorage.clear();
     setLoading(false);
   };
 
@@ -64,7 +65,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                 style={{ width: '500px', height: '35px', fontSize: '14px' }}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button className="search-button" onClick={handleSearch} style={{ marginLeft:'-100px'}}>
+              <button className="search-button" onClick={handleSearch} style={{ marginLeft: '-100px' }}>
                 <i className="bi bi-search"></i> {/* Đảm bảo class là "fas" */}
               </button>
             </>
@@ -135,6 +136,16 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                               </a>
                             </div>
                           </div>
+                          <div className="row">
+                            <div className="col-2" style={{ marginTop: '3px' }}>
+                              <i className="bi bi-house-gear" style={{ marginLeft: '5px' }}></i>
+                            </div>
+                            <div className="col-10">
+                              <a className="dropdown-item" href="/admin/livechat">
+                                Nhắn tin
+                              </a>
+                            </div>
+                          </div>
                         </li>
                       )}
 
@@ -178,7 +189,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
         </div>
       </nav>
 
-      <nav className="navbar" style={{ height: '60px' , position: 'sticky', top: '55px', zIndex: 999, backgroundColor: '#fff'}}>
+      <nav className="navbar" style={{ height: '60px', position: 'sticky', top: '55px', zIndex: 999, backgroundColor: '#fff' }}>
         <div className="container">
           <ul className="nav nav-underline">
             <li className="nav-item">

@@ -21,9 +21,33 @@ function App() {
     if (decoded?.id) {
       handleGetDetailsUser(decoded?.id, storageData);
     } else {
-      setIsLoading(false);  // Nếu không có token, kết thúc loading
+      setIsLoading(false);
     }
+
+    // GỬI DỮ LIỆU SANG CHATBOT IFRAME
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = JSON.parse(localStorage.getItem("access_token"));
+
+    const sendMessageToChatbot = () => {
+      const iframe = document.querySelector("iframe[src*='localhost:8000']");
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+          {
+            type: "USER_DATA",
+            payload: {
+              user,
+              token,
+            },
+          },
+          "*"
+        );
+      }
+    };
+
+    // Delay chút để iframe render xong
+    setTimeout(sendMessageToChatbot, 1000);
   }, []);
+
 
   const handleDecoded = () => {
     let storageData = localStorage.getItem('access_token');
@@ -69,7 +93,7 @@ function App() {
             {routes.map((route) => {
               const Page = route.page;
               const isCheckAuth = !route.isPrivate || user.isAdmin;
-              const Layout = route.isShowHeader||route.isShowFooter ? DefaultComponent : Fragment;
+              const Layout = route.isShowHeader || route.isShowFooter ? DefaultComponent : Fragment;
 
               return (
                 <Route
@@ -88,7 +112,7 @@ function App() {
       </LoadingComponent>
     </div>
   );
-  
+
 }
 
 export default App;

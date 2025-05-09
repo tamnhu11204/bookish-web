@@ -22,6 +22,7 @@ import PolicyPage from "../pages/PolicyPage/PolicyPage";
 import ForgotPassword from "../pages/ForgotPasswordPage/ForgotPassword";
 import EnterOTP from "../pages/ForgotPasswordPage/EnterOTP";
 import EnterNewPassword from "../pages/ForgotPasswordPage/EnterNewPassword";
+import AdminChatPage from "../pages/AdminChat/AdminChatPage";
 
 export const routes =[
     {
@@ -141,6 +142,13 @@ export const routes =[
     {
         path: '/admin',
         page: AdminPage,
+        //isShowHeader: true,
+        isPrivate: true
+    },
+
+    {
+        path: 'admin/livechat',
+        page: AdminChatPage,
         //isShowHeader: true,
         isPrivate: true
     },
