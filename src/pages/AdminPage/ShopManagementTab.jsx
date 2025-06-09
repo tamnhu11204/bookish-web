@@ -115,9 +115,9 @@ const ShopManagementTab = () => {
         setSelectedCommune(data.commune || '');
         setFacebook(data.facebook || '');
         setInsta(data.insta || '');
-        setBank(data.bank||'')
-        setMomo(data.momo||'')
-        setDeliveryFee(data.deliveryFee )
+        setBank(data.bank || '')
+        setMomo(data.momo || '')
+        setDeliveryFee(data.deliveryFee)
       } catch (error) {
         console.error('Error fetching shop details:', error);
       }
@@ -275,13 +275,13 @@ const ShopManagementTab = () => {
       </div>
       <h3 className="title-profile">Thông tin cửa hàng</h3>
       <div className="card-profile" style={{ padding: "0 20px" }}>
-        <div className="avatar-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px', marginTop: '10px' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px', marginTop: '10px' }}>
           <img
             src={logo || 'https://via.placeholder.com/100'}
             alt="Avatar"
             className="avatar-img"
             style={{
-              width: '200px',
+              width: '400px',
               height: '100px',
               borderRadius: '10px',
               border: '3px solid #ffffff',

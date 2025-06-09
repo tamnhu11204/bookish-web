@@ -1,25 +1,22 @@
 import React from 'react'
 import './CardProductComponent.css'
 
-const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedbackCount,onClick, view }) => {
+const CardProductComponent = ({ img, proName, currentPrice, sold, star, feedbackCount, onClick, view }) => {
     return (
-        <div className="card-pro" style={{ width: '22rem' }} onClick={onClick}>
-
-            <img src={img} className="card-img-top" alt="..." />
-
-            <div className="card-body">
-                <h5 className="pro-name">{proName}</h5>
-
-                <div className="row">
-                    <div className="col"><p className="current-price" style={{ color: 'red'}}>{currentPrice} đ</p></div>
+        <div className="card-product" style={{ width: '22rem' }} onClick={onClick}>
+            <div className="card-product-img-container">
+                <img src={img} className="card-product-img" alt="..." />
+            </div>
+            <div className="card-product-body">
+                <h5 className="card-product-name">{proName}</h5>
+                <div className="card-product-row">
+                    <div className="col"><p className="card-product-price">{currentPrice} đ</p></div>
                 </div>
-
-                <p className="sold">Đã bán: {sold}</p>
-
-                <div className="row">
+                <p className="card-product-sold">Đã bán: {sold}</p>
+                <div className="card-product-row">
                     <strong>{star}/5⭐</strong>
                 </div>
-                <div className="row" style={{marginLeft:'0px'}}>
+                <div className="card-product-row" style={{ marginLeft: '0px' }}>
                     {feedbackCount} đánh giá | {sold} lượt bán | {view} lượt xem
                 </div>
             </div>

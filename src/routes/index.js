@@ -23,14 +23,15 @@ import ForgotPassword from "../pages/ForgotPasswordPage/ForgotPassword";
 import EnterOTP from "../pages/ForgotPasswordPage/EnterOTP";
 import EnterNewPassword from "../pages/ForgotPasswordPage/EnterNewPassword";
 import AdminChatPage from "../pages/AdminChat/AdminChatPage";
+import ReviewFeedbackChatbot from "../pages/ReviewFeedbackChatbot/ReviewFeedbackChatbot";
 
-export const routes =[
+export const routes = [
     {
         path: '/',
         page: HomePage,
         isShowHeader: true
-        
-        
+
+
     },
 
     {
@@ -149,7 +150,8 @@ export const routes =[
     {
         path: 'admin/livechat',
         page: AdminChatPage,
-        //isShowHeader: true,
+        isShowHeader: true,
+
         isPrivate: true
     },
 
@@ -161,22 +163,22 @@ export const routes =[
     {
         path: "/forgot-password",
         page: ForgotPassword,
-        isShowHeader: true,
-        isShowFooter: true,
-      },
-    
-      {
+    },
+
+    {
         path: "/forgot-password/enter-otp",
         page: EnterOTP,
-        isShowHeader: true,
-        isShowFooter: true,
-      },
-    
-      {
+    },
+
+    {
         path: "/forgot-password/new-password",
         page: EnterNewPassword,
-        isShowHeader: true,
-        isShowFooter: true,
-      },
+    },
+
+    {
+        path: "/review-feedback",
+        page: ReviewFeedbackChatbot,
+        isShowHeader: true
+    },
 ]
 

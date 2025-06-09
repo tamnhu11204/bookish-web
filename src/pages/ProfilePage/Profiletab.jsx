@@ -104,7 +104,7 @@ const ProfileTab = () => {
       <div className="container mt-5">
         <form className="p-4 border rounded" style={{ fontSize: '16px' }}>
           {/* Avatar */}
-          <div className="avatar-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px' }}>
             {/* Hình đại diện */}
             <img
               src={img || 'https://via.placeholder.com/100'}
@@ -126,6 +126,7 @@ const ProfileTab = () => {
               onClick={() => document.getElementById('fileInput').click()}
             />
 
+
             {/* Input file ẩn */}
             <input
               id="fileInput"
@@ -144,7 +145,7 @@ const ProfileTab = () => {
             placeholder="Nhập họ và tên"
             value={name}
             onChange={handleOnChangeName}
-            enable = {true}
+            enable={true}
           />
 
           {/* Email */}
@@ -155,7 +156,7 @@ const ProfileTab = () => {
             placeholder="Nhập email"
             value={email}
             onChange={handleOnChangeEmail}
-            enable = {true}
+            enable={true}
           />
 
           {/* Số điện thoại */}
@@ -166,7 +167,7 @@ const ProfileTab = () => {
             placeholder="Nhập số điện thoại"
             value={phone}
             onChange={handleOnChangePhone}
-            enable = {true}
+            enable={true}
           />
 
           {/* Giới tính */}
@@ -223,7 +224,7 @@ const ProfileTab = () => {
             placeholder="Chọn ngày sinh"
             value={birthday}
             onChange={handleOnChangeBirthday}
-            enable = {true}
+            enable={true}
           />
 
           {data?.status === 'ERR' &&

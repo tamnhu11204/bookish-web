@@ -1,30 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import logo from '../../assets/img/logo.png'; // Đặt logo mặc định
+import logo from '../../assets/img/logo.png';
 import * as UserService from '../../services/UserService';
 import Styles from '../../style';
 import { resetUser } from '../../redux/slides/UserSlide';
-import LoadingComponent from '../LoadingComponent/LoadingComponent'; // Selector để lấy shop từ Redux
+import LoadingComponent from '../LoadingComponent/LoadingComponent';
 import { useNavigate } from 'react-router-dom';
-import './SearchButton.css'; // Import file CSS
+import './SearchButton.css';
 
 const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHiddenNoti = false }) => {
   const user = useSelector((state) => state.user);
-  const shop = useSelector((state) => state.shop); // Lấy thông tin shop từ Redux
-  const [name, setUserName] = useState('');
+  const shop = useSelector((state) => state.shop);
+  const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const order = useSelector((state) => state.order)
-  const navigate = useNavigate()
+  const order = useSelector((state) => state.order);
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-
 
   const handleLogout = async () => {
     setLoading(true);
     await UserService.logoutUser();
     dispatch(resetUser());
     localStorage.clear();
+    document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "user_id=; path=/; max-age=0; SameSite=Lax";
+
+    // Gửi thông báo đăng xuất tới chatbot
+    const iframe = document.querySelector("iframe[src*='localhost:8000']");
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage(
+        { type: "LOGOUT" },
+        "*"
+      );
+    }
+
     setLoading(false);
+    navigate('/login');
   };
 
   useEffect(() => {
@@ -34,23 +46,22 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
   }, [user?.name]);
 
   const handleOnClickCart = () => {
-    navigate('/shoppingcart')
-  }
+    navigate('/shoppingcart');
+  };
+
   const handleSearch = () => {
     if (searchTerm.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}`); // Điều hướng tới trang search
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
   };
 
   return (
     <>
       <nav className="navbar sticky-header">
-
         <div className="container">
           <a className="navbar-brand" href="/">
-            {/* Hiển thị logo từ Redux hoặc logo mặc định nếu không có */}
             <img
-              src={shop?.logo || logo} // Sử dụng logo từ Redux hoặc logo mặc định
+              src={shop?.logo || logo}
               alt="Logo"
               style={{ height: '40px', width: 'auto' }}
             />
@@ -66,7 +77,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button className="search-button" onClick={handleSearch} style={{ marginLeft: '-100px' }}>
-                <i className="bi bi-search"></i> {/* Đảm bảo class là "fas" */}
+                <i className="bi bi-search"></i>
               </button>
             </>
           )}
@@ -74,31 +85,17 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
           <div className="row">
             {!user?.isAdmin && (
               <div className="col-3">
-                <button type="button" class="btn position-relative" style={{ width: '40px' }}
+                <button type="button" className="btn position-relative" style={{ width: '40px' }}
                   onClick={handleOnClickCart}>
                   <i className="bi bi-cart3" style={Styles.iconHeader}></i>
-                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                     style={{ fontSize: '10px' }}>
                     {order?.orderItems?.length || 0}
-                    <span class="visually-hidden">unread messages</span>
+                    <span className="visually-hidden">unread messages</span>
                   </span>
                 </button>
               </div>
-
             )}
-
-            {/* {!isHiddenNoti && (
-              <div className="col-3">
-                <button type="button" class="btn position-relative" style={{ width: '40px' }}>
-                  <i className="bi bi-cart3" style={Styles.iconHeader}></i>
-                  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                    style={{ fontSize: '10px' }}>
-                    99+
-                    <span class="visually-hidden">unread messages</span>
-                  </span>
-                </button>
-              </div>
-            )} */}
 
             <div className="col-6">
               <LoadingComponent isLoading={loading}>
@@ -138,7 +135,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
                           </div>
                           <div className="row">
                             <div className="col-2" style={{ marginTop: '3px' }}>
-                              <i className="bi bi-house-gear" style={{ marginLeft: '5px' }}></i>
+                              <i className="bi bi-chat-dots" style={{ marginLeft: '5px' }}></i>
                             </div>
                             <div className="col-10">
                               <a className="dropdown-item" href="/admin/livechat">

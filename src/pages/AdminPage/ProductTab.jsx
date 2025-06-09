@@ -52,7 +52,7 @@ const ProductTab = () => {
             console.error("Error fetching categories:", error);
         }
     };
-
+    console.log('category', categories)
     useEffect(() => {
         fetchCategories();
     }, []);
@@ -133,6 +133,22 @@ const ProductTab = () => {
         ...(categories.length > 0 ? flattenCategoryTree(categories) : [])
     ];
 
+    // Hàm tìm tên danh mục dựa trên _id, bao gồm cả danh mục con
+    const findCategoryName = (categories, categoryId) => {
+        for (const category of categories) {
+            if (category._id === categoryId) {
+                return category.name;
+            }
+            if (category.children && category.children.length > 0) {
+                const childName = findCategoryName(category.children, categoryId);
+                if (childName) {
+                    return childName;
+                }
+            }
+        }
+        return "Không xác định";
+    };
+
     useEffect(() => {
         if (products) {
             const filtered = products.filter((product) => {
@@ -210,7 +226,6 @@ const ProductTab = () => {
                                 </tr>
                             ) : filteredProducts && filteredProducts.length > 0 ? (
                                 filteredProducts.map((product) => {
-                                    const category = categories.find(cat => cat._id === product.category);
                                     return (
                                         <tr key={product.id}>
                                             <td>{product.code}</td>
@@ -224,7 +239,7 @@ const ProductTab = () => {
                                             <td>{product.name.length > 20 ? product.name.slice(0, 20) + '...' : product.name}</td>
                                             <td>{product.price}</td>
                                             <td>{product.discount}</td>
-                                            <td>{category ? category.name : "Không xác định"}</td>
+                                            <td>{findCategoryName(categories, product.category)}</td>
                                             <td>{product.stock}</td>
                                             <td>{product.sold}</td>
                                             <td>

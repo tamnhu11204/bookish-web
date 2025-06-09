@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
@@ -18,14 +18,41 @@ const LogInPage = () => {
   const { data, isLoading, isSuccess, isError, error } = mutation;
   const navigate = useNavigate();
 
+  const handleGetDetailUser = useCallback(async (id, token) => {
+    try {
+      const res = await UserService.getDetailUser(id, token);
+      console.log('User details response:', res);
+      if (res?.status === 'OK' && res?.data?._id) {
+        dispatch(updateUser({ ...res.data, access_token: token }));
+        localStorage.setItem("user", JSON.stringify(res.data));
+        localStorage.setItem("user_id", res.data._id);
+        document.cookie = `access_token=${token}; path=/; max-age=10800; SameSite=Lax`;
+        document.cookie = `user_id=${res.data._id}; path=/; max-age=10800; SameSite=Lax`;
+        console.log('Stored user:', res.data);
+        console.log('Stored user_id:', res.data._id);
+        console.log('localStorage after save:', {
+          user: localStorage.getItem('user'),
+          user_id: localStorage.getItem('user_id'),
+          access_token: localStorage.getItem('access_token')
+        });
+        if (location?.state) {
+          navigate(location?.state);
+        } else {
+          navigate('/');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  }, [dispatch, navigate, location]);
+
   useEffect(() => {
     console.log('Mutation state:', { isSuccess, isError, data, error });
     if (isSuccess && data?.status === 'OK') {
       console.log('Login response:', data);
-      // Xóa localStorage cũ
       localStorage.clear();
       if (data?.access_token) {
-        localStorage.setItem("access_token", JSON.stringify(data.access_token));
+        localStorage.setItem("access_token", data.access_token); // Không dùng JSON.stringify
         try {
           const decoded = jwtDecode(data.access_token);
           console.log('Decoded token:', decoded);
@@ -43,33 +70,7 @@ const LogInPage = () => {
     } else if (isError) {
       console.error('Login error:', error);
     }
-  }, [data, isSuccess, isError, error, navigate]);
-
-  const handleGetDetailUser = async (id, token) => {
-    try {
-      const res = await UserService.getDetailUser(id, token);
-      console.log('User details response:', res);
-      if (res?.status === 'OK' && res?.data?._id) {
-        dispatch(updateUser({ ...res.data, access_token: token }));
-        localStorage.setItem("user", JSON.stringify(res.data));
-        localStorage.setItem("user_id", res.data._id);
-        console.log('Stored user:', res.data);
-        console.log('Stored user_id:', res.data._id);
-        console.log('localStorage after save:', {
-          user: localStorage.getItem('user'),
-          user_id: localStorage.getItem('user_id'),
-          access_token: localStorage.getItem('access_token')
-        });
-        if (location?.state) {
-          navigate(location?.state);
-        } else {
-          navigate('/');
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-    }
-  };
+  }, [data, isSuccess, isError, error, handleGetDetailUser]);
 
   const handleOnChangeEmail = (value) => setEmail(value);
   const handleOnChangePassword = (value) => setPassword(value);
@@ -102,7 +103,7 @@ const LogInPage = () => {
         </form>
         <div style={{ textAlign: "center", marginTop: "15px", fontSize: "14px", color: "#333" }}>
           Bạn chưa có tài khoản?{" "}
-          <a class="text-decoration-underline" href="./signup" style={{ color: "#198754", textDecoration: "none", fontStyle: "italic" }}>
+          <a className="text-decoration-underline" href="./signup" style={{ color: "#198754", textDecoration: "none", fontStyle: "italic" }}>
             Đăng ký
           </a>
         </div>

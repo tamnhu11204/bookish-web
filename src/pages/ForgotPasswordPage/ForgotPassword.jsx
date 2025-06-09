@@ -5,25 +5,19 @@ import * as AuthService from "../../services/AuthService";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
 import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
-import Message from "../../components/MessageComponent/Message";
-import background from "../../assets/img/background.jpg";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [showLoading, setShowLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState(null);
 
   const handleChange = (value) => {
     setEmail(value);
   };
 
-  const handleSendEmail = async () => { // Bỏ tham số e vì không còn dùng e.preventDefault
+  const handleSendEmail = async () => {
     if (!isValid()) {
-      setStatusMessage({
-        type: "Error",
-        message: "Vui lòng nhập email hợp lệ",
-      });
+      alert("Vui lòng nhập email hợp lệ");
       return;
     }
 
@@ -31,10 +25,7 @@ const ForgotPassword = () => {
     try {
       const response = await AuthService.forgotPassword(email);
       if (response.success) {
-        setStatusMessage({
-          type: "Success",
-          message: "OTP đã được gửi! Đang chuyển đến trang nhập OTP...",
-        });
+        alert("OTP đã được gửi! Đang chuyển đến trang nhập OTP...");
         setTimeout(() => {
           navigate("/forgot-password/enter-otp", { state: { email } });
         }, 1500);
@@ -42,10 +33,7 @@ const ForgotPassword = () => {
         throw new Error(response.message || "Đã xảy ra lỗi");
       }
     } catch (error) {
-      setStatusMessage({
-        type: "Error",
-        message: error.message || "Đã xảy ra lỗi. Vui lòng thử lại.",
-      });
+      alert(error.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
     } finally {
       setShowLoading(false);
     }
@@ -56,24 +44,9 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="container-xxl container-forgot-password">
-      {statusMessage && (
-        <Message
-          type={statusMessage.type}
-          message={statusMessage.message}
-          duration={3000}
-          onClose={() => setStatusMessage(null)}
-        />
-      )}
-      <div className="forgot-password-container">
-        <div className="forgot-password-container__img">
-          <img
-            className="forgot-password__img"
-            src={background}
-            alt="Hình sách"
-          />
-        </div>
-        <div className="forgot-password__left">
+    <div className="container-xl" style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+      <div style={{ width: "600px", padding: "20px", border: "1px solid #ccc", borderRadius: "8px", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)" }}>
+        <div>
           <h1
             className="title title_login"
             style={{
@@ -115,14 +88,14 @@ const ForgotPassword = () => {
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
             <ButtonComponent
               textButton="Gửi"
-              onClick={handleSendEmail} // Thêm onClick để gọi hàm trực tiếp
+              onClick={handleSendEmail}
               disabled={!isValid()}
             />
           </div>
-          </div>
         </div>
       </div>
-      );
+    </div>
+  );
 };
 
-      export default ForgotPassword;
+export default ForgotPassword;
