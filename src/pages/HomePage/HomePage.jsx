@@ -23,8 +23,8 @@ const HomePage = () => {
   const [visibleBestSeller, setVisibleBestSeller] = useState(5);
   const user = useSelector(state => state.user); // Thay state.user bằng cách bạn lưu user trong Redux
   const userId = user?.id || null; // Lấy userId từ Redux
-  
-   console.log('User ID in HomePage:', userId);
+
+  console.log('User ID in HomePage:', userId);
   const getAllProduct = async () => {
     try {
       const res = await ProductService.getAllProduct();
@@ -164,14 +164,16 @@ const HomePage = () => {
         {isLoadingCate ? (
           <LoadingComponent />
         ) : categories && categories.length > 0 ? (
-          categories.map((category) => (
-            <MiniCardComponent
-              key={category._id}
-              img={category.img}
-              content={category.name}
-              onClick={() => handleCategoryClick(category)}
-            />
-          ))
+          categories
+            .filter((category) => category.parent === null)
+            .map((category) => (
+              <MiniCardComponent
+                key={category._id}
+                img={category.img}
+                content={category.name}
+                onClick={() => handleCategoryClick(category)}
+              />
+            ))
         ) : (
           <tr>
             <td colSpan="4" className="text-center">

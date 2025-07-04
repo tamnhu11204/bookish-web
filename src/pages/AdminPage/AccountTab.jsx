@@ -121,7 +121,7 @@ const AccountTab = () => {
         return response;
     });
 
-    const { data: dataEdit, isLoading: isLoadingPassword, isSuccess:isSuccessEdit, isError:isErrorEdit } = mutationEdit;
+    const { data: dataEdit, isLoading: isLoadingPassword, isSuccess: isSuccessEdit, isError: isErrorEdit } = mutationEdit;
 
     const handleOnChangeOld = (value) => {
         setOldPassword(value.trim());
@@ -149,7 +149,7 @@ const AccountTab = () => {
         }
     }, [dataEdit, isErrorEdit, isSuccessEdit]);
 
-    const handleResetPassword = async() => {
+    const handleResetPassword = async () => {
         if (newPassword !== confirmPassword) {
             setErrorMessage("Xác nhận mật khẩu không khớp! Vui lòng nhập lại.");
             return;
@@ -162,192 +162,192 @@ const AccountTab = () => {
             access_token: user?.access_token,
         });
 
-        console.log('data',mutationEdit)
+        console.log('data', mutationEdit)
     };
 
     return (
-        <><HeaderComponent isHiddenSearch isHiddenCart isHiddenNoti/>
-        <div style={{ padding: '0 20px' }}>
-            <div className="title-section">
-                <h3 className="text mb-0">TÀI KHOẢN CỦA TÔI</h3>
-            </div>
+        <><HeaderComponent isHiddenSearch isHiddenCart isHiddenNoti />
+            <div style={{ padding: '0 20px' }}>
+                <div className="title-section">
+                    <h3 className="text mb-0">TÀI KHOẢN CỦA TÔI</h3>
+                </div>
 
-            <div className="container mt-5">
-                <div style={{ fontSize: '20px', color: '#198754', marginBottom: '10px' }}>Thông tin hồ sơ</div>
-                <form className="p-4 border rounded" style={{ fontSize: '16px' }}>
-                    {/* Avatar */}
-                    <div className="avatar-container" style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px' }}>
-                        <img
-                            src={img || 'https://via.placeholder.com/100'}
-                            alt="Avatar"
-                            className="avatar-img"
-                            style={{
-                                width: '100px',
-                                height: '100px',
-                                borderRadius: '50%',
-                                border: '3px solid #ffffff',
-                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                                marginBottom: '10px',
-                            }}
+                <div className="container mt-5">
+                    <div style={{ fontSize: '20px', color: '#198754', marginBottom: '10px' }}>Thông tin hồ sơ</div>
+                    <form className="p-4 border rounded" style={{ fontSize: '16px' }}>
+                        {/* Avatar */}
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px' }}>
+                            <img
+                                src={img || 'https://via.placeholder.com/100'}
+                                alt="Avatar"
+                                className="avatar-img"
+                                style={{
+                                    width: '100px',
+                                    height: '100px',
+                                    borderRadius: '50%',
+                                    border: '3px solid #ffffff',
+                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                    marginBottom: '10px',
+                                }}
+                            />
+                            <ButtonComponent
+                                textButton="Chọn ảnh"
+                                onClick={() => document.getElementById('fileInput').click()}
+                            />
+                            <input
+                                id="fileInput"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleOnChangeImg}
+                                style={{ display: 'none' }}
+                            />
+                        </div>
+
+                        <FormComponent
+                            id="nameInput"
+                            label="Họ và tên"
+                            type="text"
+                            placeholder="Nhập họ và tên"
+                            value={name}
+                            onChange={handleOnChangeName}
+                            enable={true}
                         />
-                        <ButtonComponent
-                            textButton="Chọn ảnh"
-                            onClick={() => document.getElementById('fileInput').click()}
+
+                        <FormComponent
+                            id="emailInput"
+                            label="Email"
+                            type="email"
+                            placeholder="Nhập email"
+                            value={email}
+                            onChange={handleOnChangeEmail}
+                            enable={true}
                         />
-                        <input
-                            id="fileInput"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleOnChangeImg}
-                            style={{ display: 'none' }}
+
+                        <FormComponent
+                            id="phoneInput"
+                            label="Số điện thoại"
+                            type="tel"
+                            placeholder="Nhập số điện thoại"
+                            value={phone}
+                            onChange={handleOnChangePhone}
+                            enable={true}
                         />
-                    </div>
 
-                    <FormComponent
-                        id="nameInput"
-                        label="Họ và tên"
-                        type="text"
-                        placeholder="Nhập họ và tên"
-                        value={name}
-                        onChange={handleOnChangeName}
-                        enable={true}
-                    />
-
-                    <FormComponent
-                        id="emailInput"
-                        label="Email"
-                        type="email"
-                        placeholder="Nhập email"
-                        value={email}
-                        onChange={handleOnChangeEmail}
-                        enable={true}
-                    />
-
-                    <FormComponent
-                        id="phoneInput"
-                        label="Số điện thoại"
-                        type="tel"
-                        placeholder="Nhập số điện thoại"
-                        value={phone}
-                        onChange={handleOnChangePhone}
-                        enable={true}
-                    />
-
-                    <div className="mb-3">
-                        <label className="form-label">Giới tính</label>
-                        <div>
-                            <div className="form-check form-check-inline">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="gender"
-                                    id="male"
-                                    checked={gender === 'male'}
-                                    onChange={() => handleOnChangeGender('male')}
-                                />
-                                <label className="form-check-label" htmlFor="male">
-                                    Nam
-                                </label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="gender"
-                                    id="female"
-                                    checked={gender === 'female'}
-                                    onChange={() => handleOnChangeGender('female')}
-                                />
-                                <label className="form-check-label" htmlFor="female">
-                                    Nữ
-                                </label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="gender"
-                                    id="other"
-                                    checked={gender === 'other'}
-                                    onChange={() => handleOnChangeGender('other')}
-                                />
-                                <label className="form-check-label" htmlFor="other">
-                                    Khác
-                                </label>
+                        <div className="mb-3">
+                            <label className="form-label">Giới tính</label>
+                            <div>
+                                <div className="form-check form-check-inline">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="gender"
+                                        id="male"
+                                        checked={gender === 'male'}
+                                        onChange={() => handleOnChangeGender('male')}
+                                    />
+                                    <label className="form-check-label" htmlFor="male">
+                                        Nam
+                                    </label>
+                                </div>
+                                <div className="form-check form-check-inline">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="gender"
+                                        id="female"
+                                        checked={gender === 'female'}
+                                        onChange={() => handleOnChangeGender('female')}
+                                    />
+                                    <label className="form-check-label" htmlFor="female">
+                                        Nữ
+                                    </label>
+                                </div>
+                                <div className="form-check form-check-inline">
+                                    <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name="gender"
+                                        id="other"
+                                        checked={gender === 'other'}
+                                        onChange={() => handleOnChangeGender('other')}
+                                    />
+                                    <label className="form-check-label" htmlFor="other">
+                                        Khác
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <FormComponent
-                        id="birthdayInput"
-                        label="Ngày sinh"
-                        type="date"
-                        placeholder="Chọn ngày sinh"
-                        value={birthday}
-                        onChange={handleOnChangeBirthday}
-                        enable={true}
-                    />
+                        <FormComponent
+                            id="birthdayInput"
+                            label="Ngày sinh"
+                            type="date"
+                            placeholder="Chọn ngày sinh"
+                            value={birthday}
+                            onChange={handleOnChangeBirthday}
+                            enable={true}
+                        />
 
-                    {data?.status === 'ERR' && <span style={{ color: 'red', fontSize: '16px' }}>{data?.message}</span>}
+                        {data?.status === 'ERR' && <span style={{ color: 'red', fontSize: '16px' }}>{data?.message}</span>}
 
-                    <div className="d-flex justify-content-end mt-3">
-                        <LoadingComponent isLoading={isLoadingProfile}>
-                            <ButtonComponent textButton="Cập nhật" onClick={handleUpdate} />
-                        </LoadingComponent>
-                    </div>
-                </form>
+                        <div className="d-flex justify-content-end mt-3">
+                            <LoadingComponent isLoading={isLoadingProfile}>
+                                <ButtonComponent textButton="Cập nhật" onClick={handleUpdate} />
+                            </LoadingComponent>
+                        </div>
+                    </form>
+                </div>
+
+                <div className="container mt-5">
+                    <div style={{ fontSize: '20px', color: '#198754', marginBottom: '10px' }}>Đổi mật khẩu</div>
+                    <form className="p-4 border rounded" style={formStyle}>
+                        <FormComponent
+                            id="oldPassInput"
+                            label="Mật khẩu cũ"
+                            type="password"
+                            placeholder="Nhập mật khẩu cũ"
+                            value={oldPassword}
+                            onChange={handleOnChangeOld}
+                            enable={true}
+                        />
+
+                        <FormComponent
+                            id="newPassInput"
+                            label="Mật khẩu mới"
+                            type="password"
+                            placeholder="Nhập mật khẩu mới"
+                            value={newPassword}
+                            onChange={handleOnChangeNew}
+                            enable={true}
+                        />
+
+                        <FormComponent
+                            id="confirmPassInput"
+                            label="Xác nhận mật khẩu"
+                            type="password"
+                            placeholder="Nhập lại mật khẩu mới"
+                            value={confirmPassword}
+                            onChange={handleOnChangeConfirm}
+                            enable={true}
+                        />
+
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+                            {errorMessage && (
+                                <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
+                                    {errorMessage}
+                                </div>
+                            )}
+                            {dataEdit?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{dataEdit?.message}</span>}
+                        </div>
+
+                        <div className="d-flex justify-content-end">
+                            <LoadingComponent isLoading={isLoadingPassword}>
+                                <ButtonComponent textButton="Cập nhật" onClick={handleResetPassword} />
+                            </LoadingComponent>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div className="container mt-5">
-                <div style={{ fontSize: '20px', color: '#198754', marginBottom: '10px' }}>Đổi mật khẩu</div>
-                <form className="p-4 border rounded" style={formStyle}>
-                    <FormComponent
-                        id="oldPassInput"
-                        label="Mật khẩu cũ"
-                        type="password"
-                        placeholder="Nhập mật khẩu cũ"
-                        value={oldPassword}
-                        onChange={handleOnChangeOld}
-                        enable={true}
-                    />
-
-                    <FormComponent
-                        id="newPassInput"
-                        label="Mật khẩu mới"
-                        type="password"
-                        placeholder="Nhập mật khẩu mới"
-                        value={newPassword}
-                        onChange={handleOnChangeNew}
-                        enable={true}
-                    />
-
-                    <FormComponent
-                        id="confirmPassInput"
-                        label="Xác nhận mật khẩu"
-                        type="password"
-                        placeholder="Nhập lại mật khẩu mới"
-                        value={confirmPassword}
-                        onChange={handleOnChangeConfirm}
-                        enable={true}
-                    />
-
-                    <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
-                        {errorMessage && (
-                            <div style={{ color: "red", textAlign: "center", marginBottom: "10px", fontSize: "16px" }}>
-                                {errorMessage}
-                            </div>
-                        )}
-                        {dataEdit?.status === 'ERR' && <span style={{ color: "red", fontSize: "16px" }}>{dataEdit?.message}</span>}
-                    </div>
-
-                    <div className="d-flex justify-content-end">
-                        <LoadingComponent isLoading={isLoadingPassword}>
-                            <ButtonComponent textButton="Cập nhật" onClick={handleResetPassword} />
-                        </LoadingComponent>
-                    </div>
-                </form>
-            </div>
-        </div>
         </>
     );
 };

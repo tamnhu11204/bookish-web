@@ -54,16 +54,16 @@ function FooterComponent() {
             <div className="container">
                 <div className="row">
                     <div className="col-md-4">
-                        <img 
-                            alt={shop.name || "Shop Logo"} 
-                            src={shop.logo} 
-                            className="shop-logo" 
+                        <img
+                            alt={shop.name || "Shop Logo"}
+                            src={shop.logo}
+                            className="shop-logo"
                             onError={(e) => e.target.src = '/default-logo.png'} // Hiển thị ảnh mặc định nếu lỗi
                         />
-                        <p style={{fontSize:'20px'}}>{shop.slogan}</p>
+                        <p style={{ fontSize: '20px' }}>{shop.slogan}</p>
                         <p>{shop.description}</p>
                         <p>
-                            Kho hàng: {shop.specificAddress}, {addressDetails.communeName}, 
+                            Kho hàng: {shop.specificAddress}, {addressDetails.communeName},
                             {addressDetails.districtName}, {addressDetails.provinceName}
                         </p>
                     </div>

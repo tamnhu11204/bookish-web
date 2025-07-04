@@ -8,13 +8,12 @@ import * as UserService from './../src/services/UserService';
 import DefaultComponent from './components/DefaultComponent/DefaultComponent';
 import { updateUser } from './redux/slides/UserSlide';
 import { routes } from './routes';
-import { isJsonString } from './utils';
 import LoadingComponent from './components/LoadingComponent/LoadingComponent';
 
 function App() {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(true);  // Mặc định là true để bắt đầu loading
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const { storageData, decoded } = handleDecoded();
@@ -24,38 +23,42 @@ function App() {
       setIsLoading(false);
     }
 
+
     // GỬI DỮ LIỆU SANG CHATBOT IFRAME
     const user = JSON.parse(localStorage.getItem("user"));
     const token = localStorage.getItem("access_token"); // ✅ Đây là chuỗi JWT, giữ nguyên
 
 
+
     const sendMessageToChatbot = () => {
       const iframe = document.querySelector("iframe[src*='localhost:8000']");
-      if (iframe && iframe.contentWindow) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = localStorage.getItem("access_token");
+      if (iframe && iframe.contentWindow && user && token) {
         iframe.contentWindow.postMessage(
           {
             type: "USER_DATA",
-            payload: {
-              user,
-              token,
-            },
+            payload: { user, token },
           },
           "*"
         );
       }
     };
 
-    // Delay chút để iframe render xong
-    setTimeout(sendMessageToChatbot, 1000);
-  }, []);
+    const timeoutId = setTimeout(sendMessageToChatbot, 1500);
 
+    return () => clearTimeout(timeoutId);
+  }, [user]);
 
   const handleDecoded = () => {
     let storageData = localStorage.getItem('access_token');
     let decoded = {};
-    if (storageData && isJsonString(storageData)) {
-      storageData = JSON.parse(storageData);
-      decoded = jwtDecode(storageData);
+    if (storageData) {
+      try {
+        decoded = jwtDecode(storageData);
+      } catch (e) {
+        console.error('Error decoding token:', e);
+      }
     }
     return { decoded, storageData };
   };
@@ -67,6 +70,7 @@ function App() {
       if (decoded?.exp < currentTime.getTime() / 1000) {
         const data = await UserService.refreshToken();
         config.headers['token'] = `Bearer ${data?.access_token}`;
+        localStorage.setItem('access_token', data?.access_token);
       }
       return config;
     },
@@ -82,7 +86,7 @@ function App() {
     } catch (error) {
       console.error("Lỗi khi lấy thông tin người dùng:", error);
     } finally {
-      setIsLoading(false);  // Đảm bảo setIsLoading luôn được gọi sau khi lấy dữ liệu
+      setIsLoading(false);
     }
   };
 
@@ -101,9 +105,15 @@ function App() {
                   key={route.path}
                   path={isCheckAuth ? route.path : undefined}
                   element={
-                    <Layout isShowFooter={routes.isShowFooter}>
-                      <Page />
-                    </Layout>
+                    Layout === DefaultComponent ? (
+                      <Layout isShowFooter={route.isShowFooter}>
+                        <Page />
+                      </Layout>
+                    ) : (
+                      <Fragment>
+                        <Page />
+                      </Fragment>
+                    )
                   }
                 />
               );
@@ -113,7 +123,6 @@ function App() {
       </LoadingComponent>
     </div>
   );
-
 }
 
 export default App;

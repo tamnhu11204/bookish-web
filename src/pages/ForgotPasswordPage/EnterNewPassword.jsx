@@ -2,58 +2,36 @@ import React, { useState } from "react";
 import "./EnterNewPassword.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import * as AuthService from "../../services/AuthService";
-import Message from "../../components/MessageComponent/Message";
 import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
-import background from "../../assets/img/background.jpg";
 
 const EnterNewPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email || ""; // Lấy email từ trang trước
-
-  console.log("Email nhận được:", email); // Debug email
+  const email = location.state?.email || "";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [statusMessage, setStatusMessage] = useState(null);
   const [showLoading, setShowLoading] = useState(false);
 
-  const handleSendNewPassword = async () => { // Bỏ tham số e vì không dùng submit
-
+  const handleSendNewPassword = async () => {
     if (password !== confirmPassword) {
-      setStatusMessage({
-        type: "Error",
-        message: "Mật khẩu nhập lại không khớp.",
-      });
+      alert("Mật khẩu nhập lại không khớp.");
       return;
     }
 
     setShowLoading(true);
-
     try {
-      console.log("Gửi yêu cầu reset password với:", { email, password }); // Debug
       const response = await AuthService.resetPassword(email, password);
-      console.log("Response từ backend:", response); // Debug
       if (response.success) {
-        setStatusMessage({
-          type: "Success",
-          message: "Đổi mật khẩu thành công! Đang chuyển đến trang đăng nhập...",
-        });
+        alert("Đổi mật khẩu thành công! Đang chuyển đến trang đăng nhập...");
         setTimeout(() => navigate("/login"), 1500);
       } else {
-        setStatusMessage({
-          type: "Error",
-          message: response.message || "Đã xảy ra lỗi. Vui lòng thử lại.",
-        });
+        alert(response.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
       }
     } catch (error) {
-      console.log("Lỗi:", error); // Debug
-      setStatusMessage({
-        type: "Error",
-        message: error.message || "Không thể kết nối đến máy chủ.",
-      });
+      alert(error.message || "Không thể kết nối đến máy chủ.");
     } finally {
       setShowLoading(false);
     }
@@ -64,23 +42,9 @@ const EnterNewPassword = () => {
   };
 
   return (
-    <div className="container-xl container-new-password">
-      {statusMessage && (
-        <Message
-          type={statusMessage.type}
-          message={statusMessage.message}
-          duration={3000}
-          onClose={() => setStatusMessage(null)}
-        />
-      )}
-
-      <div className="new-password-container">
-        {/* new-password right */}
-        <div className="new-password-container__img">
-          <img className="new-password__img" src={background} alt="Hình sách" />
-        </div>
-        {/* new-password left */}
-        <div className="new-password__left">
+    <div className="container-xl" style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
+      <div>
+        <div style={{ width: "600px", padding: "20px", border: "1px solid #ccc", borderRadius: "8px", boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)" }}>
           <h1
             className="title title_login"
             style={{
@@ -103,7 +67,6 @@ const EnterNewPassword = () => {
                 onChange={(value) => setPassword(value)}
                 enable={true}
               />
-
               <FormComponent
                 id="passwordConfirmInput"
                 label="Xác nhận lại mật khẩu"
@@ -118,8 +81,8 @@ const EnterNewPassword = () => {
           <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
             <ButtonComponent
               textButton="Gửi"
-              onClick={handleSendNewPassword} // Sửa thành handleSendNewPassword
-              disabled={!isValid()} // Dùng isValid để kiểm tra
+              onClick={handleSendNewPassword}
+              disabled={!isValid()}
             />
           </div>
         </div>

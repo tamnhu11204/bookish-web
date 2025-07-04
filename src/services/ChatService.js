@@ -5,7 +5,7 @@ export const axiosJWT = axios.create();
 export const sendChatMessage = async (data, token) => {
   const headers = { "Content-Type": "application/json" };
   if (token) {
-    headers["token"] = `Bearer ${token}`;
+    headers["Authorization "] = `Bearer ${token}`;
   }
   const res = await axiosJWT.post(
     `${process.env.REACT_APP_API_URL_BACKEND}/chat/send`,
@@ -33,7 +33,7 @@ export const getConversationWithUser = async (userId, token) => {
     `${process.env.REACT_APP_API_URL_BACKEND}/chat/conversation/${userId}`,
     {
       headers: {
-        token: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     }
   );

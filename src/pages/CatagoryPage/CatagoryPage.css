@@ -1,25 +1,43 @@
 .card-catagory {
     background-color: #FFFFFF;
-    border: 1px solid #198754; /* Viền màu đen */
-    border-radius: 10px; /* Bo góc 10px */
+    border: 1px solid #198754;
+    /* Viền màu đen */
+    border-radius: 10px;
+    /* Bo góc 10px */
     margin-top: 20px
 }
 
-.card-header-catagory{
+.card-header-catagory {
     padding: 0 10px;
     font-size: 20px;
     margin-top: 8px;
     color: #198754
 }
 
-.line{
+.line {
     border: 1px solid #198754
 }
-.list-check{
-    margin-left:10px;
-    font-size:16px
+
+.list-check {
+    margin-left: 10px;
+    font-size: 16px
 }
 
-.label{
+.label {
     font-size: 16px;
+}
+
+.price-slider {
+    width: 100%;
+    height: 5px;
+    background: #ddd;
+    border-radius: 5px;
+}
+
+.price-slider .thumb {
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
 }
