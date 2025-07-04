@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import * as RecommendationService from '../../services/RecommendationService';
 import './recommendation.css';
+import { useActionData } from 'react-router-dom';
+import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
+import * as ProductService from '../../services/ProductService';
+import { useNavigate } from 'react-router-dom';
 
 const Recommendation = ({ userId }) => {
   const [recommendedBooks, setRecommendedBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  console.log('User ID in :', userId);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -36,21 +42,31 @@ const Recommendation = ({ userId }) => {
     }
   }, [userId]);
 
+  const handleOnClickProduct = async (id) => {
+      await ProductService.updateView(id);
+      navigate(`/product-detail/${id}`);
+    };
+
   if (loading) return <div>Đang tải gợi ý...</div>;
   if (error) return <div className="text-center text-danger">{error}</div>;
   if (!recommendedBooks || recommendedBooks.length === 0) return <div>Không có sách gợi ý.</div>;
 
   return (
     <div className="recommendation-section">
-      <h3>Sách gợi ý cho bạn</h3>
+      <h3>Sách gợi ý cho bạn </h3>
       <div className="book-list">
-        {recommendedBooks.map(book => (
-          <div key={book._id} className="book-item">
-            <img src={book.img || 'https://placehold.co/80x80'} alt={book.title} style={{ width: '80px', height: '80px' }} />
-            <p><strong>{book.title}</strong></p>
-            <p>{book.author}</p>
-            <p>{book.genre}</p>
-          </div>
+        {recommendedBooks.map(product => (
+          <CardProductComponent
+          key={product._id}
+          img={product.img[0]}
+          proName={product.name}
+          currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+          sold={product.sold}
+          star={product.star}
+          feedbackCount={product.feedbackCount}
+          onClick={() => handleOnClickProduct(product._id)}
+          view={product.view}
+        />
         ))}
       </div>
     </div>

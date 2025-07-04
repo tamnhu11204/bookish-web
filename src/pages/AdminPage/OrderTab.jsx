@@ -84,19 +84,24 @@ const OrderTab = () => {
     }, [mutationData, isError, isSuccess]);
 
     const onSave = async () => {
-        const payload = {
-            active: selectedActive,
-            date: new Date(),
-        };
-        mutation.mutate({ orderId: selectedOrder, data: payload });
+    const payload = { active: selectedActive, date: new Date() };
+    console.log('Payload sent:', { orderId: selectedOrder, data: payload });
+    mutation.mutate({ orderId: selectedOrder, data: payload });
 
-        try {
-            const response = await OrderService.updateActiveOrderNow(selectedOrder, selectedActive);
-            console.log('Order updated successfully:', response);
-        } catch (error) {
-            console.error('Error updating order:', error);
+    try {
+        const response = await OrderService.updateActiveOrderNow(selectedOrder, payload);
+        console.log('Order updated successfully:', response);
+        if (response.emailSent) {
+            alert('Email đã được gửi thành công!');
+        } else if (response.emailError) {
+            alert('Gửi email thất bại: ' + response.emailError);
+        } else {
+            alert('Trạng thái đơn hàng đã được cập nhật!');
         }
-    };
+    } catch (error) {
+        console.error('Error updating order:', error);
+    }
+};
 
     const onCancel = () => {
         alert('Hủy thao tác!');
