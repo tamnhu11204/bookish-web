@@ -24,7 +24,7 @@ function App() {
     }
 
     const sendMessageToChatbot = () => {
-      const iframe = document.querySelector("iframe[src*='localhost:8000']");
+      const iframe = document.querySelector("iframe[src*='localhost:8000.onrender.com']");
       const user = JSON.parse(localStorage.getItem("user"));
       const token = localStorage.getItem("access_token");
       if (iframe && iframe.contentWindow && user && token) {

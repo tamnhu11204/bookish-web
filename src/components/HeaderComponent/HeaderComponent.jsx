@@ -27,7 +27,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
     document.cookie = "user_id=; path=/; max-age=0; SameSite=Lax";
 
     // Gửi thông báo đăng xuất tới chatbot
-    const iframe = document.querySelector("iframe[src*='localhost:8000']");
+    const iframe = document.querySelector("iframe[src*='localhost:8000.onrender.com']");
     if (iframe && iframe.contentWindow) {
       iframe.contentWindow.postMessage(
         { type: "LOGOUT" },
