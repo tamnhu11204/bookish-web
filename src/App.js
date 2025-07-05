@@ -23,6 +23,13 @@ function App() {
       setIsLoading(false);
     }
 
+
+    // GỬI DỮ LIỆU SANG CHATBOT IFRAME
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("access_token"); // ✅ Đây là chuỗi JWT, giữ nguyên
+
+
+
     const sendMessageToChatbot = () => {
       const iframe = document.querySelector("iframe[src*='localhost:8000.onrender.com']");
       const user = JSON.parse(localStorage.getItem("user"));
