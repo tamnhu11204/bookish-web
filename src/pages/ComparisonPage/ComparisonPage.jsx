@@ -145,7 +145,9 @@ const ComparisonPage = () => {
   <button
     type="button"
     className="btn btn-primary"
-    onClick={() => openModal(index)} // Mở Modal
+    onClick={() => openModal(index)} 
+    style={{ backgroundColor: '#198754', color: 'white', borderColor: '#198754' }}
+    // Mở Modal
   >
     Thêm sản phẩm
   </button>
@@ -168,10 +170,19 @@ const ComparisonPage = () => {
       ];
     
       const comparisonData1 = [
-        { criteria: 'Mã hàng', product1: selectedProducts[0]?._id || '-', product2: selectedProducts[1]?._id || '-', product3: selectedProducts[2]?._id || '-' },
+        { criteria: 'Mã hàng', product1: selectedProducts[0]?.code || '-', product2: selectedProducts[1]?.code || '-', product3: selectedProducts[2]?.code || '-' },
         { criteria: 'Tác giả', product1: selectedProducts[0]?.author || '-', product2: selectedProducts[1]?.author || '-', product3: selectedProducts[2]?.author || '-' },
         { criteria: 'Nhà xuất bản', product1: productDetails1.publisher?.name || '-', product2: productDetails2.publisher?.name|| '-', product3: productDetails3.publisher?.name || '-' },
-        { criteria: 'Năm xuất bản', product1: selectedProducts[0]?.publishDate || '-', product2: selectedProducts[1]?.publishDate || '-', product3: selectedProducts[2]?.publishDate || '-' },
+        { criteria: 'Năm xuất bản',
+product1: selectedProducts[0]?.publishDate 
+  ? new Date(selectedProducts[0].publishDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  : '-',
+product2: selectedProducts[1]?.publishDate 
+  ? new Date(selectedProducts[1].publishDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  : '-',
+product3: selectedProducts[2]?.publishDate 
+  ? new Date(selectedProducts[2].publishDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  : '-', },
         { criteria: 'Ngôn ngữ', product1: productDetails1.language?.name  || '-', product2: productDetails2.language?.name  || '-', product3: productDetails3.language?.name  || '-' },
         { criteria: 'Trọng lượng', product1: selectedProducts[0]?.weight || '-', product2: selectedProducts[1]?.weight || '-', product3: selectedProducts[2]?.weight || '-' },
         {
@@ -245,7 +256,7 @@ const ComparisonPage = () => {
                 />
             </div>
 
-            <div class="container" style={{ marginTop: '30px' }}>
+            <div class="container" style={{ marginTop: '30px',marginBottom:'30px' }}>
                 <CardComponent
                     title="Thông tin chi tiết của sách"
                     bodyContent={comparison2}

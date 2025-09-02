@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useRef} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import logo from '../../assets/img/logo.png';
 import * as UserService from '../../services/UserService';
@@ -54,10 +54,26 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
   };
+  // Ref để đo chiều cao của sticky-header
+  const headerRef = useRef(null);
+
+useEffect(() => {
+    if (headerRef.current) {
+    const headerHeight = headerRef.current.offsetHeight;
+    console.log('Sticky-header height:', headerHeight);
+    const navbarElement = document.querySelector('.navbar:nth-child(2)');
+    if (navbarElement) {
+      navbarElement.style.top = `${headerHeight}px`;
+    }
+  }
+    return () => {
+      document.body.style.paddingTop = ''; // Cleanup khi unmount
+    };
+  }, [user?.name]);
 
   return (
     <>
-      <nav className="navbar sticky-header">
+      <nav className="navbar sticky-header" ref={headerRef}  >
         <div className="container">
           <a className="navbar-brand" href="/">
             <img
@@ -186,7 +202,7 @@ const HeaderComponent = ({ isHiddenSearch = false, isHiddenCart = false, isHidde
         </div>
       </nav>
 
-      <nav className="navbar" style={{ height: '60px', position: 'sticky', top: '55px', zIndex: 999, backgroundColor: '#fff' }}>
+      <nav className="navbar" style={{ height: '60px', position: 'sticky', top: '0px', zIndex: 999, backgroundColor: '#fff' }}>
         <div className="container">
           <ul className="nav nav-underline">
             <li className="nav-item">

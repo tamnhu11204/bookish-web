@@ -188,11 +188,7 @@ const ProductTab = () => {
                             />
                         </div>
                         <div className="col text-end">
-                            <ButtonComponent
-                                textButton="Nhập hàng"
-                                icon={<i className="bi bi-plus-circle"></i>}
-                                onClick={handleOpenModal}
-                            />
+                            
                             <div style={{ marginTop: '10px' }}>
                                 <ButtonComponent
                                     textButton="Thêm sản phẩm"

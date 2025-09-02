@@ -375,7 +375,7 @@ const CatagoryPage = () => {
       <div className="container">
         <div className="row">
           <div className="col-3">
-            <div className="card-catagory">
+            <div className="card-catagory"style={{ marginBottom:'25px' }}>
               <div className="card-header-catagory">DANH MỤC SẢN PHẨM</div>
               <div className="list-check">
                 <div className="form-check">
@@ -501,45 +501,46 @@ const CatagoryPage = () => {
               </div>
               <div className="price-filter" style={{ fontSize: '16px', padding: '0 10px' }}>
                 <div className="card-header-catagory">Hoặc tự chọn mức giá</div>
-                <div className="d-flex gap-2 mb-2">
-                  <input
-                    style={{ fontSize: '16px' }}
-                    type="number"
-                    className="form-control"
-                    value={minPrice}
-                    onChange={(e) => handlePriceChange(e, 'min')}
-                  />
-                  <span>-</span>
-                  <input
-                    style={{ fontSize: '16px' }}
-                    type="number"
-                    className="form-control"
-                    value={maxPrice}
-                    onChange={(e) => handlePriceChange(e, 'max')}
-                  />
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1000000"
-                  step="1000"
-                  value={minPrice}
-                  onChange={(e) => handlePriceChange(e, 'min')}
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="1000000"
-                  step="1000"
-                  value={maxPrice}
-                  onChange={(e) => handlePriceChange(e, 'max')}
-                  className="mt-2"
-                />
-                <div>
-                  <small>
-                    Khoảng giá: {priceRange[0].toLocaleString()} đ - {priceRange[1].toLocaleString()} đ
-                  </small>
-                </div>
+<div className="d-flex gap-2 mb-2">
+  <input
+    style={{ fontSize: '16px' }}
+    type="number"
+    className="form-control"
+    value={minPrice}
+    onChange={(e) => handlePriceChange(e, 'min')}
+  />
+  <span>-</span>
+  <input
+    style={{ fontSize: '16px' }}
+    type="number"
+    className="form-control"
+    value={maxPrice}
+    onChange={(e) => handlePriceChange(e, 'max')}
+  />
+</div>
+<input
+  type="range"
+  min="0"
+  max="1000000"
+  step="1000"
+  value={minPrice}
+  onChange={(e) => handlePriceChange(e, 'min')}
+  className="custom-range"
+/>
+<input
+  type="range"
+  min="0"
+  max="1000000"
+  step="1000"
+  value={maxPrice}
+  onChange={(e) => handlePriceChange(e, 'max')}
+  className="custom-range mt-2"
+/>
+<div>
+  <small>
+    Khoảng giá: {priceRange[0].toLocaleString()} đ - {priceRange[1].toLocaleString()} đ
+  </small>
+</div>
               </div>
               <hr className="line" />
               <div className="card-header-catagory">HÌNH THỨC</div>
@@ -569,7 +570,7 @@ const CatagoryPage = () => {
             </div>
           </div>
           <div className="col-9">
-            <div className="card-catagory" style={{ padding: '0 10px' }}>
+            <div className="card-catagory" style={{ padding: '0px 10px',marginBottom:'25px' }}>
               <h4 style={{ marginTop: '10px' }}>Sắp xếp theo:</h4>
               <div className="col-md-4 mb-3">
                 <FormSelectComponent
