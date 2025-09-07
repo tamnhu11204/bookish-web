@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '../../assets/img/logo.png';
@@ -36,6 +36,22 @@ const HeaderComponent = () => {
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
   };
+  // Ref để đo chiều cao của sticky-header
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      const headerHeight = headerRef.current.offsetHeight;
+      console.log('Sticky-header height:', headerHeight);
+      const navbarElement = document.querySelector('.navbar:nth-child(2)');
+      if (navbarElement) {
+        navbarElement.style.top = `${headerHeight}px`;
+      }
+    }
+    return () => {
+      document.body.style.paddingTop = ''; // Cleanup khi unmount
+    };
+  }, [user?.name]);
 
   return (
     <>

@@ -145,3 +145,45 @@
 .plus_minus:hover {
     color: #e85d04;
 }
+
+.custom-range {
+    width: 100%;
+    accent-color: #198754;
+    /* Màu cam cho thanh (có thể thay đổi) */
+    -webkit-appearance: none;
+    /* Xóa giao diện mặc định */
+}
+
+.custom-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 15px;
+    height: 15px;
+    background: #198754;
+    /* Màu xanh dương cho nút trượt */
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #FFFFFF;
+    /* Viền trắng cho nổi bật */
+}
+
+.custom-range::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #198754, #E0E0E0);
+    /* Màu cam cho phần đã chọn, xám cho phần chưa chọn */
+    height: 8px;
+    border-radius: 4px;
+}
+
+.custom-range::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: #198754;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #FFFFFF;
+}
+
+.custom-range::-moz-range-track {
+    background: linear-gradient(to right, #198754, #E0E0E0);
+    height: 8px;
+    border-radius: 4px;
+}

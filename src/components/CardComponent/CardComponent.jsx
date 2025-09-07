@@ -21,6 +21,7 @@ const CardComponent = ({ title, bodyContent, icon }) => {
                             height: "35px",
                             backgroundColor: "#2A7D46",
                             borderRadius: "5px",
+                           
                         }}
                     >
                         <i
