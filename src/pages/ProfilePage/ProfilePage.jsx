@@ -9,9 +9,6 @@ import FeedbackTab from './FeedbackTab';
 export const ProfilePage = () => {
 
     const [activeTab, setActiveTab] = useState("profileManagement");
-    const [successMessage, setSuccessMessage] = useState(false); // Quản lý trạng thái thông báo
-
-  
 
     return (
         <div className="d-flex">
@@ -77,7 +74,7 @@ export const ProfilePage = () => {
                     </div>
                 </button>
 
-                
+
 
                 <button
                     className={`nav-link ${activeTab === "productManagement" ? "active" : ""}`}
@@ -92,12 +89,12 @@ export const ProfilePage = () => {
 
             <div className="tab-content" style={{ flexGrow: 1 }}>
                 <div className="tab-pane fade show active">
-                {activeTab === "profileManagement" && <ProfileTab/>} 
-                    {activeTab === "passwordManagement" && <PasswordTab />} 
-                    {activeTab === "addressManagement" && <AddressTab/>} 
-                    {activeTab === "productManagement" && <ProductTab/>} 
-                    {activeTab === "orderManagement" && <OrderTab/>} 
-                    {activeTab === "feedbackManagement" && <FeedbackTab/>} 
+                    {activeTab === "profileManagement" && <ProfileTab />}
+                    {activeTab === "passwordManagement" && <PasswordTab />}
+                    {activeTab === "addressManagement" && <AddressTab />}
+                    {activeTab === "productManagement" && <ProductTab />}
+                    {activeTab === "orderManagement" && <OrderTab />}
+                    {activeTab === "feedbackManagement" && <FeedbackTab />}
 
                 </div>
             </div>

@@ -6,6 +6,7 @@ import LanguageSubTab from './LanguageSubTab';
 import StatusSubTab from './StatusSubTab';
 import FormSubTab from './FormSubTab';
 import UnitSubTab from './UnitSubTab';
+import AuthorSubTab from './AuthorSubTab';
 
 const OptionTab = () => {
     const [activeTab, setActiveTab] = useState("language");
@@ -54,14 +55,23 @@ const OptionTab = () => {
                                 Nhà xuất bản
                             </button>
                         </li>
+                        <li className="nav-item">
+                            <button
+                                className={`nav-link ${activeTab === "author" ? "active" : ""}`}
+                                onClick={() => setActiveTab("author")}
+                            >
+                                Tác giả
+                            </button>
+                        </li>
                     </ul>
                 </div>
 
                 <div className="tab-content" style={{ flexGrow: 1 }}>
-                    {activeTab === "language" && <LanguageSubTab/>}
-                    {activeTab === "format" && <FormSubTab/>}
-                    {activeTab === "unit" && <UnitSubTab/>}
-                    {activeTab === "publisher" && <PublisherSubTab/>}
+                    {activeTab === "language" && <LanguageSubTab />}
+                    {activeTab === "format" && <FormSubTab />}
+                    {activeTab === "unit" && <UnitSubTab />}
+                    {activeTab === "publisher" && <PublisherSubTab />}
+                    {activeTab === "author" && <AuthorSubTab />}
                 </div>
             </div>
 
@@ -91,7 +101,7 @@ const OptionTab = () => {
 
                 <div className="tab-content" style={{ flexGrow: 1 }}>
                     {activeTab1 === "supplier" && <SupplierSubTab />}
-                    {activeTab1 === "status" && <StatusSubTab/>}
+                    {activeTab1 === "status" && <StatusSubTab />}
                 </div>
             </div>
         </div>

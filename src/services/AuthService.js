@@ -1,3 +1,4 @@
+/* eslint-disable no-throw-literal */
 import axios from "axios";
 
 // Bỏ qua kiểm tra chứng chỉ SSL trong môi trường phát triển

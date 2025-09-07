@@ -29,13 +29,8 @@ const flattenCategoryTree = (categories, level = 0) => {
 };
 
 const ProductTab = () => {
-    const [activeTab, setActiveTab] = useState("all");
     const [productID, setProductID] = useState("");
     const [showModal, setShowModal] = useState(false);
-    const [modalTitle, setModalTitle] = useState('');
-    const [modalBody, setModalBody] = useState(null);
-    const [textButton1, setTextButton1] = useState('');
-    const [onSave, setOnSave] = useState(() => () => { });
     const [onCancel, setOnCancel] = useState(() => () => { });
     const [Type, setType] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');

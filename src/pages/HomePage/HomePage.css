@@ -1,0 +1,821 @@
+.homepage-container {
+    background-color: #F9F6F2;
+}
+
+.product-grid,
+.author-products {
+    gap: 1.5rem !important;
+    justify-content: center !important;
+}
+
+.d-flex.flex-wrap {
+    gap: 1.5rem !important;
+}
+
+/* --- Hero Banner Section --- */
+.hero-banner {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    background-size: cover;
+    background-position: center center;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 10%;
+    color: #fff;
+}
+
+.hero-text-content {
+    z-index: 2;
+    padding: 20px;
+    background-color: transparent;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.hero-text-content h1,
+.hero-text-content p {
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.hero-text-content h1 {
+    font-size: 6rem;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.hero-text-content p {
+    font-size: 3rem;
+    margin-top: 10px;
+    text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+    transition-delay: 0.2s;
+}
+
+.hero-text-content h1.visible,
+.hero-text-content p.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Wavy Divider Section --- */
+.wave-divider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+}
+
+.wave-divider svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 80px;
+}
+
+.wave-divider .shape-fill {
+    fill: #198754;
+}
+
+.section-wrapper {
+    padding: 50px 0;
+}
+
+.section-wrapper.green-bg {
+    background-color: #198754;
+    padding: 20px 0;
+}
+
+.product-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+}
+
+.view-more-container {
+    width: 100%;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* --- Mini Card Slider (Category & Publisher) --- */
+.slider-container {
+    position: relative;
+    padding: 10px 40px;
+}
+
+.slider-content {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 3rem;
+    overflow: hidden;
+    padding: 5px 5px
+}
+
+.slider-nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    border: 1px solid #198754;
+    background-color: white;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #198754;
+    transition: all 0.2s ease;
+}
+
+.slider-nav-button:hover:not(:disabled) {
+    background-color: #198754;
+    color: white;
+}
+
+.slider-nav-button:disabled {
+    display: none;
+}
+
+.slider-nav-button.prev {
+    left: -25px;
+}
+
+.slider-nav-button.next {
+    right: -25px;
+}
+
+.no-data-text {
+    text-align: center;
+}
+
+/* --- About us --- */
+.about-section {
+    padding: 60px 0;
+    background-color: #198754;
+}
+
+.about-grid {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+.about-image {
+    flex: 1;
+}
+
+.about-image img {
+    width: 30vw;
+    height: 30vw;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.about-content {
+    flex: 1.2;
+}
+
+.about-content h2 {
+    font-size: 5rem;
+    font-weight: 700;
+    color: #483d43;
+    margin-bottom: 1rem;
+    position: relative;
+    padding-bottom: 1rem;
+    text-align: left;
+}
+
+.about-content h2::after {
+    content: '';
+    position: absolute;
+    bottom: 35px;
+    left: 280px;
+    width: 60%;
+    height: 4px;
+    background-color: #483d43;
+    border-radius: 2px;
+}
+
+.about-content>p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #fff;
+    margin-bottom: 2.5rem;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    text-align: left;
+    gap: 15px;
+}
+
+.feature-item img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1rem;
+}
+
+.feature-item h3 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #483d43;
+    margin-bottom: 0.5rem;
+}
+
+.feature-item p {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #fff;
+}
+
+/* author area  */
+.featured-author-section {
+    padding: 60px 0;
+    position: relative;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.featured-author-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+.featured-author-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 2.5fr;
+    gap: 2.5rem;
+    align-items: center;
+}
+
+.text-featured-author {
+    color: #2A7D46;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    width: 100%;
+    margin-bottom: 2.5rem;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section-header-left h2 {
+    margin: 0;
+    text-align: left;
+}
+
+.section-header-left .header-line {
+    position: absolute;
+    bottom: 37px;
+    left: 190px;
+    height: 3px;
+    width: 85%;
+    background-color: #198754;
+    border-radius: 2px;
+}
+
+/* Cột 1: Tiểu sử */
+.author-bio {
+    text-align: right;
+}
+
+.author-bio h4 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #198754;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.author-bio h2 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #e85d04;
+    margin-bottom: 1.5rem;
+}
+
+.author-bio .bio-text {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 2rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 10;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.author-bio .btn-more {
+    background-color: #e85d04;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.author-bio .btn-more:hover {
+    background-color: #d05303;
+}
+
+.author-bio .btn-more i {
+    margin-left: 8px;
+}
+
+/* Cột 2: Ảnh được trang trí */
+.author-image-decorated {
+    position: relative;
+    background-color: #fceae1;
+    padding: 2rem;
+    border-radius: 12px;
+}
+
+.author-image-decorated>img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.author-image-info h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #198754;
+    text-align: center;
+}
+
+.author-image-info h2 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #e85d04;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.author-image-info ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.author-image-info ul li {
+    font-size: 0.9rem;
+    color: #444;
+    margin-bottom: 0.75rem;
+    display: flex;
+}
+
+.author-image-info ul li i {
+    color: #ffc107;
+    margin-right: 10px;
+    padding-top: 3px;
+}
+
+/* Cột 3: Sản phẩm của tác giả */
+.author-products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+
+.edit-page-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.edit-actions-footer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+}
+
+.edit-actions-footer button {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.edit-actions-footer .save-button {
+    background-color: #28a745;
+}
+
+.edit-actions-footer .cancel-button {
+    background-color: #dc3545;
+}
+
+/* Styling cho các input chỉnh sửa trực tiếp */
+.inline-edit-input,
+.inline-edit-textarea {
+    width: 100%;
+    padding: 8px;
+    margin: 0;
+    border: 2px dashed #198754;
+    border-radius: 4px;
+    font-family: inherit;
+    background-color: rgba(227, 242, 253, 0.9);
+    color: #333;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+
+.inline-edit-input.h1-input {
+    font-size: 6rem;
+    font-weight: bold;
+    text-shadow: none;
+    width: 20vw;
+}
+
+.hero-text-content .inline-edit-input.p-input {
+    font-size: 3rem;
+    text-shadow: none;
+}
+
+.inline-edit-input.h2-input {
+    font-size: 5rem;
+    font-weight: 700;
+}
+
+.inline-edit-input.h3-input {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.feature-item .inline-edit-input.p-input {
+    font-size: 16px;
+}
+
+.inline-edit-textarea {
+    font-size: 16px;
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Overlay để upload ảnh */
+.about-image,
+.hero-banner {
+    position: relative;
+}
+
+.image-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+
+.about-image:hover .image-upload-overlay,
+.hero-banner:hover .image-upload-overlay {
+    opacity: 1;
+}
+
+.image-upload-overlay label {
+    color: white;
+    background-color: #198754;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.featured-author-edit {
+    background-color: rgb(228, 247, 203);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.featured-author-edit label {
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.featured-author-edit select {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    min-width: 250px;
+    font-size: 16px;
+}
+
+.author-bio .bio-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 10;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+}
+
+.author-bio .bio-text.expanded {
+    -webkit-line-clamp: unset;
+    max-height: 1000px;
+}
+
+/* =================================== */
+/* === KHU VỰC TÁC GIẢ NỔI BẬT (MỚI) === */
+/* =================================== */
+
+.featured-authors-section {
+    padding: 60px 0;
+    background-color: #fff;
+}
+
+.featured-authors-section .section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2.5rem;
+}
+
+/* --- Slider Wrapper --- */
+.authors-slider {
+    position: relative;
+}
+
+.authors-slider-content {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 0 40px;
+    align-items: flex-start;
+}
+
+/* ======================================= */
+/* === AUTHOR SHOWCASE ITEM (MỚI)      === */
+/* ======================================= */
+
+.author-showcase-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 200px;
+}
+
+.author-portrait-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 125%;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.author-portrait {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.author-portrait-wrapper:hover .author-portrait {
+    transform: scale(1.05);
+}
+
+.author-name-below {
+    text-align: center;
+}
+
+.author-name-below h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* --- Hiệu ứng sách trên ảnh (CẬP NHẬT) --- */
+.book-stack-on-portrait {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+
+    width: 55px;
+    height: 82px;
+    perspective: 600px;
+}
+
+.book-counter-card,
+.stacked-book-cover {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Card đếm số sách (CẬP NHẬT) */
+.book-counter-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(30, 30, 30, 0.85);
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    z-index: 5;
+    opacity: 1;
+    transform: rotateY(0deg);
+}
+
+/* Các bìa sách */
+.stacked-book-cover {
+    object-fit: cover;
+    opacity: 0;
+    transform: rotateY(90deg);
+}
+
+.author-portrait-wrapper:hover .book-counter-card {
+    opacity: 0;
+    transform: rotateY(-90deg);
+}
+
+.author-portrait-wrapper:hover .stacked-book-cover {
+    opacity: 1;
+    transform: rotateY(0deg);
+}
+
+.author-portrait-wrapper:hover .book-cover-0 {
+    transform: translateX(-15%) rotateZ(-8deg);
+    z-index: 3;
+}
+
+.author-portrait-wrapper:hover .book-cover-1 {
+    transform: translateX(0) rotateZ(2deg) scale(1.05);
+    z-index: 4;
+}
+
+.author-portrait-wrapper:hover .book-cover-2 {
+    transform: translateX(15%) rotateZ(10deg);
+    z-index: 2;
+}
+
+/* ============================================= */
+/* === KHU VỰC TESTIMONIALS (FEEDBACK) === */
+/* ============================================= */
+
+.testimonials-section {
+    padding: 80px 0;
+    background-color: #fff;
+}
+
+.testimonials-section .section-title,
+.featured-authors-section .section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 3rem;
+}
+
+.testimonial-slider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.testimonial-slider-content {
+    width: 90%;
+    overflow: hidden;
+}
+
+.testimonial-slider-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+/* --- Thẻ Testimonial Card (Style mới: Ảnh + Chữ) --- */
+
+.testimonial-card {
+    flex: 0 0 calc(100% / 3);
+    box-sizing: border-box;
+    padding: 25px;
+    margin: 0 15px;
+    border-radius: 20px;
+}
+
+.testimonial-card.color-1 {
+    background-color: rgb(228, 247, 203);
+}
+
+.testimonial-card.color-2 {
+    background-color: #fceae1;
+}
+
+/* Bố cục flex cho ảnh và chữ */
+.testimonial-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    min-height: 160px;
+
+}
+
+.testimonial-image-wrapper {
+    flex: 0 0 120px;
+    width: 120px;
+}
+
+.testimonial-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.testimonial-text-wrapper {
+    flex: 1;
+}
+
+.testimonial-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #555;
+    font-style: italic;
+    margin: 0;
+    text-align: left;
+}
+
+.text-featured-fb {
+    color: #2A7D46;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    width: 100%;
+    margin-bottom: 2.5rem;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section-header-left-fb h2 {
+    margin: 0;
+    text-align: left;
+}
+
+.section-header-left-fb .header-line-fb {
+    position: absolute;
+    bottom: 37px;
+    left: 320px;
+    height: 3px;
+    width: 75%;
+    background-color: #198754;
+    border-radius: 2px;
+}

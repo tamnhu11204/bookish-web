@@ -1,41 +1,42 @@
-import React, { useMemo, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useLocation } from 'react-router-dom';
-import './CatagoryPage.css';
-import SliderComponent from '../../components/SliderComponent/SliderComponent';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import img1 from '../../assets/img/img1.png';
-import img2 from '../../assets/img/img2.png';
-import CardProductComponent from '../../components/CardProductComponent2/CardProductComponent2';
 import CardComponent from '../../components/CardComponent2/CardComponent2';
-import FormSelectComponent from '../../components/FormSelectComponent/FormSelectComponent';
+import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
-import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent';
+import * as CategoryService from '../../services/CategoryService';
+import * as AuthorService from '../../services/AuthorService';
+import * as FormatService from '../../services/OptionService/FormatService';
+import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as PublisherService from '../../services/OptionService/PublisherService';
 import * as ProductService from '../../services/ProductService';
-import * as CategoryService from '../../services/CategoryService';
-import * as FormatService from '../../services/OptionService/FormatService';
+import './CatagoryPage.css';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 
 const CatagoryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
+  const [selectAllCategories, setSelectAllCategories] = useState(false);
   const [selectedPublishers, setSelectedPublishers] = useState([]);
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [selectedFormats, setSelectedFormats] = useState([]);
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
   const [totalPages, setTotalPages] = useState(1);
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000000);
-  const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [selectedSort, setSelectedSort] = useState('');
+  const [openedCategories, setOpenedCategories] = useState([]);
+  const [authorSearch, setAuthorSearch] = useState('');
 
   // Lấy tất cả sản phẩm
   const getAllProduct = async () => {
     try {
       const res = await ProductService.getAllProduct();
-      console.log('Product API response:', res); // Debug
+      console.log('Product API response:', res);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy sản phẩm:', error);
@@ -52,7 +53,7 @@ const CatagoryPage = () => {
   const getTreeCategory = async () => {
     try {
       const res = await CategoryService.getTreeCategory();
-      console.log('Category tree:', res.data); // Debug
+      console.log('Category tree:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy danh mục:', error);
@@ -69,7 +70,7 @@ const CatagoryPage = () => {
   const getAllCategory = async () => {
     try {
       const res = await CategoryService.getAllCategory();
-      console.log('All categories:', res.data); // Debug
+      console.log('All categories:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy danh mục:', error);
@@ -93,7 +94,7 @@ const CatagoryPage = () => {
   const getAllPublisher = async () => {
     try {
       const res = await PublisherService.getAllPublisher();
-      console.log('All publishers:', res.data); // Debug
+      console.log('All publishers:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy nhà xuất bản:', error);
@@ -113,11 +114,63 @@ const CatagoryPage = () => {
     }))
     : [];
 
+  // Lấy tác giả
+  const getAllAuthor = async () => {
+    try {
+      const res = await AuthorService.getAllAuthor();
+      console.log('All authors:', res.data);
+      return res.data;
+    } catch (error) {
+      console.error('Lỗi khi lấy tác giả:', error);
+      throw error;
+    }
+  };
+
+  const { isLoading: isLoadingAuthor, data: authors } = useQuery({
+    queryKey: ['authors'],
+    queryFn: getAllAuthor,
+  });
+
+  const AllAuthors = Array.isArray(authors)
+    ? authors.map((author) => ({
+      value: author._id,
+      label: author.name,
+    }))
+    : [];
+
+  const filteredAuthors = AllAuthors.filter((author) =>
+    author.label.toLowerCase().includes(authorSearch.toLowerCase())
+  );
+
+  // Lấy ngôn ngữ
+  const getAllLanguage = async () => {
+    try {
+      const res = await LanguageService.getAllLanguage();
+      console.log('All languages:', res.data);
+      return res.data;
+    } catch (error) {
+      console.error('Lỗi khi lấy ngôn ngữ:', error);
+      throw error;
+    }
+  };
+
+  const { isLoading: isLoadingLanguage, data: languages } = useQuery({
+    queryKey: ['languages'],
+    queryFn: getAllLanguage,
+  });
+
+  const AllLanguages = Array.isArray(languages)
+    ? languages.map((language) => ({
+      value: language._id,
+      label: language.name,
+    }))
+    : [];
+
   // Lấy hình thức
   const getAllFormat = async () => {
     try {
       const res = await FormatService.getAllFormat();
-      console.log('All formats:', res.data); // Debug
+      console.log('All formats:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy hình thức:', error);
@@ -155,37 +208,62 @@ const CatagoryPage = () => {
       cats.forEach((cat) => {
         if (selectedIds.includes(cat._id)) {
           allIds.add(cat._id);
-          if (cat.children) {
-            cat.children.forEach((child) => allIds.add(child._id));
+          if (cat.children && cat.children.length > 0) {
+            cat.children.forEach((child) => {
+              allIds.add(child._id);
+            });
             traverse(cat.children);
           }
-        } else if (cat.children) {
-          traverse(cat.children);
+        } else {
+          if (cat.children) {
+            traverse(cat.children);
+          }
         }
       });
     };
     traverse(categories);
-    return Array.from(allIds);
+    const result = Array.from(allIds);
+    console.log('All category IDs for filtering:', result, 'Selected:', selectedIds);
+    return result;
   };
 
-  // Hàm render danh mục dạng cây
+  // Toggle mở/đóng category
+  const toggleCategory = (categoryId) => {
+    setOpenedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  // Render danh mục dạng cây với +/- bên phải
   const renderCategoryTree = (categories, level = 0) => {
     return categories.map((cat) => (
       <div key={cat._id} style={{ marginLeft: `${level * 20}px` }}>
-        <div className="form-check">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            value={cat._id}
-            id={`category-${cat._id}`}
-            checked={selectedCategories.includes(cat._id)}
-            onChange={() => handleCategoryChange(cat._id)}
-          />
-          <label className="form-check-label" htmlFor={`category-${cat._id}`}>
-            {cat.name}
-          </label>
+        <div className="d-flex align-items-center justify-content-between">
+          <div className="form-check flex-grow-1">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              value={cat._id}
+              id={`category-${cat._id}`}
+              checked={selectedCategories.includes(cat._id)}
+              onChange={() => handleCategoryChange(cat._id)}
+            />
+            <label className="form-check-label" htmlFor={`category-${cat._id}`}>
+              {cat.name}
+            </label>
+          </div>
+          {cat.children && cat.children.length > 0 && (
+            <span
+              onClick={() => toggleCategory(cat._id)}
+              className='plus_minus'
+            >
+              {openedCategories.includes(cat._id) ? '-' : '+'}
+            </span>
+          )}
         </div>
-        {cat.children && renderCategoryTree(cat.children, level + 1)}
+        {cat.children && openedCategories.includes(cat._id) && renderCategoryTree(cat.children, level + 1)}
       </div>
     ));
   };
@@ -197,7 +275,7 @@ const CatagoryPage = () => {
         ? prev.filter((value) => value !== categoryValue)
         : [...prev, categoryValue]
     );
-    setSelectAll(false);
+    setSelectAllCategories(false);
     setCurrentPage(1);
   };
 
@@ -206,6 +284,24 @@ const CatagoryPage = () => {
       prev.includes(publisherValue)
         ? prev.filter((value) => value !== publisherValue)
         : [...prev, publisherValue]
+    );
+    setCurrentPage(1);
+  };
+
+  const handleAuthorChange = (authorValue) => {
+    setSelectedAuthors((prev) =>
+      prev.includes(authorValue)
+        ? prev.filter((value) => value !== authorValue)
+        : [...prev, authorValue]
+    );
+    setCurrentPage(1);
+  };
+
+  const handleLanguageChange = (languageValue) => {
+    setSelectedLanguages((prev) =>
+      prev.includes(languageValue)
+        ? prev.filter((value) => value !== languageValue)
+        : [...prev, languageValue]
     );
     setCurrentPage(1);
   };
@@ -219,49 +315,55 @@ const CatagoryPage = () => {
     setCurrentPage(1);
   };
 
-  const handleSelectAllChange = () => {
-    if (!selectAll) {
+  const handlePriceRangeChange = (range) => {
+    const rangeStr = `${range[0]}-${range[1] === Infinity ? 'Infinity' : range[1]}`;
+    setSelectedPriceRanges((prev) =>
+      prev.includes(rangeStr)
+        ? prev.filter((r) => r !== rangeStr)
+        : [...prev, rangeStr]
+    );
+    setCurrentPage(1);
+  };
+
+  const handleSelectAllCategoriesChange = () => {
+    if (!selectAllCategories) {
       const allCategoryValues = AllCategory.map((category) => category.value);
       setSelectedCategories(allCategoryValues);
     } else {
       setSelectedCategories([]);
     }
-    setSelectAll(!selectAll);
+    setSelectAllCategories(!selectAllCategories);
     setCurrentPage(1);
   };
 
-  const handlePriceChange = (e, type) => {
-    const value = parseInt(e.target.value || 0, 10);
-    if (type === 'min') {
-      if (value <= maxPrice) {
-        setMinPrice(value);
-        setPriceRange([value, maxPrice]);
-      }
-    } else {
-      if (value >= minPrice) {
-        setMaxPrice(value);
-        setPriceRange([minPrice, value]);
-      }
+  const removeFilter = (type, value) => {
+    switch (type) {
+      case 'category':
+        setSelectedCategories((prev) => prev.filter((v) => v !== value));
+        break;
+      case 'price':
+        setSelectedPriceRanges((prev) => prev.filter((v) => v !== value));
+        break;
+      case 'author':
+        setSelectedAuthors((prev) => prev.filter((v) => v !== value));
+        break;
+      case 'publisher':
+        setSelectedPublishers((prev) => prev.filter((v) => v !== value));
+        break;
+      case 'language':
+        setSelectedLanguages((prev) => prev.filter((v) => v !== value));
+        break;
+      case 'format':
+        setSelectedFormats((prev) => prev.filter((v) => v !== value));
+        break;
+      default:
+        break;
     }
     setCurrentPage(1);
   };
 
-  const handleRangeSelect = (range) => {
-    const [min, max] = range;
-    setMinPrice(min);
-    setMaxPrice(max);
-    setPriceRange([min, max]);
-    setCurrentPage(1);
-  };
-
-  const Sort = [
-    { value: 'price-asc', label: 'Giá từ thấp đến cao' },
-    { value: 'price-desc', label: 'Giá từ cao đến thấp' },
-    { value: 'sold', label: 'Lượt bán sản phẩm' },
-  ];
-
-  const handleOnChangeSort = (e) => {
-    setSelectedSort(e.target.value);
+  const handleSortChange = (sortValue) => {
+    setSelectedSort(sortValue);
     setCurrentPage(1);
   };
 
@@ -273,10 +375,19 @@ const CatagoryPage = () => {
         sortedProducts.sort((a, b) => a.price - b.price);
         break;
       case 'price-desc':
-        sortedProducts.sort((a, b) => b.price - a.price);
+        sortedProducts.sort((a, b) => b.price - b.price);
+        break;
+      case 'name-asc':
+        sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'name-desc':
+        sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
         break;
       case 'sold':
         sortedProducts.sort((a, b) => (b.sold || 0) - (a.sold || 0));
+        break;
+      case 'new':
+        sortedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
       default:
         break;
@@ -287,27 +398,40 @@ const CatagoryPage = () => {
   // Lọc sản phẩm
   useEffect(() => {
     if (products && products.length > 0 && categoryTree) {
-      // Lấy tất cả ID danh mục con
       const allCategoryIds = getAllCategoryIds(categoryTree, selectedCategories);
-      console.log('All category IDs for filtering:', allCategoryIds); // Debug
 
       let filtered = products.filter((product) => {
-        const categoryMatch = selectedCategories.length
-          ? allCategoryIds.includes(product.category)
-          : true;
-        const publisherMatch = selectedPublishers.length
-          ? selectedPublishers.includes(product.publisher)
-          : true;
-        const formatMatch = selectedFormats.length
-          ? selectedFormats.includes(product.format)
-          : true;
-        const priceAfterDiscount = (product.price * (100 - (product.discount || 0))) / 100;
-        const priceMatch = priceAfterDiscount >= priceRange[0] && priceAfterDiscount <= priceRange[1];
+        const productCategoryId = product.category?._id || product.category;
+        const categoryMatch = selectedCategories.length === 0
+          ? true
+          : allCategoryIds.includes(productCategoryId);
 
-        return categoryMatch && publisherMatch && formatMatch && priceMatch;
+        console.log(`Product ${product._id}: category object=${JSON.stringify(product.category)}, categoryId='${productCategoryId}', allCategoryIds includes? ${allCategoryIds.includes(productCategoryId)}, match: ${categoryMatch}`);
+
+        const publisherMatch = selectedPublishers.length === 0
+          ? true
+          : selectedPublishers.includes(product.publisher?._id || product.publisher);
+        const authorMatch = selectedAuthors.length === 0
+          ? true
+          : selectedAuthors.includes(product.author?._id || product.author);
+        const languageMatch = selectedLanguages.length === 0
+          ? true
+          : selectedLanguages.includes(product.language?._id || product.language);
+        const formatMatch = selectedFormats.length === 0
+          ? true
+          : selectedFormats.includes(product.format?._id || product.format);
+        const priceAfterDiscount = (product.price * (100 - (product.discount || 0))) / 100;
+        const priceMatch = selectedPriceRanges.length === 0
+          ? true
+          : selectedPriceRanges.some((rangeStr) => {
+            const [min, max] = rangeStr.split('-').map((num) => num === 'Infinity' ? Infinity : Number(num));
+            return priceAfterDiscount >= min && priceAfterDiscount <= (isFinite(max) ? max : Infinity);
+          });
+
+        return categoryMatch && publisherMatch && authorMatch && languageMatch && formatMatch && priceMatch;
       });
 
-      console.log('Filtered products:', filtered); // Debug
+      console.log('Filtered products count:', filtered.length, 'Total products:', products.length);
 
       filtered = sortProducts(filtered, selectedSort);
       setTotalPages(Math.ceil(filtered.length / productsPerPage));
@@ -316,7 +440,7 @@ const CatagoryPage = () => {
       setFilteredProducts([]);
       setTotalPages(1);
     }
-  }, [products, categoryTree, selectedCategories, selectedPublishers, selectedFormats, priceRange, selectedSort]);
+  }, [products, categoryTree, selectedCategories, selectedPublishers, selectedAuthors, selectedLanguages, selectedFormats, selectedPriceRanges, selectedSort]);
 
   const handleOnClickProduct = (id) => {
     navigate(`/product-detail/${id}`);
@@ -328,27 +452,31 @@ const CatagoryPage = () => {
   }, [currentPage, filteredProducts]);
 
   const paginationButtons = (
-    <div className="pagination">
+    <div className="pagination-category d-flex justify-content-center gap-2">
       {currentPage > 1 && (
-        <button onClick={() => setCurrentPage(currentPage - 1)}>Trước</button>
+        <ButtonComponent2
+          textButton="Trước"
+          onClick={() => setCurrentPage(currentPage - 1)}
+        />
       )}
       {[...Array(totalPages)].map((_, index) => (
-        <button
+        <ButtonComponent2
           key={index}
+          textButton={String(index + 1)}
           onClick={() => setCurrentPage(index + 1)}
-          className={currentPage === index + 1 ? 'active' : ''}
-        >
-          {index + 1}
-        </button>
+        />
       ))}
       {currentPage < totalPages && (
-        <button onClick={() => setCurrentPage(currentPage + 1)}>Tiếp theo</button>
+        <ButtonComponent2
+          textButton="Tiếp theo"
+          onClick={() => setCurrentPage(currentPage + 1)}
+        />
       )}
     </div>
   );
 
   const BookInfo = (
-    <div className="d-flex flex-wrap justify-content-center align-items-center gap-5">
+    <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
       {isLoadingPro ? (
         <LoadingComponent />
       ) : paginatedProducts.length > 0 ? (
@@ -361,6 +489,7 @@ const CatagoryPage = () => {
             sold={product.sold || 0}
             star={product.star || 0}
             feedbackCount={product.feedbackCount || 0}
+            view={product.view || 0}
             onClick={() => handleOnClickProduct(product._id)}
           />
         ))
@@ -370,24 +499,128 @@ const CatagoryPage = () => {
     </div>
   );
 
+  const selectedFiltersDisplay = (
+    <div className="selected-filters mb-3">
+      {selectedCategories.map((id) => {
+        const label = AllCategory.find((c) => c.value === id)?.label || 'Unknown Category';
+        return (
+          <span key={`cat-${id}`} className="badge bg-secondary me-2">
+            {label} <button type="button" onClick={() => removeFilter('category', id)}>×</button>
+          </span>
+        );
+      })}
+      {selectedPriceRanges.map((range) => {
+        const displayRange = range.replace('-', 'đ - ').replace('Infinity', 'trở lên') + 'đ';
+        return (
+          <span key={`price-${range}`} className="badge bg-secondary me-2">
+            Giá {displayRange} <button type="button" onClick={() => removeFilter('price', range)}>×</button>
+          </span>
+        );
+      })}
+      {selectedAuthors.map((id) => {
+        const label = AllAuthors.find((a) => a.value === id)?.label || 'Unknown Author';
+        return (
+          <span key={`auth-${id}`} className="badge bg-secondary me-2">
+            {label} <button type="button" onClick={() => removeFilter('author', id)}>×</button>
+          </span>
+        );
+      })}
+      {selectedPublishers.map((id) => {
+        const label = AllPub.find((p) => p.value === id)?.label || 'Unknown Publisher';
+        return (
+          <span key={`pub-${id}`} className="badge bg-secondary me-2">
+            {label} <button type="button" onClick={() => removeFilter('publisher', id)}>×</button>
+          </span>
+        );
+      })}
+      {selectedLanguages.map((id) => {
+        const label = AllLanguages.find((l) => l.value === id)?.label || 'Unknown Language';
+        return (
+          <span key={`lang-${id}`} className="badge bg-secondary me-2">
+            {label} <button type="button" onClick={() => removeFilter('language', id)}>×</button>
+          </span>
+        );
+      })}
+      {selectedFormats.map((id) => {
+        const label = AllFormat.find((f) => f.value === id)?.label || 'Unknown Format';
+        return (
+          <span key={`fmt-${id}`} className="badge bg-secondary me-2">
+            {label} <button type="button" onClick={() => removeFilter('format', id)}>×</button>
+          </span>
+        );
+      })}
+    </div>
+  );
+
+  const sortButtons = (
+    <div className="sort-buttons d-flex gap-2 mb-3 flex-wrap">
+      <button
+        type="button"
+        onClick={() => handleSortChange('name-asc')}
+        className={selectedSort === 'name-asc' ? 'active' : ''}
+      >
+        Tên A-Z
+      </button>
+      <button
+        type="button"
+        onClick={() => handleSortChange('name-desc')}
+        className={selectedSort === 'name-desc' ? 'active' : ''}
+      >
+        Tên Z-A
+      </button>
+      <button
+        type="button"
+        onClick={() => handleSortChange('new')}
+        className={selectedSort === 'new' ? 'active' : ''}
+      >
+        Hàng mới
+      </button>
+      <button
+        type="button"
+        onClick={() => handleSortChange('price-asc')}
+        className={selectedSort === 'price-asc' ? 'active' : ''}
+      >
+        Giá thấp đến cao
+      </button>
+      <button
+        type="button"
+        onClick={() => handleSortChange('price-desc')}
+        className={selectedSort === 'price-desc' ? 'active' : ''}
+      >
+        Giá cao đến thấp
+      </button>
+      <button
+        type="button"
+        onClick={() => handleSortChange('sold')}
+        className={selectedSort === 'sold' ? 'active' : ''}
+      >
+        Bán chạy
+      </button>
+    </div>
+  );
+
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
       <div className="container">
         <div className="row">
           <div className="col-3">
             <div className="card-catagory">
+              {selectedFiltersDisplay}
+              {selectedCategories.length + selectedPriceRanges.length + selectedAuthors.length + selectedPublishers.length + selectedLanguages.length + selectedFormats.length === 0 && (
+                <span className="text-muted">Chưa chọn bộ lọc nào</span>
+              )}
               <div className="card-header-catagory">DANH MỤC SẢN PHẨM</div>
               <div className="list-check">
                 <div className="form-check">
                   <input
                     className="form-check-input"
                     type="checkbox"
-                    id="selectAll"
-                    checked={selectAll}
-                    onChange={handleSelectAllChange}
+                    id="selectAllCategories"
+                    checked={selectAllCategories}
+                    onChange={handleSelectAllCategoriesChange}
                   />
-                  <label className="form-check-label" htmlFor="selectAll">
-                    All
+                  <label className="form-check-label" htmlFor="selectAllCategories">
+                    Tất cả
                   </label>
                 </div>
                 {isLoadingCategory ? (
@@ -396,6 +629,68 @@ const CatagoryPage = () => {
                   renderCategoryTree(categoryTree)
                 ) : (
                   <p>Không có danh mục nào để hiển thị.</p>
+                )}
+              </div>
+              <hr className="line" />
+              <div className="card-header-catagory">GIÁ</div>
+              <div className="list-check">
+                {[
+                  { id: 'price1', range: [0, 100000], label: '0đ - 100.000đ' },
+                  { id: 'price2', range: [100000, 200000], label: '100.000đ - 200.000đ' },
+                  { id: 'price3', range: [200000, 300000], label: '200.000đ - 300.000đ' },
+                  { id: 'price4', range: [300000, 400000], label: '300.000đ - 400.000đ' },
+                  { id: 'price5', range: [400000, 500000], label: '400.000đ - 500.000đ' },
+                  { id: 'price6', range: [500000, Infinity], label: '500.000đ - trở lên' }
+                ].map(({ id, range, label }) => {
+                  const rangeStr = `${range[0]}-${range[1] === Infinity ? 'Infinity' : range[1]}`;
+                  return (
+                    <div className="form-check" key={id}>
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id={id}
+                        onChange={() => handlePriceRangeChange(range)}
+                        checked={selectedPriceRanges.includes(rangeStr)}
+                      />
+                      <label className="form-check-label" htmlFor={id}>
+                        {label}
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+              <hr className="line" />
+              <div className="card-header-catagory">TÁC GIẢ</div>
+              <input
+                type="text"
+                className="form-control mb-2"
+                placeholder="Tìm kiếm tác giả..."
+                value={authorSearch}
+                onChange={(e) => setAuthorSearch(e.target.value)}
+              />
+              <div className="list-check" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                {isLoadingAuthor ? (
+                  <LoadingComponent />
+                ) : filteredAuthors.length > 0 ? (
+                  filteredAuthors.map((author) => (
+                    <div className="form-check" key={author.value}>
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        value={author.value}
+                        id={`author-${author.value}`}
+                        checked={selectedAuthors.includes(author.value)}
+                        onChange={() => handleAuthorChange(author.value)}
+                      />
+                      <label className="form-check-label" htmlFor={`author-${author.value}`}>
+                        {author.label}
+                      </label>
+                    </div>
+                  ))
+                ) : authorSearch ? (
+                  <p>Không tìm thấy tác giả.</p>
+                ) : (
+                  <p>Không có tác giả nào để hiển thị.</p>
                 )}
               </div>
               <hr className="line" />
@@ -424,122 +719,29 @@ const CatagoryPage = () => {
                 )}
               </div>
               <hr className="line" />
-              <div className="card-header-catagory">GIÁ</div>
+              <div className="card-header-catagory">NGÔN NGỮ</div>
               <div className="list-check">
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="priceRange"
-                    id="range1"
-                    onChange={() => handleRangeSelect([0, 100000])}
-                  />
-                  <label className="form-check-label" htmlFor="range1">
-                    0đ - 100.000đ
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="priceRange"
-                    id="range2"
-                    onChange={() => handleRangeSelect([100000, 200000])}
-                  />
-                  <label className="form-check-label" htmlFor="range2">
-                    100.000đ - 200.000đ
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="priceRange"
-                    id="range3"
-                    onChange={() => handleRangeSelect([200000, 300000])}
-                  />
-                  <label className="form-check-label" htmlFor="range3">
-                    200.000đ - 300.000đ
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="priceRange"
-                    id="range4"
-                    onChange={() => handleRangeSelect([300000, 400000])}
-                  />
-                  <label className="form-check-label" htmlFor="range4">
-                    300.000đ - 400.000đ
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="priceRange"
-                    id="range5"
-                    onChange={() => handleRangeSelect([400000, 500000])}
-                  />
-                  <label className="form-check-label" htmlFor="range5">
-                    400.000đ - 500.000đ
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="priceRange"
-                    id="range6"
-                    onChange={() => handleRangeSelect([500000, 1000000])}
-                  />
-                  <label className="form-check-label" htmlFor="range6">
-                    500.000đ - trở lên
-                  </label>
-                </div>
-              </div>
-              <div className="price-filter" style={{ fontSize: '16px', padding: '0 10px' }}>
-                <div className="card-header-catagory">Hoặc tự chọn mức giá</div>
-                <div className="d-flex gap-2 mb-2">
-                  <input
-                    style={{ fontSize: '16px' }}
-                    type="number"
-                    className="form-control"
-                    value={minPrice}
-                    onChange={(e) => handlePriceChange(e, 'min')}
-                  />
-                  <span>-</span>
-                  <input
-                    style={{ fontSize: '16px' }}
-                    type="number"
-                    className="form-control"
-                    value={maxPrice}
-                    onChange={(e) => handlePriceChange(e, 'max')}
-                  />
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1000000"
-                  step="1000"
-                  value={minPrice}
-                  onChange={(e) => handlePriceChange(e, 'min')}
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="1000000"
-                  step="1000"
-                  value={maxPrice}
-                  onChange={(e) => handlePriceChange(e, 'max')}
-                  className="mt-2"
-                />
-                <div>
-                  <small>
-                    Khoảng giá: {priceRange[0].toLocaleString()} đ - {priceRange[1].toLocaleString()} đ
-                  </small>
-                </div>
+                {isLoadingLanguage ? (
+                  <LoadingComponent />
+                ) : AllLanguages.length > 0 ? (
+                  AllLanguages.map((language) => (
+                    <div className="form-check" key={language.value}>
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        value={language.value}
+                        id={`language-${language.value}`}
+                        checked={selectedLanguages.includes(language.value)}
+                        onChange={() => handleLanguageChange(language.value)}
+                      />
+                      <label className="form-check-label" htmlFor={`language-${language.value}`}>
+                        {language.label}
+                      </label>
+                    </div>
+                  ))
+                ) : (
+                  <p>Không có ngôn ngữ nào để hiển thị.</p>
+                )}
               </div>
               <hr className="line" />
               <div className="card-header-catagory">HÌNH THỨC</div>
@@ -569,16 +771,9 @@ const CatagoryPage = () => {
             </div>
           </div>
           <div className="col-9">
-            <div className="card-catagory" style={{ padding: '0 10px' }}>
-              <h4 style={{ marginTop: '10px' }}>Sắp xếp theo:</h4>
-              <div className="col-md-4 mb-3">
-                <FormSelectComponent
-                  options={Sort}
-                  selectedValue={selectedSort}
-                  onChange={handleOnChangeSort}
-                  required={false}
-                />
-              </div>
+            <div className="card-catagory">
+              <h4 style={{ marginTop: '-5px', marginBottom: "15px" }}>Sắp xếp theo:</h4>
+              {sortButtons}
               <div style={{ backgroundColor: '#F9F6F2' }}>
                 <CardComponent bodyContent={BookInfo} />
               </div>

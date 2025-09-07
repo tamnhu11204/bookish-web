@@ -5,6 +5,9 @@ import FormComponent from '../../components/FormComponent/FormComponent';
 import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
 import * as message from "../../components/MessageComponent/MessageComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
+
+// Import các service
+import * as AuthorService from "../../services/AuthorService";
 import * as CategoryService from "../../services/CategoryService";
 import * as FormatService from "../../services/OptionService/FormatService";
 import * as LanguageService from "../../services/OptionService/LanguageService";
@@ -14,12 +17,13 @@ import * as UnitService from "../../services/OptionService/UnitService";
 import * as ProductService from "../../services/ProductService";
 import TextEditor from "./partials/TextEditor";
 
+// Hàm làm phẳng cây danh mục để hiển thị trong select
 const flattenCategoryTree = (categories, level = 0) => {
   let result = [];
   categories.forEach((category) => {
     result.push({
       value: category._id,
-      label: "-".repeat(level * 2) + " " + category.name, // Thêm dấu "-" để biểu thị cấp
+      label: "-".repeat(level * 2) + " " + category.name,
     });
     if (category.children && category.children.length > 0) {
       result = result.concat(flattenCategoryTree(category.children, level + 1));
@@ -28,31 +32,11 @@ const flattenCategoryTree = (categories, level = 0) => {
   return result;
 };
 
+
 const AddProductForm = ({ isOpen, onCancel }) => {
-
-  // State lưu trữ thông tin sản phẩm
-  const [product1, setProduct] = useState({
-    name: "",
-    author: "",
-    publishDate: "",
-    weight: "",
-    height: "",
-    width: "",
-    length: "",
-    page: "",
-    description: "",
-    price: "",
-    img: [], // Đổi img thành mảng
-    star: "",
-    favorite: "",
-    score: "",
-    hot: "",
-    view: "",
-  });
-
+  // --- STATE QUẢN LÝ DỮ LIỆU FORM ---
   const [name, setName] = useState('');
   const [pubdate, setDate] = useState('');
-  const [author, setAuthor] = useState('');
   const [weight, setWeight] = useState('');
   const [page, setPage] = useState(0);
   const [height, setHeight] = useState(0);
@@ -64,11 +48,10 @@ const AddProductForm = ({ isOpen, onCancel }) => {
   const [description, setDescription] = useState('');
   const [discount, setDiscount] = useState(0);
   const [priceEntry, setPriceEntry] = useState(0);
-  const handleOnChangePriceEntry = (value) => setPriceEntry(value);
 
+  // --- CÁC HÀM XỬ LÝ SỰ KIỆN ONCHANGE ---
   const handleOnChangeName = (value) => setName(value);
   const handleOnChangeDate = (value) => setDate(value);
-  const handleOnChangeAuthor = (value) => setAuthor(value);
   const handleOnChangeWeight = (value) => setWeight(value);
   const handleOnChangePage = (value) => setPage(value);
   const handleOnChangeHeight = (value) => setHeight(value);
@@ -78,33 +61,39 @@ const AddProductForm = ({ isOpen, onCancel }) => {
   const handleOnChangePrice = (value) => {
     setPrice(value);
     const calculatedPriceEntry = (value * (100 - discount)) / 100;
-    setPriceEntry(calculatedPriceEntry)
+    setPriceEntry(calculatedPriceEntry);
   };
+  const handleOnChangeDiscount = (value) => {
+    setDiscount(value);
+    const calculatedPriceEntry = (price * (100 - value)) / 100;
+    setPriceEntry(calculatedPriceEntry);
+  };
+  const handleOnChangePriceEntry = (value) => setPriceEntry(value);
 
+  // --- MUTATION ĐỂ TẠO SẢN PHẨM MỚI ---
   const mutation = useMutationHook(data => ProductService.addProduct(data));
   const { data, isSuccess, isError } = mutation;
 
   useEffect(() => {
-    console.log("Dữ liệu gửi đi: ", product1); // Kiểm tra dữ liệu gửi đi
-    console.log(isSuccess);
     if (isSuccess && data?.status !== 'ERR') {
-      message.success();
-      alert('Thêm sản phẩm mới thành công!');
+      message.success('Thêm sản phẩm mới thành công!');
+      onCancel();
+    } else if (isError || (data?.status === 'ERR')) {
+      message.error(data?.message || "Có lỗi xảy ra khi thêm sản phẩm!");
     }
-    if (isError) {
-      message.error();
-    }
-  }, [isSuccess, isError, data?.status]);
+  }, [isSuccess, isError, data, onCancel]);
 
+
+  // --- HÀM LƯU SẢN PHẨM ---
   const onSave = async () => {
-    if (!author || !name || !price) {
-      alert('Cần nhập đầy đủ thông tin!');
+    if (!name || !selectedAuthor || !price || !selectedPublisher || !selectedCategory || !selectedSupplier) {
+      message.error('Vui lòng nhập đầy đủ các trường thông tin bắt buộc (*)!');
       return;
     }
 
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("author", author);
+    formData.append("author", selectedAuthor);
     formData.append("publishDate", pubdate);
     formData.append("weight", weight);
     formData.append("height", height);
@@ -113,11 +102,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
     formData.append("page", page);
     formData.append("description", description);
     formData.append("price", price);
-    formData.append("star", 0);
-    formData.append("favorite", 0);
-    formData.append("score", 0);
-    formData.append("hot", false);
-    formData.append("view", 0);
+    formData.append("discount", discount);
     formData.append("publisher", selectedPublisher);
     formData.append("supplier", selectedSupplier);
     formData.append("language", selectedLanguage);
@@ -125,419 +110,276 @@ const AddProductForm = ({ isOpen, onCancel }) => {
     formData.append("unit", selectedUnit);
     formData.append("category", selectedCategory);
 
-    // Thêm danh sách ảnh vào FormData
-    img.forEach((imageFile, index) => {
+    img.forEach((imageFile) => {
       formData.append(`img`, imageFile);
     });
 
-    mutation.mutate(formData); // Gửi dữ liệu lên server
-    alert('Thêm sản phẩm mới thành công!');
-    onCancel();
+    mutation.mutate(formData);
   };
 
 
-  // Xử lý chọn ảnh và nén ảnh
+  // --- CÁC HÀM XỬ LÝ HÌNH ẢNH ---
   const handleChangeImg = (event) => {
     const files = Array.from(event.target.files);
-    if (files.length > 0) {
-        setImage((prev) => [...prev, ...files]); // Lưu file ảnh để gửi lên server
-        setPreviewImage((prev) => [...prev, ...files.map(file => URL.createObjectURL(file))]); // Hiển thị ảnh preview
-    } else {
-        console.error("Không có file hợp lệ được chọn!");
-    }
-};
+    setImage((prev) => [...prev, ...files]);
+    setPreviewImage((prev) => [...prev, ...files.map(file => URL.createObjectURL(file))]);
+  };
+
+  const handleRemoveImage = (index) => {
+    setImage((prev) => prev.filter((_, i) => i !== index));
+    setPreviewImage((prev) => prev.filter((_, i) => i !== index));
+  };
 
 
+  // --- LOGIC LẤY DỮ LIỆU CHO CÁC DROPDOWN ---
 
-const handleRemoveImage = (index) => {
-  setImage((prev) => prev.filter((_, i) => i !== index));
-  setPreviewImage((prev) => prev.filter((_, i) => i !== index));
-};
+  // Tác giả
+  const [selectedAuthor, setSelectedAuthor] = useState("");
+  const handleOnChangeAuthor = (e) => setSelectedAuthor(e.target.value);
+  const getAllAuthor = async () => (await AuthorService.getAllAuthor()).data;
+  const { isLoading: isLoadingAuthor, data: authors } = useQuery({ queryKey: ['authors'], queryFn: getAllAuthor });
+  const AllAuthors = Array.isArray(authors) ? authors.map(author => ({ value: author._id, label: author.name })) : [];
 
-
-
-  //Xử lý nhà xuất bản
+  // Nhà xuất bản
   const [selectedPublisher, setSelectedPublisher] = useState("");
+  const handleOnChangePublisher = (e) => setSelectedPublisher(e.target.value);
+  const getAllPublisher = async () => (await PublisherService.getAllPublisher()).data;
+  const { data: publishers } = useQuery({ queryKey: ['publishers'], queryFn: getAllPublisher });
+  const AllPub = Array.isArray(publishers) ? publishers.map(p => ({ value: p._id, label: p.name })) : [];
 
-  const handleOnChangePublisher = (e) => {
-    setSelectedPublisher(e.target.value);
-  };
-
-  const getAllPublisher = async () => {
-    const res = await PublisherService.getAllPublisher();
-    return res.data;
-  };
-
-
-  const { isLoading: isLoadingPublisher, data: publishers } = useQuery({
-    queryKey: ['publishers'],
-    queryFn: getAllPublisher,
-
-  });
-
-  const AllPub = Array.isArray(publishers)
-    ? publishers.map((publisher) => ({
-      value: publisher._id,
-      label: publisher.name,
-    }))
-    : [];
-
-  console.log('nbas', AllPub)
-
-
-  //Xử lý ngôn ngữ
+  // Ngôn ngữ
   const [selectedLanguage, setSelectedLanguage] = useState("");
+  const handleOnChangeLanguage = (e) => setSelectedLanguage(e.target.value);
+  const getAllLanguage = async () => (await LanguageService.getAllLanguage()).data;
+  const { data: languages } = useQuery({ queryKey: ['languages'], queryFn: getAllLanguage });
+  const AllLang = Array.isArray(languages) ? languages.map(l => ({ value: l._id, label: l.name })) : [];
 
-  const handleOnChangeLanguage = (e) => {
-    setSelectedLanguage(e.target.value);
-  };
-
-  const getAllLanguage = async () => {
-    const res = await LanguageService.getAllLanguage();
-    return res.data;
-  };
-
-
-  const { isLoading: isLoadingLanguage, data: languages } = useQuery({
-    queryKey: ['languages'],
-    queryFn: getAllLanguage,
-
-  });
-
-  const AllLang = Array.isArray(languages) && languages.length > 0
-    ? languages.map((language) => ({
-      value: language._id,
-      label: language.name,
-    }))
-    : [];
-
-
-  //Xử lý Format
+  // Hình thức
   const [selectedFormat, setSelectedFormat] = useState("");
+  const handleOnChangeFormat = (e) => setSelectedFormat(e.target.value);
+  const getAllFormat = async () => (await FormatService.getAllFormat()).data;
+  const { data: formats } = useQuery({ queryKey: ['formats'], queryFn: getAllFormat });
+  const AllFormat = Array.isArray(formats) ? formats.map(f => ({ value: f._id, label: f.name })) : [];
 
-  const handleOnChangeFormat = (e) => {
-    setSelectedFormat(e.target.value);
-  };
-
-  const getAllFormat = async () => {
-    const res = await FormatService.getAllFormat();
-    return res.data;
-  };
-
-
-  const { isLoading: isLoadingFormat, data: formats } = useQuery({
-    queryKey: ['formats'],
-    queryFn: getAllFormat,
-
-  });
-
-  const AllFormat = Array.isArray(formats)
-    ? formats.map((format) => ({
-      value: format._id,
-      label: format.name,
-    }))
-    : [];
-
-
-  //Xử lý nhà cung cấp
+  // Nhà cung cấp
   const [selectedSupplier, setSelectedSupplier] = useState("");
+  const handleOnChangeSupplier = (e) => setSelectedSupplier(e.target.value);
+  const getAllSupplier = async () => (await SupplierService.getAllSupplier()).data;
+  const { data: suppliers } = useQuery({ queryKey: ['suppliers'], queryFn: getAllSupplier });
+  const AllSupplier = Array.isArray(suppliers) ? suppliers.map(s => ({ value: s._id, label: s.name })) : [];
 
-  const handleOnChangeSupplier = (e) => {
-    setSelectedSupplier(e.target.value);
-  };
-
-  const getAllSupplier = async () => {
-    const res = await SupplierService.getAllSupplier();
-    return res.data;
-  };
-
-
-  const { isLoading: isLoadingSupplier, data: suppliers } = useQuery({
-    queryKey: ['suppliers'],
-    queryFn: getAllSupplier,
-
-  });
-
-  const AllSupplier = Array.isArray(suppliers)
-    ? suppliers.map((supplier) => ({
-      value: supplier._id,
-      label: supplier.name,
-    }))
-    : [];
-
-
-  //Xử lý đơn vị
+  // Đơn vị
   const [selectedUnit, setSelectedUnit] = useState("");
+  const handleOnChangeUnit = (e) => setSelectedUnit(e.target.value);
+  const getAllUnit = async () => (await UnitService.getAllUnit()).data;
+  const { data: units } = useQuery({ queryKey: ['units'], queryFn: getAllUnit });
+  const AllUnit = Array.isArray(units) ? units.map(u => ({ value: u._id, label: u.name })) : [];
 
-  const handleOnChangeUnit = (e) => {
-    setSelectedUnit(e.target.value);
-  };
-
-  const getAllUnit = async () => {
-    const res = await UnitService.getAllUnit();
-    return res.data;
-  };
-
-
-  const { isLoading: isLoadingUnit, data: units } = useQuery({
-    queryKey: ['units'],
-    queryFn: getAllUnit,
-
-  });
-
-  const AllUnit = Array.isArray(units)
-    ? units.map((unit) => ({
-      value: unit._id,
-      label: unit.name,
-    }))
-    : [];
-
-  //Xử lý danh mục
+  // Danh mục
   const [selectedCategory, setSelectedCategory] = useState("");
-
-  const handleOnChangeCategory = (e) => {
-    setSelectedCategory(e.target.value);
-  };
-
-  const getTreeCategory = async () => {
-    const res = await CategoryService.getTreeCategory();
-    return res.data;
-  };
-
-
-  const { isLoading: isLoadingCategory, data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: getTreeCategory,
-
-  });
-
-  const AllCategory = Array.isArray(categories)
-  ? flattenCategoryTree(categories) // Chuyển cây thành danh sách phẳng
-  : [];
-
-  const handleOnChangeDiscount = (value) => {
-    setDiscount(value);
-    const calculatedPriceEntry = (price * (100 - value)) / 100;
-    setPriceEntry(calculatedPriceEntry)
-  };
-
-  // Xử lý khi nhấn nút Lưu sản phẩm
+  const handleOnChangeCategory = (e) => setSelectedCategory(e.target.value);
+  const getTreeCategory = async () => (await CategoryService.getTreeCategory()).data;
+  const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: getTreeCategory });
+  const AllCategory = Array.isArray(categories) ? flattenCategoryTree(categories) : [];
 
 
   if (!isOpen) return null;
+
+  // --- PHẦN RENDER GIAO DIỆN (JSX) ---
   return (
     <div className="container my-4">
       <h4>Thêm sản phẩm mới</h4>
 
       <div className="row">
+        {/* Hàng 1: Tên sản phẩm và nút Hủy */}
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
-
           <FormComponent
-            id="nameLanguageInput"
-            label="Tên sản phẩm"
+            id="name"
+            label="Tên sản phẩm (*)"
             type="text"
             placeholder="Nhập tên sản phẩm"
             value={name}
             onChange={handleOnChangeName}
-            required={true}
-            enable={true}
+            required
           />
         </div>
-        <div className="col-6 text-end">
+        <div className="col-6 d-flex justify-content-end align-items-start pt-3">
           <ButtonComponent
             textButton="Hủy bỏ"
             onClick={onCancel}
           />
         </div>
+
+        {/* Hàng 2: Tác giả và NXB */}
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-            id="nameLanguageInput"
-            label="Tác giả"
-            type="text"
-            placeholder="Nhập tên tác giả"
-            value={author}
+          <FormSelectComponent
+            label="Tác giả (*)"
+            placeholder="Chọn tác giả"
+            options={AllAuthors}
+            selectedValue={selectedAuthor}
             onChange={handleOnChangeAuthor}
-            required={true}
-            enable={true}
+            required
+            isLoading={isLoadingAuthor}
           />
         </div>
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormSelectComponent
-            label="Nhà xuất bản"
-            placeholder={"Chọn nhà xuất bản"}
+            label="Nhà xuất bản (*)"
+            placeholder="Chọn nhà xuất bản"
             options={AllPub}
             selectedValue={selectedPublisher}
             onChange={handleOnChangePublisher}
-            required={true}
+            required
           />
         </div>
+
+        {/* Hàng 3: Năm XB và Ngôn ngữ */}
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormComponent
-            id="nameLanguageInput"
+            id="publishDate"
             label="Năm xuất bản"
             type="date"
-            placeholder="Nhập năm xuất bản"
             value={pubdate}
             onChange={handleOnChangeDate}
-            required={true}
-            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormSelectComponent
             label="Ngôn ngữ"
-            placeholder={"Chọn ngôn ngữ"}
+            placeholder="Chọn ngôn ngữ"
             options={AllLang}
             selectedValue={selectedLanguage}
             onChange={handleOnChangeLanguage}
-            required={true}
           />
         </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
+
+        {/* Hàng 4: Kích thước */}
+        <div className="col-md-3 mb-3">
           <FormComponent
-            id="nameLanguageInput"
-            label="Trọng lượng"
-            type="text"
-            placeholder="Nhập trọng lượng (ví dụ: 100g)"
+            id="weight"
+            label="Trọng lượng (gram)"
+            type="number"
+            placeholder="gram"
             value={weight}
             onChange={handleOnChangeWeight}
-            required={true}
-            enable={true}
           />
         </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
+        <div className="col-md-3 mb-3">
           <FormComponent
-            id="nameLanguageInput"
-            label="Chiều cao"
+            id="height"
+            label="Cao (cm)"
             type="number"
-            placeholder="Nhập chiều cao (cm)"
+            placeholder="cm"
             value={height}
             onChange={handleOnChangeHeight}
-            required={true}
-            enable={true}
           />
         </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
+        <div className="col-md-3 mb-3">
           <FormComponent
-            id="nameLanguageInput"
-            label="Chiều rộng"
+            id="width"
+            label="Rộng (cm)"
             type="number"
-            placeholder="Nhập chiều rộng"
+            placeholder="cm"
             value={width}
             onChange={handleOnChangeWidth}
-            required={true}
-            enable={true}
           />
         </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
+        <div className="col-md-3 mb-3">
           <FormComponent
-            id="nameLanguageInput"
-            label="Chiều dài"
+            id="length"
+            label="Dài (cm)"
             type="number"
-            placeholder="Nhập chiều dài (cm)"
+            placeholder="cm"
             value={length}
             onChange={handleOnChangeLength}
-            required={true}
-            enable={true}
           />
         </div>
+
+        {/* Hàng 5: Số trang và Hình thức */}
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormComponent
-            id="nameLanguageInput"
+            id="page"
             label="Số trang"
             type="number"
             placeholder="Nhập số trang"
             value={page}
             onChange={handleOnChangePage}
-            required={true}
-            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormSelectComponent
             label="Hình thức"
-            placeholder={"Chọn hình thức"}
+            placeholder="Chọn hình thức"
             options={AllFormat}
             selectedValue={selectedFormat}
             onChange={handleOnChangeFormat}
-            required={true}
           />
         </div>
 
+        {/* Hàng 6: NCC và Danh mục */}
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormSelectComponent
-            label="Nhà cung cấp"
-            placeholder={"Chọn nhà cung cấp"}
+            label="Nhà cung cấp (*)"
+            placeholder="Chọn nhà cung cấp"
             options={AllSupplier}
             selectedValue={selectedSupplier}
             onChange={handleOnChangeSupplier}
-            required={true}
+            required
           />
         </div>
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormSelectComponent
-            label="Danh mục"
-            placeholder={"Chọn danh mục"}
+            label="Danh mục (*)"
+            placeholder="Chọn danh mục"
             options={AllCategory}
             selectedValue={selectedCategory}
             onChange={handleOnChangeCategory}
-            required={true}
+            required
           />
         </div>
+
+        {/* Hàng 7: Đơn vị */}
         <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
           <FormSelectComponent
             label="Đơn vị"
-            placeholder={"Chọn đơn vị"}
+            placeholder="Chọn đơn vị"
             options={AllUnit}
             selectedValue={selectedUnit}
             onChange={handleOnChangeUnit}
-            required={true}
           />
         </div>
 
-        <div style={{ marginBottom: "10px", marginTop: "20px" }}>
-          <p style={{ fontSize: '16px' }}>Mô tả sản phẩm</p>
-          <TextEditor value={description} onChange={handleOnChangeDescription} />
+        {/* Mô tả sản phẩm */}
+        <div className="col-12 my-3">
+          <p className="form-label" style={{ fontSize: '16px' }}>Mô tả sản phẩm</p>
+          <TextEditor
+            value={description}
+            onChange={handleOnChangeDescription}
+          />
         </div>
 
-        <div className="mb-3">
+        {/* Hình ảnh */}
+        <div className="col-12 mb-3">
           <label htmlFor="image" className="form-label" style={{ fontSize: '16px' }}>Hình ảnh</label>
-          <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: "200px", overflow: "hidden" }}>
+          <div className="border rounded d-flex flex-wrap p-2" style={{ minHeight: "150px" }}>
             {previewImage.length > 0 ? (
               previewImage.map((image, index) => (
-                <div key={index} className="position-relative d-inline-block me-2" style={{ width: '100px', height: '100px', margin: '5px' }}>
+                <div key={index} className="position-relative me-2 mb-2" style={{ width: '120px', height: '120px' }}>
                   <img
                     src={image}
                     alt="Preview"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover', // Giữ tỷ lệ hình ảnh
-                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '5px' }}
                   />
                   <button
                     type="button"
-                    className="btn-close position-absolute top-0 end-0"
+                    className="btn-close position-absolute top-0 end-0 bg-light rounded-circle"
+                    style={{ transform: 'translate(50%, -50%)' }}
                     onClick={() => handleRemoveImage(index)}
                   ></button>
                 </div>
               ))
             ) : (
-              <span className="text-muted">Chọn hình ảnh</span>
+              <div className="w-100 d-flex align-items-center justify-content-center text-muted">Chưa có ảnh nào được chọn</div>
             )}
           </div>
           <input
@@ -550,54 +392,47 @@ const handleRemoveImage = (index) => {
           />
         </div>
 
-
+        {/* Hàng giá */}
         <div className="col-md-4 mb-3">
-          <label className="form-label"></label>
           <FormComponent
-            id="nameLanguageInput"
-            label="Giá"
+            id="price"
+            label="Giá (*)"
             type="number"
             placeholder="Nhập giá"
             value={price}
             onChange={handleOnChangePrice}
-            required={true}
-            enable={true}
+            required
           />
         </div>
         <div className="col-md-4 mb-3">
-          <label className="form-label"></label>
           <FormComponent
             id="discount"
-            label="Giảm giá"
+            label="Giảm giá (%)"
             type="number"
-            placeholder="Nhập giảm giá"
+            placeholder="Nhập % giảm giá"
             value={discount}
             onChange={handleOnChangeDiscount}
-            required={true}
-            enable={true}
           />
         </div>
         <div className="col-md-4 mb-3">
-          <label className="form-label"></label>
           <FormComponent
             id="PriceEntry"
             label="Giá sau giảm"
             type="number"
-            placeholder=""
             value={priceEntry}
             onChange={handleOnChangePriceEntry}
-            required={true}
             enable={false}
           />
         </div>
       </div>
+
+      {/* Nút lưu */}
       <div className="text-end">
-        <td>
-          <ButtonComponent
-            textButton="Lưu sản phẩm"
-            onClick={onSave}
-          />
-        </td>
+        <ButtonComponent
+          textButton="Lưu sản phẩm"
+          onClick={onSave}
+          disabled={mutation.isLoading}
+        />
       </div>
     </div>
   );

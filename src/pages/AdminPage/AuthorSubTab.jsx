@@ -1,49 +1,52 @@
+import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import FormComponent from '../../components/FormComponent/FormComponent';
-import ModalComponent from '../../components/ModalComponent/ModalComponent';
-import './AdminPage.css';
-import { useMutationHook } from "../../hooks/useMutationHook";
-import * as SupplierService from '../../services/OptionService/SupplierService';
-import * as message from "../../components/MessageComponent/MessageComponent";
-import { useQuery } from '@tanstack/react-query';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
+import * as message from "../../components/MessageComponent/MessageComponent";
+import ModalComponent from '../../components/ModalComponent/ModalComponent';
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as AuthorService from '../../services/AuthorService';
+import './AdminPage.css';
+import TextEditor from './partials/TextEditor';
 
-const SupplierSubTab = () => {
+const AuthorSubTab = () => {
     // State quản lý modal
     const [name, setName] = useState('');
-    const [note, setNote] = useState('');
+    const [info, setInfo] = useState('');
     const [img, setImage] = useState(null);
     const [id, setID] = useState('');
-    const [editingSupplier, setEditingSupplier] = useState(null);
+    const [editingAuthor, setEditingAuthor] = useState(null);
     const [rowSelected, setRowSelected] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
+
     const [previewImage, setPreviewImage] = useState(null);
+
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+    const [filteredAuthors, setFilteredAuthors] = useState([]);
 
     const resetForm = () => {
         setName('');
-        setNote('');
+        setInfo('');
         setImage(null);
         setPreviewImage(null);
-        setEditingSupplier(null);
+        setEditingAuthor(null);
     };
 
-    const mutation = useMutationHook(data => SupplierService.addSupplier(data));
-    const mutationEdit = useMutationHook(data => SupplierService.updateSupplier(id, data));
-    const mutationDelete = useMutationHook(data => SupplierService.deleteSupplier(id));
+    const mutation = useMutationHook(data => AuthorService.addAuthor(data));
+    const mutationEdit = useMutationHook(data => AuthorService.updateAuthor(id, data));
+    const mutationDelete = useMutationHook(data => AuthorService.deleteAuthor(id));
 
-    // Lấy danh sách nhà xb từ API
-    const getAllSupplier = async () => {
-        const res = await SupplierService.getAllSupplier();
+    // Lấy danh sách từ API
+    const getAllAuthor = async () => {
+        const res = await AuthorService.getAllAuthor();
         return res.data;
     };
 
-    const { isLoading: isLoadingSupplier, data: suppliers } = useQuery({
-        queryKey: ['suppliers'],
-        queryFn: getAllSupplier,
+    const { isLoading: isLoadingAuthor, data: authors } = useQuery({
+        queryKey: ['authors'],
+        queryFn: getAllAuthor,
     });
 
     const { data, isSuccess, isError } = mutation;
@@ -64,7 +67,7 @@ const SupplierSubTab = () => {
     useEffect(() => {
         if (isSuccess && data?.status !== 'ERR') {
             message.success();
-            alert('Thêm nhà cung cấp mới thành công!');
+            alert('Thêm tác giả mới thành công!');
             resetForm();
             setShowModal(false);
         }
@@ -76,7 +79,7 @@ const SupplierSubTab = () => {
     useEffect(() => {
         if (isEditSuccess && editData?.status !== 'ERR') {
             message.success();
-            alert('Cập nhật nhà cung cấp thành công!');
+            alert('Cập nhật tác giả thành công!');
             resetForm();
             setEditModal(false);
         }
@@ -88,7 +91,7 @@ const SupplierSubTab = () => {
     useEffect(() => {
         if (isDeleteSuccess && deleteData?.status !== 'ERR') {
             message.success();
-            alert('Xóa nhà cung cấp thành công!');
+            alert('Xóa tác giả thành công!');
             resetForm();
         }
         if (isDeleteError) {
@@ -96,34 +99,34 @@ const SupplierSubTab = () => {
         }
     }, [isDeleteSuccess, isDeleteError, deleteData?.status]);
 
-    const handleAddSupplier = () => {
+    const handleAddAuthor = () => {
         setShowModal(true);
     };
 
-    const handleEditSupplier = (supplier) => {
+    const handleEditAuthor = (auhtor) => {
         setEditModal(true);
-        setRowSelected(supplier);
-        setID(supplier._id);
-        setName(supplier.name);
-        setNote(supplier.note);
-        setImage(supplier.img);
-        setPreviewImage(supplier.img);
+        setRowSelected(auhtor);
+        setID(auhtor._id);
+        setName(auhtor.name);
+        setInfo(auhtor.info);
+        setImage(auhtor.img);
+        setPreviewImage(auhtor.img);
     };
 
-    const handleDeleteSupplier = async (supplier) => {
-        setID(supplier._id);
+    const handleDeleteAuthor = async (auhtor) => {
+        setID(auhtor._id);
         // eslint-disable-next-line no-restricted-globals
-        const isConfirmed = confirm("Bạn có chắc chắn muốn xóa " + supplier.name + "?");
+        const isConfirmed = confirm("Bạn có chắc chắn muốn xóa " + auhtor.name + "?");
         if (isConfirmed) {
             onDelete();
-            getAllSupplier();
+            getAllAuthor();
         }
     };
 
     const onSave = async () => {
         const formData = new FormData();
         formData.append("name", name);
-        formData.append("note", note);
+        formData.append("info", info);
 
         if (img instanceof File) {
             formData.append("img", img);
@@ -142,7 +145,7 @@ const SupplierSubTab = () => {
 
         const formData = new FormData();
         formData.append("name", name);
-        formData.append("note", note);
+        formData.append("info", info);
 
         if (img instanceof File) {
             formData.append("img", img);
@@ -157,6 +160,7 @@ const SupplierSubTab = () => {
 
         mutationEdit.mutate(formData);
     };
+
 
     const onDelete = async () => {
         await mutationDelete.mutateAsync({ id });
@@ -179,12 +183,12 @@ const SupplierSubTab = () => {
     };
 
     useEffect(() => {
-        if (suppliers) {
-            setFilteredSuppliers(
-                suppliers.filter(supplier => supplier.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        if (authors) {
+            setFilteredAuthors(
+                authors.filter(author => author.name.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }
-    }, [searchTerm, suppliers]);
+    }, [searchTerm, authors]);
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -194,16 +198,16 @@ const SupplierSubTab = () => {
                         <FormComponent
                             id="searchInput"
                             type="text"
-                            placeholder="Tìm kiếm theo tên nhà cung cấp"
+                            placeholder="Tìm kiếm theo tên tác giả"
                             enable={true}
                             onChange={handleOnChange}
                         />
                     </div>
                     <div className="col-6 text-end">
                         <ButtonComponent
-                            textButton="Thêm nhà cung cấp"
+                            textButton="Thêm tác giả"
                             icon={<i className="bi bi-plus-circle"></i>}
-                            onClick={handleAddSupplier}
+                            onClick={handleAddAuthor}
                         />
                     </div>
                 </div>
@@ -212,42 +216,42 @@ const SupplierSubTab = () => {
                     <thead className="table-light">
                         <tr>
                             <th scope="col" style={{ width: '20%' }}>Mã</th>
-                            <th scope="col" style={{ width: '10%' }}>Hình ảnh</th>
-                            <th scope="col" style={{ width: '20%' }}>Tên nhà cung cấp</th>
-                            <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}></th>
+                            <th scope="col" style={{ width: '20%' }}>Hình ảnh</th>
+                            <th scope="col" style={{ width: '20%' }}>Tên tác giả</th>
+                            <th scope="col" style={{ width: '20%' }}>Thông tin</th>
+                            <th scope="col" style={{ width: '20%' }}>Sửa/Xóa</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
-                        {isLoadingSupplier ? (
+                        {isLoadingAuthor ? (
                             <tr>
                                 <td colSpan="4" className="text-center">
                                     <LoadingComponent />
                                 </td>
                             </tr>
-                        ) : filteredSuppliers && filteredSuppliers.length > 0 ? (
-                            filteredSuppliers.map((supplier) => (
-                                <tr key={supplier._id}>
-                                    <td>{supplier._id}</td>
+                        ) : filteredAuthors && filteredAuthors.length > 0 ? (
+                            filteredAuthors.map((author) => (
+                                <tr key={author._id}>
+                                    <td>{author.code}</td>
                                     <td>
                                         <img
-                                            src={supplier.img}
-                                            alt={supplier.name}
-                                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            src={author.img}
+                                            alt={author.name}
+                                            style={{ width: '80px', height: '100px', objectFit: 'cover' }}
                                         />
                                     </td>
-                                    <td>{supplier.name}</td>
-                                    <td>{supplier.note || '*'}</td>
+                                    <td>{author.name.length > 20 ? author.name.slice(0, 20) + '...' : author.name}</td>
+                                    <td>{author.info && author.info.length > 30 ? author.info.slice(0, 30) + '...' : author.info || 'Không có'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"
-                                            onClick={() => handleEditSupplier(supplier)}
+                                            onClick={() => handleEditAuthor(author)}
                                         >
                                             <i className="bi bi-pencil-square"></i>
                                         </button>
                                         <button
                                             className="btn btn-sm btn-danger"
-                                            onClick={() => handleDeleteSupplier(supplier)}
+                                            onClick={() => handleDeleteAuthor(author)}
                                         >
                                             <i className="bi bi-trash"></i>
                                         </button>
@@ -267,27 +271,28 @@ const SupplierSubTab = () => {
 
             <ModalComponent
                 isOpen={showModal}
-                title="THÊM NHÀ CUNG CẤP"
+                title="THÊM TÁC GIẢ"
                 body={
                     <>
                         <FormComponent
-                            id="nameSupplierInput"
-                            label="Tên nhà cung cấp"
+                            id="nameAuthorInput"
+                            label="Tên tác giả"
                             type="text"
-                            placeholder="Nhập tên nhà cung cấp"
+                            placeholder="Nhập tên tác giả"
                             value={name}
                             onChange={setName}
                             enable={true}
                         />
-                        <FormComponent
-                            id="noteSupplierInput"
-                            label="Ghi chú"
+                        {/* <FormComponent
+                            id="infoAuthorInput"
+                            label="Thông tin"
                             type="text"
-                            placeholder="Nhập ghi chú"
-                            value={note}
-                            onChange={setNote}
+                            placeholder="Nhập thông tin"
+                            value={info}
+                            onChange={setInfo}
                             enable={true}
-                        />
+                        /> */}
+                        <TextEditor value={info} onChange={setInfo} />
                         <div className="mb-3">
                             <input
                                 type="file"
@@ -320,27 +325,28 @@ const SupplierSubTab = () => {
 
             <ModalComponent
                 isOpen={editModal}
-                title={editingSupplier ? "CẬP NHẬT NHÀ CUNG CẤP" : "CẬP NHẬT NHÀ CUNG CẤP"}
+                title={editingAuthor ? "CẬP NHẬT TÁC GIẢ" : "CẬP NHẬT TÁC GIẢ"}
                 body={
                     <>
                         <FormComponent
-                            id="nameSupplierInput"
-                            label="Tên nhà cung cấp"
+                            id="nameAuthorInput"
+                            label="Tên tác giả"
                             type="text"
                             placeholder={rowSelected.name}
                             value={name}
                             onChange={setName}
                             enable={true}
                         />
-                        <FormComponent
-                            id="noteSupplierInput"
-                            label="Ghi chú"
+                        {/* <FormComponent
+                            id="infoAuthorInput"
+                            label="Thông tin"
                             type="text"
-                            placeholder={rowSelected.note}
-                            value={note}
-                            onChange={setNote}
+                            placeholder={rowSelected.info}
+                            value={info}
+                            onChange={setInfo}
                             enable={true}
-                        />
+                        /> */}
+                        <TextEditor value={info} onChange={setInfo} />
                         <div className="mb-3">
                             <input
                                 type="file"
@@ -374,4 +380,4 @@ const SupplierSubTab = () => {
     );
 };
 
-export default SupplierSubTab;
+export default AuthorSubTab;

@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import * as RecommendationService from '../../services/RecommendationService';
-import './recommendation.css';
-import { useActionData } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import * as ProductService from '../../services/ProductService';
-import { useNavigate } from 'react-router-dom';
+import * as RecommendationService from '../../services/RecommendationService';
+import './recommendation.css';
 
 const Recommendation = ({ userId }) => {
   const [recommendedBooks, setRecommendedBooks] = useState([]);
@@ -43,9 +42,9 @@ const Recommendation = ({ userId }) => {
   }, [userId]);
 
   const handleOnClickProduct = async (id) => {
-      await ProductService.updateView(id);
-      navigate(`/product-detail/${id}`);
-    };
+    await ProductService.updateView(id);
+    navigate(`/product-detail/${id}`);
+  };
 
   if (loading) return <div>Đang tải gợi ý...</div>;
   if (error) return <div className="text-center text-danger">{error}</div>;
@@ -53,20 +52,20 @@ const Recommendation = ({ userId }) => {
 
   return (
     <div className="recommendation-section">
-      <h3>Sách gợi ý cho bạn </h3>
+      {/* <h3>Sách gợi ý cho bạn </h3> */}
       <div className="book-list">
         {recommendedBooks.map(product => (
           <CardProductComponent
-          key={product._id}
-          img={product.img[0]}
-          proName={product.name}
-          currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
-          sold={product.sold}
-          star={product.star}
-          feedbackCount={product.feedbackCount}
-          onClick={() => handleOnClickProduct(product._id)}
-          view={product.view}
-        />
+            key={product._id}
+            img={product.img[0]}
+            proName={product.name}
+            currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+            sold={product.sold}
+            star={product.star}
+            feedbackCount={product.feedbackCount}
+            onClick={() => handleOnClickProduct(product._id)}
+            view={product.view}
+          />
         ))}
       </div>
     </div>

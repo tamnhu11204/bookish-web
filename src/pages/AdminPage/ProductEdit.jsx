@@ -12,6 +12,7 @@ import * as PublisherService from "../../services/OptionService/PublisherService
 import * as SupplierService from "../../services/OptionService/SupplierService";
 import * as UnitService from "../../services/OptionService/UnitService";
 import * as ProductService from "../../services/ProductService";
+import * as AuthorService from "../../services/AuthorService";
 
 const flattenCategoryTree = (categories, level = 0) => {
   let result = [];
@@ -32,7 +33,6 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   const [name, setName] = useState('');
   const [id, setID] = useState('');
   const [pubdate, setDate] = useState('');
-  const [author, setAuthor] = useState('');
   const [weight, setWeight] = useState('');
   const [page, setPage] = useState(0);
   const [priceEntry, setPriceEntry] = useState(0);
@@ -52,6 +52,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   const [selectedSupplier, setSelectedSupplier] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedAuthor, setSelectedAuthor] = useState("");
 
 
 
@@ -69,7 +70,6 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
       setWidth(data?.data.width || "");
       setHeight(data?.data.height || "");
       setLength(data?.data.length || "");
-      setAuthor(data?.data.author || "");
       //setDate(data?.data.publishDate || "");
       setPage(data?.data.page || "");
       setPrice(data?.data.price || "");
@@ -83,17 +83,17 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
       setSelectedPublisher(data?.data.publisher || "");
       setSelectedSupplier(data?.data.supplier || "");
       setSelectedUnit(data?.data.unit || "");
-      const publishdate = new Date(data?.data.publishDate).toISOString().split('T')[0];  // Lấy phần ngày của ISO string
+      setSelectedAuthor(data?.data.author || "");
+      const publishdate = new Date(data?.data.publishDate).toISOString().split('T')[0];
       setDate(publishdate);
     };
     fetchProduct();
-  }, [IDProduct]);
+  }, [IDProduct, setID]);
 
 
   const handleOnChangePriceEntry = (value) => setPriceEntry(value);
   const handleOnChangeName = (value) => setName(value);
   const handleOnChangeDate = (value) => setDate(value);
-  const handleOnChangeAuthor = (value) => setAuthor(value);
   const handleOnChangeWeight = (value) => setWeight(value);
   const handleOnChangePage = (value) => setPage(value);
   const handleOnChangeHeight = (value) => setHeight(value);
@@ -130,14 +130,13 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   }, [isSuccess, isError, data?.status, product, onCancel]);
 
   const onSave = async () => {
-    if (author === "" || name === "" || price === "") {
+    if (selectedAuthor === "" || name === "" || price === "") {
       alert("Cần nhập đầy đủ thông tin!");
       return;
     }
 
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("author", author);
     formData.append("publishDate", pubdate);
     formData.append("weight", weight);
     formData.append("height", height);
@@ -159,6 +158,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
     formData.append("format", selectedFormat);
     formData.append("unit", selectedUnit);
     formData.append("category", selectedCategory);
+    formData.append("author", selectedAuthor);
 
     // Nếu không có ảnh mới, gửi danh sách ảnh cũ
     if (img.length === 0 && previewImage.length > 0) {
@@ -228,7 +228,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   };
 
 
-  const { isLoading: isLoadingPublisher, data: publishers } = useQuery({
+  const { data: publishers } = useQuery({
     queryKey: ['publishers'],
     queryFn: getAllPublisher,
 
@@ -253,7 +253,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   };
 
 
-  const { isLoading: isLoadingLanguage, data: languages } = useQuery({
+  const { data: languages } = useQuery({
     queryKey: ['languages'],
     queryFn: getAllLanguage,
 
@@ -278,7 +278,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   };
 
 
-  const { isLoading: isLoadingFormat, data: formats } = useQuery({
+  const { data: formats } = useQuery({
     queryKey: ['formats'],
     queryFn: getAllFormat,
 
@@ -304,7 +304,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   };
 
 
-  const { isLoading: isLoadingSupplier, data: suppliers } = useQuery({
+  const { data: suppliers } = useQuery({
     queryKey: ['suppliers'],
     queryFn: getAllSupplier,
 
@@ -329,7 +329,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   };
 
 
-  const { isLoading: isLoadingUnit, data: units } = useQuery({
+  const { data: units } = useQuery({
     queryKey: ['units'],
     queryFn: getAllUnit,
 
@@ -353,15 +353,40 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   };
 
 
-  const { isLoading: isLoadingCategory, data: categories } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: getTreeCategory,
 
   });
 
   const AllCategory = Array.isArray(categories)
-  ? flattenCategoryTree(categories) // Chuyển cây thành danh sách phẳng
-  : [];
+    ? flattenCategoryTree(categories) // Chuyển cây thành danh sách phẳng
+    : [];
+
+  //Xử lý tác giả
+
+  const handleOnChangeAuthor = (e) => {
+    setSelectedAuthor(e.target.value);
+  };
+
+  const getAllAuthor = async () => {
+    const res = await AuthorService.getAllAuthor();
+    return res.data;
+  };
+
+
+  const { data: authors } = useQuery({
+    queryKey: ['authors'],
+    queryFn: getAllAuthor,
+
+  });
+
+  const AllAuthor = Array.isArray(authors)
+    ? authors.map((unit) => ({
+      value: unit._id,
+      label: unit.name,
+    }))
+    : [];
 
   // Xử lý khi nhấn nút Lưu sản phẩm
 
@@ -394,15 +419,14 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
         </div>
         <div className="col-md-6 mb-3">
           <label className="form-label"></label>
-          <FormComponent
-            id="nameLanguageInput"
+          <FormSelectComponent
             label="Tác giả"
-            type="text"
-            placeholder="Nhập tên tác giả"
-            value={author}
+            placeholder={"Chọn tác giả"}
+            options={AllAuthor}
+            selectedValue={selectedAuthor}
             onChange={handleOnChangeAuthor}
             required={true}
-            enable={true}
+
           />
         </div>
         <div className="col-md-6 mb-3">

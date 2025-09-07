@@ -1,11 +1,8 @@
 .footer {
     width: 100%;
     background-color: #28a745;
-    /* Màu xanh lá từ hình ảnh */
     padding: 20px 0;
     text-align: center;
-    border-top: 1px solid #ddd;
-    /* Loại bỏ position: fixed hoặc absolute */
 }
 
 .footer h2 {

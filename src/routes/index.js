@@ -24,161 +24,139 @@ import EnterOTP from "../pages/ForgotPasswordPage/EnterOTP";
 import EnterNewPassword from "../pages/ForgotPasswordPage/EnterNewPassword";
 import AdminChatPage from "../pages/AdminChat/AdminChatPage";
 import ReviewFeedbackChatbot from "../pages/ReviewFeedbackChatbot/ReviewFeedbackChatbot";
+import FavoriteProducts from "../pages/ProfilePage/ProductTab";
 
 export const routes = [
     {
         path: '/',
         page: HomePage,
-        isShowHeader: true
-
-
+        isShowHeader: true,
     },
-
     {
         path: '/signup',
         page: SignUpPage,
-        //isShowHeader: true
     },
-
     {
         path: '/login',
         page: LogInPage,
-        //isShowFooter: true
-        isShowHeader: false
+        isShowHeader: false,
     },
-
     {
         path: '/bookpurchasingtrend',
         page: BookPurchasingTrendPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/newbook',
         page: NewBookPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/category',
         page: CatagoryPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/product-detail/:id',
         page: ProductDetailPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
-        path: "*",
-        page: NotFoundPage
+        path: '*',
+        page: NotFoundPage,
     },
-
     {
         path: '/shoppingcart',
         page: ShoppingCartPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/deliveryaddress',
         page: DeliveryAddress,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/promoselection',
         page: PromoCodeSelectionPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/comparison',
         page: ComparisonPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/order',
         page: OrderPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
     {
         path: '/profile',
         page: ProfilePage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/discount',
         page: DiscountPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
     {
         path: '/order-detail/:id',
         page: OrderDetailsPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
     {
         path: '/search',
         page: SearchPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
     {
         path: '/instruction',
         page: InstructionPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
     {
         path: '/policy',
         page: PolicyPage,
-        isShowHeader: true
+        isShowHeader: true,
     },
-
-    //////////////////////admin//////////////////////
-
     {
-        path: '/admin',
+        path: '/forgot-password',
+        page: ForgotPassword,
+    },
+    {
+        path: '/forgot-password/enter-otp',
+        page: EnterOTP,
+    },
+    {
+        path: '/forgot-password/new-password',
+        page: EnterNewPassword,
+    },
+    {
+        path: '/review-feedback',
+        page: ReviewFeedbackChatbot,
+        isShowHeader: true,
+    },
+    {
+        path: '/favorite-products',
+        page: FavoriteProducts,
+        isShowHeader: true,
+    },
+    // Admin routes
+    {
+        path: '/admin/:tab?',
         page: AdminPage,
-        //isShowHeader: true,
-        isPrivate: true
+        isPrivate: true,
     },
-
     {
-        path: 'admin/livechat',
+        path: '/admin/livechat',
         page: AdminChatPage,
         isShowHeader: true,
-
-        isPrivate: true
+        isPrivate: true,
     },
-
     {
         path: '/admin-profile',
         page: AccountTab,
-        isPrivate: true
+        isPrivate: true,
     },
-    {
-        path: "/forgot-password",
-        page: ForgotPassword,
-    },
-
-    {
-        path: "/forgot-password/enter-otp",
-        page: EnterOTP,
-    },
-
-    {
-        path: "/forgot-password/new-password",
-        page: EnterNewPassword,
-    },
-
-    {
-        path: "/review-feedback",
-        page: ReviewFeedbackChatbot,
-        isShowHeader: true
-    },
-]
-
+];

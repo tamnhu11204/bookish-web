@@ -1,45 +1,57 @@
-import React, { useEffect, useState } from 'react'
-import * as ProductService from '../../services/ProductService';
-import * as FeedbackService from '../../services/FeedbackService';
+import Compressor from 'compressorjs';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
-import Compressor from 'compressorjs';
+import * as FeedbackService from '../../services/FeedbackService';
+import * as ProductService from '../../services/ProductService';
 
 const FeedbackTab = () => {
     const user = useSelector((state) => state.user);
     const [feedbacks, setFeedbacks] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [selectedFeedback, setSelectedFeedback] = useState(null);
-    const [img, setImg] = useState(null);
+
+    // State cho modal
+    const [imageFile, setImageFile] = useState(null);
+    const [previewImage, setPreviewImage] = useState(null);
     const [starRating, setStarRating] = useState(0);
     const [feedbackContent, setFeedbackContent] = useState('');
-    const [name, setName] = useState(null);
-    const [imgPro, setImgPro] = useState(null);
+    const [productName, setProductName] = useState(null);
+    const [productImage, setProductImage] = useState(null);
 
     useEffect(() => {
         const fetchFeedbackAndUserDetails = async () => {
-            const feedbackData = await FeedbackService.getAllFeedbackByUser(user?.id);
-            const feedbackWithProductDetails = await Promise.all(
-                feedbackData.data.map(async (feedback) => {
-                    const product = await ProductService.getDetailProduct(feedback.product);
-                    return { ...feedback, product };
-                })
-            );
-            setFeedbacks(feedbackWithProductDetails);
+            if (!user?.id) return;
+            try {
+                const feedbackData = await FeedbackService.getAllFeedbackByUser(user.id);
+                const feedbackWithProductDetails = await Promise.all(
+                    feedbackData.data.map(async (feedback) => {
+                        const product = await ProductService.getDetailProduct(feedback.product);
+                        return { ...feedback, productDetail: product.data };
+                    })
+                );
+                setFeedbacks(feedbackWithProductDetails);
+            } catch (error) {
+                console.error("Failed to fetch feedbacks:", error);
+            }
         };
 
         fetchFeedbackAndUserDetails();
     }, [user?.id]);
 
-    const handleOnFeedback = (feedback, product) => {
-        setShowModal(true);
+    const handleOpenUpdateModal = (feedback) => {
         setSelectedFeedback(feedback);
         setStarRating(feedback.star || 0);
         setFeedbackContent(feedback.content || '');
-        setImg(feedback.img || null);
-        setName(product.name);
-        setImgPro(product.img);
+        setProductName(feedback.productDetail.name);
+        setProductImage(feedback.productDetail.img[0]); // Lấy ảnh đầu tiên của sản phẩm
+
+        // Logic ảnh feedback
+        setPreviewImage(feedback.img || null);
+        setImageFile(null);
+
+        setShowModal(true);
     };
 
     const handleImageChange = (event) => {
@@ -50,46 +62,54 @@ const FeedbackTab = () => {
                 maxWidth: 800,
                 maxHeight: 800,
                 success(result) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        setImg(reader.result);
-                    };
-                    reader.readAsDataURL(result);
+                    setImageFile(result);
+                    setPreviewImage(URL.createObjectURL(result));
                 },
                 error(err) {
-                    console.error(err);
+                    console.error('Image compression error:', err);
                 }
             });
         }
+    };
+
+    const handleRemoveImage = () => {
+        setImageFile(null);
+        setPreviewImage(null);
     };
 
     const handleStarClick = (rating) => {
         setStarRating(rating);
     };
 
-    const onSave = async () => {
-        const updatedFeedback = {
-            star: starRating,
-            content: feedbackContent,
-            img: img,
-        };
+    const handleUpdateSave = async () => {
+        const formData = new FormData();
+        formData.append('star', starRating);
+        formData.append('content', feedbackContent);
+
+        if (imageFile) {
+            formData.append('img', imageFile);
+        } else if (previewImage) {
+            formData.append('img', previewImage);
+        } else {
+            formData.append('img', '');
+        }
 
         try {
-            const oldRating = selectedFeedback.star;
+            const oldRating = selectedFeedback.star || 0;
             const newRating = starRating;
 
-            await FeedbackService.updateFeedback(selectedFeedback._id, updatedFeedback);
+            const updatedFeedbackData = await FeedbackService.updateFeedback(selectedFeedback._id, formData);
 
-            await ProductService.updateRating2(selectedFeedback.product.data._id, {
-                oldRating: oldRating || 0,
-                newRating: newRating,
-            });
+            if (oldRating !== newRating) {
+                await ProductService.updateRating2(selectedFeedback.productDetail._id, {
+                    oldRating,
+                    newRating,
+                });
+            }
 
             setFeedbacks((prev) =>
-                prev.map((feedback) =>
-                    feedback._id === selectedFeedback._id
-                        ? { ...feedback, ...updatedFeedback }
-                        : feedback
+                prev.map((fb) =>
+                    fb._id === selectedFeedback._id ? { ...fb, ...updatedFeedbackData.data } : fb
                 )
             );
 
@@ -97,80 +117,79 @@ const FeedbackTab = () => {
             setShowModal(false);
         } catch (error) {
             console.error('Failed to update feedback:', error);
+            alert('Cập nhật đánh giá thất bại!');
         }
     };
 
-    const handleDeleteFeedback = async (id, product) => {
-        // eslint-disable-next-line no-restricted-globals
-        const isConfirmed = confirm("Bạn có chắc chắn muốn xóa đơn vị này?");
-        if (isConfirmed) {
+    const handleDeleteFeedback = async (feedback) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) {
             try {
-                const deletedFeedback = feedbacks.find((feedback) => feedback._id === id);
-                const oldRating = deletedFeedback?.star;
+                const oldRating = feedback.star || 0;
 
-                await FeedbackService.deleteFeedback(id);
+                await FeedbackService.deleteFeedback(feedback._id);
+                await ProductService.deleteRating(feedback.productDetail._id, { rating: oldRating });
 
-                await ProductService.deleteRating(product._id, { rating: oldRating });
-
-                setFeedbacks((prev) => prev.filter((feedback) => feedback._id !== id));
-
+                setFeedbacks((prev) => prev.filter((fb) => fb._id !== feedback._id));
                 alert('Xóa đánh giá thành công!');
             } catch (error) {
                 console.error('Failed to delete feedback:', error);
+                alert('Xóa đánh giá thất bại!');
             }
         }
-
-    };
-
-    const onCancel = () => {
-        setShowModal(false);
     };
 
     return (
         <div className="container mt-4">
-            <div className="title-section">
+            <div className="title-section mb-3">
                 <h3 className="text mb-0">LỊCH SỬ ĐÁNH GIÁ</h3>
             </div>
             <div>
                 {feedbacks.length > 0 ? (
-                    feedbacks.map((feedback, index) => (
-                        <div key={index} className="card mb-3">
+                    feedbacks.map((feedback) => (
+                        <div key={feedback._id} className="card mb-3">
                             <div className="card-body">
-                                <button
-                                    className="btn btn-sm btn-danger"
-                                    onClick={() => handleDeleteFeedback(feedback._id, feedback.product.data)}
-                                >
-                                    <i className="bi bi-trash"></i>
-                                </button>
-                                <div className="d-flex align-items-center mb-3">
-                                    <img
-                                        src={feedback.product?.data.img || ''}
-                                        alt={`${feedback.product?.data.name}'s avatar`}
-                                        style={{ width: '100px', height: 'auto', marginRight: '15px' }}
-                                    />
-                                    <h5 style={{ fontSize: '18px' }} className="card-title mb-0">
-                                        {feedback.product?.data.name || 'Người dùng ẩn danh'}
-                                    </h5>
+                                <div className="d-flex justify-content-between align-items-start">
+                                    <div className="d-flex align-items-center mb-3">
+                                        <img
+                                            src={feedback.productDetail?.img[0] || ''}
+                                            alt={feedback.productDetail?.name}
+                                            style={{ width: '100px', height: '100px', objectFit: 'cover', marginRight: '15px' }}
+                                        />
+                                        <h5 style={{ fontSize: '18px' }} className="card-title mb-0">
+                                            {feedback.productDetail?.name || 'Sản phẩm không tồn tại'}
+                                        </h5>
+                                    </div>
+                                    <button
+                                        className="btn btn-sm btn-outline-danger"
+                                        onClick={() => handleDeleteFeedback(feedback)}
+                                    >
+                                        <i className="bi bi-trash"></i>
+                                    </button>
                                 </div>
+                                <p className="mb-1"><strong>Đánh giá của bạn:</strong></p>
                                 <p style={{ fontSize: '16px' }}>{feedback.content}</p>
-                                <p style={{ fontSize: '16px' }}>Đánh giá: {feedback.star}/5⭐</p>
-                                <p style={{ fontSize: '16px' }}>Ảnh:</p>
-                                <img
-                                    src={feedback.img || ''}
-                                    alt={`${feedback.product?.data.name}'s avatar`}
-                                    style={{ width: '80px', height: 'auto', marginRight: '15px' }}
-                                />
-                                <div className="text-end">
+                                <p style={{ fontSize: '16px' }}><strong>Xếp hạng:</strong> {feedback.star}/5 ⭐</p>
+                                {feedback.img && (
+                                    <>
+                                        <p style={{ fontSize: '16px' }} className="mb-1"><strong>Ảnh đính kèm:</strong></p>
+                                        <img
+                                            src={feedback.img}
+                                            alt="Feedback"
+                                            style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '5px' }}
+                                        />
+                                    </>
+                                )}
+                                <div className="text-end mt-3">
                                     <ButtonComponent
                                         textButton="Cập nhật"
-                                        onClick={() => handleOnFeedback(feedback, feedback.product.data)}
+                                        onClick={() => handleOpenUpdateModal(feedback)}
                                     />
                                 </div>
                             </div>
                         </div>
                     ))
                 ) : (
-                    <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+                    <p>Bạn chưa có đánh giá nào.</p>
                 )}
             </div>
 
@@ -182,22 +201,22 @@ const FeedbackTab = () => {
                         <>
                             <div className="d-flex align-items-center mb-3">
                                 <img
-                                    src={imgPro}
+                                    src={productImage}
                                     alt="Product"
                                     className="img-thumbnail"
                                     style={{ width: '80px', height: 'auto' }}
                                 />
-                                <h6 className="ml-3" style={{ fontSize: '20px', marginLeft: '10px' }}>{name}</h6>
+                                <h6 style={{ fontSize: '20px', marginLeft: '15px' }}>{productName}</h6>
                             </div>
                             <div className="mb-3">
                                 <label className="form-label">Chất lượng sản phẩm</label>
-                                <div className="d-flex">
-                                    {Array.from({ length: 5 }).map((_, index) => (
+                                <div>
+                                    {[1, 2, 3, 4, 5].map((star) => (
                                         <span
-                                            key={index}
-                                            className={`mr-1 ${starRating > index ? 'text-warning' : 'text-muted'}`}
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => handleStarClick(index + 1)}
+                                            key={star}
+                                            className={`star ${starRating >= star ? 'text-warning' : 'text-muted'}`}
+                                            style={{ cursor: 'pointer', fontSize: '2rem', marginRight: '5px' }}
+                                            onClick={() => handleStarClick(star)}
                                         >
                                             &#9733;
                                         </span>
@@ -205,22 +224,30 @@ const FeedbackTab = () => {
                                 </div>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label">Nội dung sản phẩm:</label>
+                                <label className="form-label">Nội dung đánh giá:</label>
                                 <textarea
                                     className="form-control"
                                     rows="3"
-                                    placeholder="Nhập nội dung"
+                                    placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
                                     value={feedbackContent}
                                     onChange={(e) => setFeedbackContent(e.target.value)}
                                 ></textarea>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="image" className="form-label">Hình ảnh</label>
-                                <div className="border rounded d-flex align-items-center justify-content-center" style={{ height: '150px' }}>
-                                    {img ? (
-                                        <img src={img} alt="Preview" style={{ maxHeight: '100%', maxWidth: '100%' }} />
+                                <div className="border rounded d-flex align-items-center justify-content-center position-relative" style={{ height: '150px' }}>
+                                    {previewImage ? (
+                                        <>
+                                            <img src={previewImage} alt="Preview" style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                                            <button
+                                                type="button"
+                                                className="btn-close position-absolute top-0 end-0 bg-light rounded-circle"
+                                                style={{ transform: 'translate(30%, -30%)', border: '1px solid #ccc' }}
+                                                onClick={handleRemoveImage}
+                                            ></button>
+                                        </>
                                     ) : (
-                                        <span className="text-muted">Chọn hình ảnh</span>
+                                        <span className="text-muted">Thêm hình ảnh</span>
                                     )}
                                 </div>
                                 <input
@@ -233,9 +260,9 @@ const FeedbackTab = () => {
                             </div>
                         </>
                     }
-                    textButton1="Cập nhật"
-                    onClick1={onSave}
-                    onClick2={onCancel}
+                    textButton1="Lưu thay đổi"
+                    onClick1={handleUpdateSave}
+                    onClick2={() => setShowModal(false)}
                 />
             )}
         </div>
@@ -243,4 +270,3 @@ const FeedbackTab = () => {
 };
 
 export default FeedbackTab;
-

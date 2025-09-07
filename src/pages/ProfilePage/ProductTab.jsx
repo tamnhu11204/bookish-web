@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import * as FavoriteProductService from '../../services/FavoriteProductService';
-import * as ProductService from '../../services/ProductService'; // Assuming this includes `getDetailProduct`
+import * as ProductService from '../../services/ProductService';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 
 const ProductTab = () => {
@@ -15,19 +16,16 @@ const ProductTab = () => {
     const fetchFavoriteProducts = async () => {
         if (user?.id) {
             try {
-                // Get favorite products by user
                 const favoriteData = await FavoriteProductService.getAllFavoriteProductByUser(user.id);
                 console.log('favoriteData', favoriteData);
 
-                // Check if the favoriteData contains products
                 if (favoriteData?.data && Array.isArray(favoriteData.data)) {
                     const productDetailsPromises = favoriteData.data.map(async (favoriteItem) => {
-                        // For each favoriteItem, get the product details using the product ID
                         const product = await ProductService.getDetailProduct(favoriteItem.product);
-                        return product; // Return the detailed product
+                        return product;
                     });
                     const productDetails = await Promise.all(productDetailsPromises);
-                    setProductFavorite(productDetails); // Set the detailed products to state
+                    setProductFavorite(productDetails);
                 } else {
                     console.error('Product data is not available or not in expected format');
                 }
@@ -48,7 +46,7 @@ const ProductTab = () => {
     };
 
     if (loading) {
-        return <div>Loading...</div>; // You can add a spinner or loading animation
+        return <div>Loading...</div>;
     }
     console.log('productFavorite', productFavorite);
 

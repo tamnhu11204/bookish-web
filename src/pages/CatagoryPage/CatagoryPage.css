@@ -1,43 +1,147 @@
 .card-catagory {
-    background-color: #FFFFFF;
-    border: 1px solid #198754;
-    /* Viền màu đen */
-    border-radius: 10px;
-    /* Bo góc 10px */
-    margin-top: 20px
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+}
+
+.product-grid,
+.author-products {
+    gap: 1.5rem !important;
+    justify-content: center !important;
+}
+
+.d-flex.flex-wrap {
+    gap: 1.5rem !important;
+}
+
+.col-9 {
+    margin-top: 30px;
+}
+
+.col-3 {
+    margin-top: 30px;
 }
 
 .card-header-catagory {
-    padding: 0 10px;
-    font-size: 20px;
-    margin-top: 8px;
-    color: #198754
-}
-
-.line {
-    border: 1px solid #198754
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #198754;
 }
 
 .list-check {
-    margin-left: 10px;
-    font-size: 16px
+    max-height: 300px;
+    overflow-y: auto;
 }
 
-.label {
-    font-size: 16px;
+.list-check .form-check {
+    margin-bottom: 10px;
+    margin-left: 5px;
 }
 
-.price-slider {
-    width: 100%;
-    height: 5px;
-    background: #ddd;
-    border-radius: 5px;
+.list-check .form-check-input {
+    margin-right: 10px;
 }
 
-.price-slider .thumb {
-    width: 20px;
-    height: 20px;
-    background: #007bff;
-    border-radius: 50%;
+.list-check .form-check-label {
+    font-size: 14px;
+    color: #555;
+}
+
+.list-check .form-check-label:hover {
+    color: #e85d04;
+}
+
+.selected-filters {
+    margin-bottom: 15px;
+}
+
+.selected-filters .badge {
+    margin-right: 5px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.selected-filters .badge button {
+    margin-left: 5px;
+    border: none;
+    background: none;
+    color: #fff;
     cursor: pointer;
+}
+
+.sort-buttons button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px;
+}
+
+.sort-buttons button:hover {
+    background-color: #f0f0f0;
+}
+
+.sort-buttons button.active {
+    background-color: #198754;
+    color: #fff;
+    border-color: #198754;
+}
+
+.pagination-category {
+    margin-top: 20px;
+}
+
+.price-filter {
+    margin-top: 10px;
+}
+
+.price-filter input[type="number"] {
+    width: 100px;
+    margin-right: 5px;
+}
+
+.price-filter input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.line {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 10px 0;
+}
+
+.list-check input.form-control {
+    margin-bottom: 20px;
+    padding: 5px;
+    font-size: 14px;
+}
+
+.text-muted {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 10px;
+    margin-top: -15px;
+    display: block;
+}
+
+.plus_minus {
+    cursor: pointer;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-weight: bold;
+    color: #8b8b8b;
+    font-size: 20px;
+}
+
+.plus_minus:hover {
+    color: #e85d04;
 }

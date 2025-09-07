@@ -38,7 +38,7 @@ const UnitSubTab = () => {
     const mutationEdit = useMutationHook(data => UnitService.updateUnit(selectedUnit._id, data));
     const mutationDelete = useMutationHook(data => UnitService.deleteUnit(selectedUnit._id));
 
-    const { data, isLoading, isSuccess, isError } = mutationAdd;
+    const { data, isSuccess, isError } = mutationAdd;
     const { data: editData, isSuccess: isEditSuccess, isError: isEditError } = mutationEdit;
     const { data: deleteData, isSuccess: isDeleteSuccess, isError: isDeleteError } = mutationDelete;
 

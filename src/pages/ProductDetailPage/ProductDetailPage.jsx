@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useQuery } from '@tanstack/react-query';
 import parse from 'html-react-parser';
 import React, { useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ import * as UnitService from '../../services/OptionService/UnitService';
 import * as ProductService from '../../services/ProductService';
 import * as UserService from '../../services/UserService';
 import './ProductDetailPage.css';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user);
@@ -32,6 +34,7 @@ const ProductDetailPage = () => {
   const [productFavorite, setProductFavorite] = useState('');
   const [proCategory, setProCategory] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -151,10 +154,15 @@ const ProductDetailPage = () => {
     { criteria: 'Mã hàng', detail: product?.code || 'N/A' },
     { criteria: 'Tác giả', detail: product?.author || 'N/A' },
     { criteria: 'Nhà xuất bản', detail: publisher?.name || 'N/A' },
-    { criteria: 'Năm xuất bản', detail: product?.publishDate || 'N/A' },
+    {
+      criteria: 'Năm xuất bản',
+      detail: product?.publishDate
+        ? new Date(product.publishDate).toLocaleDateString('vi-VN')
+        : 'N/A'
+    },
     { criteria: 'Ngôn ngữ', detail: language?.name || 'N/A' },
     { criteria: 'Trọng lượng', detail: product?.weight || 'N/A' },
-    { criteria: 'Kích thước', detail: `${product?.length}x${product?.width}x${product?.height}` || 'N/A' },
+    { criteria: 'Kích thước', detail: `${product?.length} x ${product?.width} x ${product?.height}` || 'N/A' },
     { criteria: 'Số trang', detail: product?.page || 'N/A' },
     { criteria: 'Hình thức', detail: format?.name || 'N/A' },
     { criteria: 'Nhà cung cấp', detail: supplier?.name || 'N/A' },
@@ -380,13 +388,13 @@ const ProductDetailPage = () => {
           </div>
 
           <div className="col-8">
-            <div className="card p-3 mb-4" style={{ maxWidth: "600px", marginTop: "20px", borderRadius: "10px" }}>
+            <div className="card p-3 mb-4" style={{ marginLeft: "10px", marginRight: "10px", marginTop: "20px", borderRadius: "10px" }}>
               <div className="card-body">
                 <div className="row">
                   <div className="col">
                     <h5 className="card-title-detail fw-bold">{product.name}</h5>
                   </div>
-                  <div className="col-1">
+                  <div className="col d-flex justify-content-end">
                     <button
                       className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
                       onClick={handleAddToFavorite}
@@ -418,19 +426,8 @@ const ProductDetailPage = () => {
                           -{product.discount}%
                         </div>
                       </div>
-                      <div className="col">
-                        <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '12px', backgroundColor: '#FFFFFF', border: '1px solid #198754', marginTop: '8px', color: '#198754' }}>
-                          Còn {product.stock} sản phẩm
-                        </div>
-                      </div>
+
                     </>
-                  )}
-                  {!product.discount && (
-                    <div className="col">
-                      <div className="badge text-wrap" style={{ width: 'fit-content', fontSize: '12px', backgroundColor: '#FFFFFF', border: '1px solid #198754', marginTop: '8px', color: '#198754' }}>
-                        Còn {product.stock} sản phẩm
-                      </div>
-                    </div>
                   )}
                 </div>
                 {product.discount > 0 && (
@@ -438,10 +435,24 @@ const ProductDetailPage = () => {
                     {product.price.toLocaleString()}đ
                   </p>
                 )}
-                <div className="mt-3 text-muted" style={{ fontSize: "14px" }}>
-                  <span>
+                <div className="mt-3 text-muted row" style={{ fontSize: "14px" }}>
+                  <div className="col">
                     <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán | {product.view} lượt xem
-                  </span>
+                  </div>
+                  <div className="col d-flex justify-content-end">
+                    <div
+                      className="badge text-wrap"
+                      style={{
+                        width: 'fit-content',
+                        fontSize: '14px',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #198754',
+                        color: '#198754'
+                      }}
+                    >
+                      Còn {product.stock} sản phẩm
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -450,11 +461,36 @@ const ProductDetailPage = () => {
                 <CardComponent title="Thông tin chi tiết" bodyContent={detailInfo} icon="bi bi-card-list" />
               </div>
             </div>
+
             <div style={{ backgroundColor: '#F9F6F2' }}>
               <div className="container" style={{ marginTop: '30px' }}>
-                <CardComponent title="Mô tả sản phẩm" bodyContent={<><p style={{ fontSize: '20px', fontWeight: 'bold' }}>{product.name}</p><div style={{ fontSize: '16px' }}>{product.description ? parse(product.description) : 'Không có mô tả.'}</div></>} icon="bi bi-blockquote-left" />
+                <CardComponent
+                  title="Mô tả sản phẩm"
+                  icon="bi bi-blockquote-left"
+                  bodyContent={
+                    <>
+                      <p style={{ fontSize: '20px', fontWeight: 'bold' }}>{product.name}</p>
+                      <div
+                        style={{ fontSize: '16px' }}
+                        className={!expanded ? "truncate-5" : ""}
+                      >
+                        {product.description ? parse(product.description) : 'Không có mô tả.'}
+                      </div>
+
+                      {product.description && (
+                        <div className="w-100 text-center mt-4">
+                          <ButtonComponent2
+                            textButton={expanded ? "Thu gọn" : "Xem thêm"}
+                            onClick={() => setExpanded(!expanded)}
+                          />
+                        </div>
+                      )}
+                    </>
+                  }
+                />
               </div>
             </div>
+
           </div>
         </div>
 
@@ -468,7 +504,7 @@ const ProductDetailPage = () => {
 
         <div className="row">
           <div style={{ backgroundColor: '#F9F6F2' }}>
-            <div className="container" style={{ marginTop: '30px' }}>
+            <div className="container" style={{ marginTop: '30px', marginBottom: '30px' }}>
               <CardComponent title="Đánh giá" bodyContent={feedbackProduct} icon="bi bi-bookmark-star" />
             </div>
           </div>
