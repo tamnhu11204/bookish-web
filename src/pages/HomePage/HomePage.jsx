@@ -636,7 +636,7 @@ const HomePage = () => {
       {isEditing && (
         <div className="edit-actions-footer">
           <button className="save-button" onClick={handleSubmitEdit}>
-            <i className="bi bi-check-circle"></i> Lưu Thay Đổi
+            <i className="bi bi-check-circle"></i> Lưu
           </button>
           <button className="cancel-button" onClick={handleCancelEdit}>
             <i className="bi bi-x-circle"></i> Hủy

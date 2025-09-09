@@ -147,7 +147,7 @@ const PromotionTab = () => {
         if (mutation.isError || mutation.data?.status === 'ERR') {
             message.error(mutation.data?.message || 'Lỗi khi thêm ưu đãi.');
         }
-    }, [mutation.isSuccess, mutation.isError, mutation.data]);
+    }, [mutation.isSuccess, mutation.isError, mutation.data, queryClient]);
 
     const handleAddPromotion = () => setShowModal(true);
     const handleOnChangeValue = (value) => setValue(value);
@@ -243,7 +243,7 @@ const PromotionTab = () => {
         if (mutationUpdate.isError || mutationUpdate.data?.status === 'ERR') {
             message.error(mutationUpdate.data?.message || 'Lỗi khi cập nhật ưu đãi.');
         }
-    }, [mutationUpdate.isSuccess, mutationUpdate.isError, mutationUpdate.data]);
+    }, [mutationUpdate.isSuccess, mutationUpdate.isError, mutationUpdate.data, queryClient]);
 
     const onSaveEdit = async () => {
         if (validateFormEdit()) {
@@ -286,12 +286,12 @@ const PromotionTab = () => {
     return (
         <div style={{ padding: '0 20px' }}>
             <div className="title-section">
-                <h3 className="text mb-0">ƯU ĐÃI</h3>
+                <h3 className="text mb-0">QUẢN LÝ ƯU ĐÃI</h3>
             </div>
 
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center mb-3">
-                    <div className="col d-flex justify-content-end">
+                    <div className="col d-flex justify-content-start">
                         <ButtonComponent
                             textButton="Thêm ưu đãi"
                             icon={<i className="bi bi-plus-circle"></i>}

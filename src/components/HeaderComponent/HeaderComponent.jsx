@@ -123,7 +123,7 @@ const HeaderComponent = () => {
               <CategoryDropdown />
             </li>
             <li className="nav-item"><NavLink className="nav-link" to="/discount">Khuyến mãi</NavLink></li>
-            <li className="nav-item"><NavLink className="nav-link" to="/about">Giới thiệu</NavLink></li>
+            <li className="nav-item"><NavLink className="nav-link" to="/about-us">Giới thiệu</NavLink></li>
             <li className="nav-item"><NavLink className="nav-link" to="/news">Tin tức</NavLink></li>
           </ul>
           <div className="search-container">
