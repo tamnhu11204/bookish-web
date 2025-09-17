@@ -49,7 +49,7 @@
   text-align: left;
   vertical-align: middle;
   white-space: nowrap;
-  padding: 12px 15px;
+  padding: 10px 10px;
   font-size: 16px;
   color: #333;
 }
@@ -90,6 +90,7 @@
   font-size: 14px;
   padding: 5px 10px;
   transition: all 0.2s ease;
+  margin-left: 5px;
 }
 
 .custom-table .btn-primary {
@@ -205,4 +206,45 @@
 
 .import-details .btn {
   font-size: 16px !important;
+}
+
+
+/* AdminPage.css */
+.category-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.category-item.selected {
+  background-color: #d8eeda;
+  /* Một màu xanh lá cây nhạt để làm nổi bật */
+  font-weight: bold;
+}
+
+.category-item:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.category-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.category-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* Khoảng cách giữa icon và tên */
+}
+
+/* Thêm margin-top cho các cấp danh mục con */
+.child-category-container {
+  margin-top: 10px;
+}
+
+.text-truncate {
+  font-size: 16px;
 }

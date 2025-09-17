@@ -394,7 +394,11 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   if (!isOpen) return null;
   return (
     <div className="container my-4">
-      <h4>Cập nhật sản phẩm</h4>
+      <h4 style={{
+        color: "#198754",
+        fontSize: "25px",
+        fontWeight: "bold"
+      }}>Cập nhật sản phẩm</h4>
 
       <div className="row">
         <div className="col-md-6 mb-3">

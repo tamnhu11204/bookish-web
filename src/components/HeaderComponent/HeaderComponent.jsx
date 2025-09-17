@@ -85,7 +85,7 @@ const HeaderComponent = () => {
                         <>
                           <li><NavLink className="dropdown-item" to="/admin-profile"><i className="bi bi-person-circle"></i> Hồ sơ</NavLink></li>
                           <li><NavLink className="dropdown-item" to="/admin/shopManagement"><i className="bi bi-house-gear"></i> Hệ thống</NavLink></li>
-                          <li><NavLink className="dropdown-item" to="/admin/livechat"><i className="bi bi-chat-dots"></i> Nhắn tin</NavLink></li>
+                          {/* <li><NavLink className="dropdown-item" to="/admin/livechat"><i className="bi bi-chat-dots"></i> Nhắn tin</NavLink></li> */}
                         </>
                       )}
                       {!user?.isAdmin && (

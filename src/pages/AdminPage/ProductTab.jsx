@@ -1,291 +1,193 @@
-import React, { useEffect, useState } from 'react';
-import './AdminPage.css';
-import FormComponent from '../../components/FormComponent/FormComponent';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
-import ProductDetailForm from './ProductEdit';
-import AddProductForm from './ProductAdd';
-import * as ProductService from "../../services/ProductService";
-import { useQuery } from '@tanstack/react-query';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
+import FormComponent from '../../components/FormComponent/FormComponent';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
-import ImportModal from '../../components/ImportComponent/ImportComponent';
-import * as message from "../../components/MessageComponent/MessageComponent";
-import { useMutationHook } from "../../hooks/useMutationHook";
+import { useMutationHook } from '../../hooks/useMutationHook';
 import * as CategoryService from '../../services/CategoryService';
-import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
+import * as ProductService from '../../services/ProductService';
+import './AdminPage.css';
+import AddProductForm from './ProductAdd';
+import ProductDetailForm from './ProductEdit';
 
-// Hàm làm phẳng danh mục thành dạng cây
-const flattenCategoryTree = (categories, level = 0) => {
-    let result = [];
-    categories.forEach((category) => {
-        result.push({
-            value: category._id,
-            label: "-".repeat(level * 2) + " " + category.name, // Thêm dấu "-" để biểu thị cấp
-        });
-        if (category.children && category.children.length > 0) {
-            result = result.concat(flattenCategoryTree(category.children, level + 1));
+const getAllSubCategoryIds = (categories, parentId) => {
+    const ids = new Set();
+    if (!parentId || !categories) return [];
+
+    const findChildrenRecursive = (currentCategoryId) => {
+        ids.add(currentCategoryId);
+        let categoryNode = null;
+        const findNode = (nodes) => {
+            for (const node of nodes) {
+                if (node._id === currentCategoryId) {
+                    categoryNode = node;
+                    return;
+                }
+                if (node.children) findNode(node.children);
+            }
+        };
+        findNode(categories);
+        if (categoryNode?.children?.length > 0) {
+            categoryNode.children.forEach(child => findChildrenRecursive(child._id));
         }
-    });
-    return result;
+    };
+
+    findChildrenRecursive(parentId);
+    return Array.from(ids);
 };
 
-const ProductTab = () => {
-    const [productID, setProductID] = useState("");
-    const [showModal, setShowModal] = useState(false);
-    const [onCancel, setOnCancel] = useState(() => () => { });
-    const [Type, setType] = useState(false);
+const ProductTab = ({ selectedCategoryId }) => {
+    const [productID, setProductID] = useState('');
+    const [isFormVisible, setIsFormVisible] = useState(false);
+    const [formMode, setFormMode] = useState('add'); // 'add' hoặc 'edit'
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState("Tất cả danh mục");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+    const queryClient = useQueryClient();
 
-    const fetchCategories = async () => {
-        try {
-            const response = await CategoryService.getTreeCategory();
-            setCategories(response.data);
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-        }
-    };
-    console.log('category', categories)
-    useEffect(() => {
-        fetchCategories();
-    }, []);
-
-    const handleOpenModal = () => setIsModalOpen(true);
-
-    const handleImportSubmit = (data) => {
-        console.log('Dữ liệu nhập hàng:', data);
-        handleCloseModal();
-    };
-
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setIsModalOpen(false);
-    };
-
-    const getAllProduct = async () => {
-        const res = await ProductService.getAllProduct();
-        return res.data;
-    };
+    const { isLoading: isLoadingCategories, data: categories } = useQuery({
+        queryKey: ['categoryTree'],
+        queryFn: () => CategoryService.getTreeCategory().then(res => res.data),
+        staleTime: 5 * 60 * 1000,
+    });
 
     const { isLoading: isLoadingProduct, data: products } = useQuery({
         queryKey: ['products'],
-        queryFn: getAllProduct,
+        queryFn: () => ProductService.getAllProduct().then(res => res.data),
+        staleTime: 5 * 60 * 1000,
     });
 
-    const handleAddProduct = () => {
-        setShowModal(true);
-        setType(true);
-    };
-
-    const onCancel2 = () => {
-        setShowModal(false);
-    };
-
-    const handleEditProduct = (product) => {
-        setOnCancel(() => () => {
-            setShowModal(false);
-        });
-        setShowModal(true);
-        setType(false);
-        setProductID(product._id);
-    };
-
-    const [selectedProduct, setSelectedProduct] = useState("");
-    const deleteMutation = useMutationHook(data => ProductService.deleteProduct(selectedProduct._id));
-    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
+    const categoryNameMap = useMemo(() => {
+        const map = {};
+        if (!categories) return map;
+        const flattenCategories = (cats) => {
+            cats.forEach(cat => {
+                map[cat._id] = cat.name;
+                if (cat.children?.length > 0) flattenCategories(cat.children);
+            });
+        };
+        flattenCategories(categories);
+        return map;
+    }, [categories]);
 
     useEffect(() => {
-        if (isSuccessDelete) {
-            message.success();
-            alert('Xóa sản phẩm thành công!');
-            setShowModal(false);
-        }
-        if (isErrorDelete) {
-            message.error();
-        }
-    }, [isSuccessDelete, isErrorDelete]);
-
-    const handleDeleteProduct = (product) => {
-        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}" không?`)) {
-            setSelectedProduct(product);
-            deleteMutation.mutate(product.id);
-        }
-    };
-
-    const handleOnChange = (value) => {
-        setSearchTerm(value);
-    };
-
-    const handleOnChangeCategory = (e) => {
-        setSelectedCategory(e.target.value);
-    };
-
-    // Tạo danh sách tùy chọn dạng cây
-    const AllCategory = [
-        { value: "Tất cả danh mục", label: "Tất cả danh mục" },
-        ...(categories.length > 0 ? flattenCategoryTree(categories) : [])
-    ];
-
-    // Hàm tìm tên danh mục dựa trên _id, bao gồm cả danh mục con
-    const findCategoryName = (categories, categoryId) => {
-        for (const category of categories) {
-            if (category._id === categoryId) {
-                return category.name;
-            }
-            if (category.children && category.children.length > 0) {
-                const childName = findCategoryName(category.children, categoryId);
-                if (childName) {
-                    return childName;
-                }
-            }
-        }
-        return "Không xác định";
-    };
-
-    useEffect(() => {
-        if (products) {
+        if (products && categories) {
+            const categoryIdsToFilter = selectedCategoryId ? getAllSubCategoryIds(categories, selectedCategoryId) : null;
             const filtered = products.filter((product) => {
                 const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-                const matchesCategory =
-                    selectedCategory === "Tất cả danh mục" || product.category === selectedCategory;
+                const productCategoryId = product.category?._id || product.category;
+                const matchesCategory = !categoryIdsToFilter || categoryIdsToFilter.includes(productCategoryId);
                 return matchesSearch && matchesCategory;
             });
             setFilteredProducts(filtered);
+            setCurrentPage(1);
+        } else if (products) {
+            const filtered = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            setFilteredProducts(filtered);
         }
-    }, [searchTerm, selectedCategory, products]);
+    }, [searchTerm, selectedCategoryId, products, categories]);
 
-    if (!showModal) {
-        return (
-            <div style={{ padding: '0 20px' }}>
-                <div className="title-section">
-                    <h3 className="text mb-0">DANH SÁCH SẢN PHẨM</h3>
-                </div>
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-                <div className="content-section" style={{ marginTop: '30px' }}>
-                    <div className="row align-items-center mb-3">
-                        <div className="col-6">
-                            <FormComponent
-                                id="searchInput"
-                                type="text"
-                                placeholder="Tìm kiếm theo tên sản phẩm"
-                                enable={true}
-                                onChange={handleOnChange}
-                            />
-                        </div>
-                        <div className="col-3">
-                            <FormSelectComponent
-                                options={AllCategory}
-                                selectedValue={selectedCategory}
-                                onChange={handleOnChangeCategory}
-                                required={false}
-                            />
-                        </div>
-                        <div className="col text-end">
-                            
-                            <div style={{ marginTop: '10px' }}>
-                                <ButtonComponent
-                                    textButton="Thêm sản phẩm"
-                                    icon={<i className="bi bi-plus-circle"></i>}
-                                    onClick={handleAddProduct}
-                                />
-                            </div>
-                        </div>
-                    </div>
+    const paginationButtons = totalPages > 1 && (
+        <div className="pagination-category d-flex justify-content-center gap-2 mt-4">
+            {currentPage > 1 && (<ButtonComponent2 textButton="Trước" onClick={() => setCurrentPage(currentPage - 1)} />)}
+            {[...Array(totalPages)].map((_, index) => (<ButtonComponent2 key={index} textButton={String(index + 1)} onClick={() => setCurrentPage(index + 1)} className={currentPage === index + 1 ? 'active' : ''} />))}
+            {currentPage < totalPages && (<ButtonComponent2 textButton="Tiếp theo" onClick={() => setCurrentPage(currentPage + 1)} />)}
+        </div>
+    );
 
-                    <table className="table custom-table" style={{ marginTop: '30px' }}>
-                        <thead className="table-light">
-                            <tr>
-                                <th scope="col" style={{ width: '10%' }}>Mã</th>
-                                <th scope="col" style={{ width: '10%' }}>Ảnh</th>
-                                <th scope="col" style={{ width: '20%' }}>Tên sản phẩm</th>
-                                <th scope="col" style={{ width: '10%' }}>Giá</th>
-                                <th scope="col" style={{ width: '10%' }}>Giảm giá</th>
-                                <th scope="col" style={{ width: '20%' }}>Thuộc danh mục</th>
-                                <th scope="col" style={{ width: '15%' }}>Tồn kho</th>
-                                <th scope="col" style={{ width: '15%' }}>Đã bán</th>
-                                <th scope="col" style={{ width: '10%' }}></th>
-                            </tr>
-                        </thead>
-                        <tbody className="table-content">
-                            {isLoadingProduct ? (
-                                <tr>
-                                    <td colSpan="4" className="text-center">
-                                        <LoadingComponent />
-                                    </td>
-                                </tr>
-                            ) : filteredProducts && filteredProducts.length > 0 ? (
-                                filteredProducts.map((product) => {
-                                    return (
-                                        <tr key={product.id}>
-                                            <td>{product.code}</td>
-                                            <td>
-                                                <img
-                                                    src={product?.img[0]}
-                                                    alt={product.name}
-                                                    style={{ width: '80px', height: '100px', objectFit: 'cover' }}
-                                                />
-                                            </td>
-                                            <td>{product.name.length > 20 ? product.name.slice(0, 20) + '...' : product.name}</td>
-                                            <td>{product.price}</td>
-                                            <td>{product.discount}</td>
-                                            <td>{findCategoryName(categories, product.category)}</td>
-                                            <td>{product.stock}</td>
-                                            <td>{product.sold}</td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-sm btn-primary me-2"
-                                                    onClick={() => handleEditProduct(product)}
-                                                >
-                                                    <i className="bi bi-pencil-square"></i>
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-sm btn-danger"
-                                                    onClick={() => handleDeleteProduct(product)}
-                                                >
-                                                    <i className="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            ) : (
-                                <tr>
-                                    <td colSpan="4" className="text-center">
-                                        Không có dữ liệu để hiển thị.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-                <ImportModal
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    onSubmit={handleImportSubmit}
-                />
-            </div>
-        );
-    }
+    const handleAddProduct = () => {
+        setFormMode('add');
+        setIsFormVisible(true);
+    };
 
-    if (!Type) {
-        return (
-            <ProductDetailForm
-                isOpen={showModal}
-                IDProduct={productID}
-                onCancel={onCancel2}
-            />
-        );
+    const handleEditProduct = (product) => {
+        setProductID(product._id);
+        setFormMode('edit');
+        setIsFormVisible(true);
+    };
+
+    const handleCloseForm = () => {
+        setIsFormVisible(false);
+        setProductID('');
+        queryClient.invalidateQueries(['products']);
+    };
+
+    const deleteMutation = useMutationHook((id) => ProductService.deleteProduct(id));
+    const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
+
+    useEffect(() => {
+        if (isSuccessDelete) { toast.success('Xóa sản phẩm thành công!'); queryClient.invalidateQueries(['products']); }
+        if (isErrorDelete) { toast.error('Xóa sản phẩm thất bại!'); }
+    }, [isSuccessDelete, isErrorDelete, queryClient]);
+
+    const handleDeleteProduct = (product) => {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}" không?`)) {
+            deleteMutation.mutate(product._id);
+        }
+    };
+
+    // LOGIC RENDER TẠI CHỖ (IN-PLACE RENDERING)
+    if (isFormVisible) {
+        if (formMode === 'add') {
+            return <AddProductForm isOpen={true} onCancel={handleCloseForm} />;
+        }
+        if (formMode === 'edit') {
+            return <ProductDetailForm isOpen={true} IDProduct={productID} onCancel={handleCloseForm} />;
+        }
     }
 
     return (
-        <AddProductForm
-            isOpen={showModal}
-            onCancel={onCancel2}
-        />
+        <div>
+            <div className="title-section"><h3 className="text mb-0">DANH SÁCH SẢN PHẨM</h3></div>
+            <div className="content-section" style={{ marginTop: '30px' }}>
+                <div className="row align-items-center mb-3">
+                    <div className="col-6"><FormComponent id="searchInput" type="text" placeholder="Tìm kiếm theo tên sản phẩm" value={searchTerm} onChange={setSearchTerm} enable={true} /></div>
+                    <div className="col-6 text-end"><ButtonComponent textButton="Thêm sản phẩm" icon={<i className="bi bi-plus-circle"></i>} onClick={handleAddProduct} /></div>
+                </div>
+                <table className="table custom-table" style={{ marginTop: '30px' }}>
+                    <thead className="table-light">
+                        <tr>
+                            <th style={{ width: '10%' }}>Ảnh</th>
+                            <th style={{ width: '20%' }}>Tên sản phẩm</th>
+                            <th style={{ width: '10%' }}>Giá</th>
+                            <th style={{ width: '20%' }}>Thuộc danh mục</th>
+                            <th style={{ width: '15%' }}>Tồn kho</th>
+                            <th style={{ width: '15%' }}>Đã bán</th>
+                            <th style={{ width: '10%' }}></th>
+                        </tr>
+                    </thead>
+                    <tbody className="table-content">
+                        {isLoadingProduct || isLoadingCategories ? (
+                            <tr><td colSpan="7" className="text-center"><LoadingComponent /></td></tr>
+                        ) : paginatedProducts.length > 0 ? (
+                            paginatedProducts.map((product) => (
+                                <tr key={product._id}>
+                                    <td>{product.img?.[0] ? (<img src={product.img[0]} alt={product.name} style={{ width: '80px', height: '100px', objectFit: 'cover' }} onError={(e) => (e.target.src = '/default-image.png')} />) : ('No image')}</td>
+                                    <td title={product.name}>{product.name.length > 20 ? `${product.name.slice(0, 20)}...` : product.name}</td>
+                                    <td>{product.price?.toLocaleString('vi-VN')} VND</td>
+                                    <td>{categoryNameMap[product.category?._id || product.category] || 'Không xác định'}</td>
+                                    <td>{product.stock}</td>
+                                    <td>{product.sold}</td>
+                                    <td>
+                                        <button className="btn btn-sm btn-primary" onClick={() => handleEditProduct(product)}><i className="bi bi-pencil-square"></i></button>
+                                        <button className="btn btn-sm btn-danger" onClick={() => handleDeleteProduct(product)}><i className="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan="7" className="text-center">Không có dữ liệu để hiển thị.</td></tr>
+                        )}
+                    </tbody>
+                </table>
+                {paginationButtons}
+            </div>
+        </div>
     );
 };
 
