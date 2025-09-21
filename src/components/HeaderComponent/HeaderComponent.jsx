@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -7,12 +8,42 @@ import * as UserService from '../../services/UserService';
 import LoadingComponent from '../LoadingComponent/LoadingComponent';
 import './HeaderComponent.css';
 import CategoryDropdown from '../CategoryDropdownComponent/CategoryDropdown';
+import * as FavoriteProductService from '../../services/FavoriteProductService';
+import * as ProductService from '../../services/ProductService';
 
 const HeaderComponent = () => {
   const user = useSelector((state) => state.user);
   const shop = useSelector((state) => state.shop);
   const order = useSelector((state) => state.order);
-  const wishlist = useSelector((state) => state.wishlist);
+  const [productFavorite, setProductFavorite] = useState([]);
+
+  const fetchFavoriteProducts = async () => {
+    if (user?.id) {
+      try {
+        const favoriteData = await FavoriteProductService.getAllFavoriteProductByUser(user.id);
+        console.log('favoriteData', favoriteData);
+
+        if (favoriteData?.data && Array.isArray(favoriteData.data)) {
+          const productDetailsPromises = favoriteData.data.map(async (favoriteItem) => {
+            const product = await ProductService.getDetailProduct(favoriteItem.product);
+            return product;
+          });
+          const productDetails = await Promise.all(productDetailsPromises);
+          setProductFavorite(productDetails);
+        } else {
+          console.error('Product data is not available or not in expected format');
+        }
+      } catch (error) {
+        console.error('Error fetching favorite products:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchFavoriteProducts();
+  }, [user?.id]);
 
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,7 +67,7 @@ const HeaderComponent = () => {
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
   };
-  // Ref để đo chiều cao của sticky-header
+
   const headerRef = useRef(null);
 
   useEffect(() => {
@@ -49,7 +80,7 @@ const HeaderComponent = () => {
       }
     }
     return () => {
-      document.body.style.paddingTop = ''; // Cleanup khi unmount
+      document.body.style.paddingTop = '';
     };
   }, [user?.name]);
 
@@ -68,7 +99,7 @@ const HeaderComponent = () => {
                 <div className="user-actions-inner">
                   <button type="button" className="icon-button" onClick={() => navigate('/favorite-products')} title="Sản phẩm yêu thích">
                     <i className="bi bi-heart"></i>
-                    <span className="badge-count">{wishlist?.items?.length || 0}</span>
+                    <span className="badge-count">{productFavorite?.length || 0}</span>
                   </button>
 
                   <button type="button" className="icon-button" onClick={() => navigate('/shoppingcart')} title="Giỏ hàng">

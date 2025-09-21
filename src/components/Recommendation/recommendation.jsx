@@ -57,14 +57,18 @@ const Recommendation = ({ userId }) => {
         {recommendedBooks.map(product => (
           <CardProductComponent
             key={product._id}
+            id={product._id}
             img={product.img[0]}
             proName={product.name}
             currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+            originalPrice={product.price}
             sold={product.sold}
             star={product.star}
             feedbackCount={product.feedbackCount}
             onClick={() => handleOnClickProduct(product._id)}
             view={product.view}
+            stock={product.stock}
+            discount={product.discount}
           />
         ))}
       </div>

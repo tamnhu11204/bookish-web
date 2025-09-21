@@ -21,7 +21,7 @@ const CardComponent = ({ title, bodyContent, icon }) => {
                             height: "35px",
                             backgroundColor: "#2A7D46",
                             borderRadius: "5px",
-                           
+
                         }}
                     >
                         <i
@@ -40,8 +40,8 @@ const CardComponent = ({ title, bodyContent, icon }) => {
                 style={{
                     backgroundColor: "#FFFFFF",
                     borderRadius: "10px",
-                    minHeight: "100px", // Đảm bảo có chiều cao tối thiểu
-                    flexWrap: "wrap", // Nếu có nhiều CardProductComponent, cho phép xuống dòng
+                    minHeight: "100px",
+                    flexWrap: "wrap",
                 }}
             >
                 {bodyContent}

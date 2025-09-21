@@ -1,22 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import img1 from '../../assets/img/img1.png';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 import CardComponent from '../../components/CardComponent2/CardComponent2';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
-import * as CategoryService from '../../services/CategoryService';
 import * as AuthorService from '../../services/AuthorService';
+import * as CategoryService from '../../services/CategoryService';
 import * as FormatService from '../../services/OptionService/FormatService';
 import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as PublisherService from '../../services/OptionService/PublisherService';
 import * as ProductService from '../../services/ProductService';
-import './CatagoryPage.css';
-import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
-import { useSelector } from 'react-redux';
-import CatagoryTab from '../AdminPage/CategoryTab';
-import ProductTab from '../AdminPage/ProductTab';
 import CategoryTab from '../AdminPage/CategoryTab';
+import ProductTab from '../AdminPage/ProductTab';
+import './CatagoryPage.css';
 
 const CatagoryPage = () => {
   const navigate = useNavigate();
@@ -30,7 +28,7 @@ const CatagoryPage = () => {
   const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 12;
+  const productsPerPage = 9;
   const [totalPages, setTotalPages] = useState(1);
   const [selectedSort, setSelectedSort] = useState('');
   const [openedCategories, setOpenedCategories] = useState([]);
@@ -491,14 +489,18 @@ const CatagoryPage = () => {
         paginatedProducts.map((product) => (
           <CardProductComponent
             key={product._id}
-            img={product.img?.[0] || img1}
+            id={product._id}
+            img={product.img[0]}
             proName={product.name}
-            currentPrice={((product.price * (100 - (product.discount || 0))) / 100).toLocaleString()}
-            sold={product.sold || 0}
-            star={product.star || 0}
-            feedbackCount={product.feedbackCount || 0}
-            view={product.view || 0}
+            currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+            originalPrice={product.price}
+            sold={product.sold}
+            star={product.star}
+            feedbackCount={product.feedbackCount}
             onClick={() => handleOnClickProduct(product._id)}
+            view={product.view}
+            stock={product.stock}
+            discount={product.discount}
           />
         ))
       ) : (

@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import ButtonComponent2 from "../../components/ButtonComponent/ButtonComponent2";
 import CardComponent from "../../components/CardComponent/CardComponent";
@@ -11,6 +12,7 @@ import * as message from "../../components/MessageComponent/MessageComponent";
 import OrderProductComponent from "../../components/OrderProductComponent/OrderProductComponent";
 import PromoItemComponent from "../../components/PromoItemComponent/PromoItemComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
+import { removeAllOrderProduct } from "../../redux/slides/OrderSlide";
 import * as ListAddressService from '../../services/ListAddressService';
 import * as OrderActiveListService from '../../services/OrderActiveListService';
 import * as OrderService from '../../services/OrderService';
@@ -19,23 +21,26 @@ import * as PromotionService from '../../services/PromotionService';
 import * as ShopProfileService from '../../services/ShopProfileService';
 import * as UserService from '../../services/UserService';
 import "./OrderPage.css";
-import { removeAllOrderProduct } from "../../redux/slides/OrderSlide";
 
 const OrderPage = () => {
   const order = useSelector((state) => state.order)
   const [selectedOption, setSelectedOption] = useState("default");
   const [selectedOption2, setSelectedOption2] = useState("default");
+  const [newOrderId, setNewOrderId] = useState(null);
+  const location = useLocation();
+  const promotionFromCart = location.state?.promotion;
 
-  // Lấy dữ liệu address mặc định
+  const [selectedPromotion, setSelectedPromotion] = useState(promotionFromCart?._id || null);
+
   const getUser = useSelector((state) => state.user);
-  const dispatch=useDispatch()
+  const dispatch = useDispatch()
 
   const getAllListAddressIsDefault = async (user, token) => {
-    const res = await UserService.getAllListAddressIsDefault(user, token);  // Gọi API với user và token
+    const res = await UserService.getAllListAddressIsDefault(user, token);
     return res.data;
   };
 
-  const { isLoading: isLoadingListAddress, data: listAddressesData } = useQuery({
+  const { data: listAddressesData } = useQuery({
     queryKey: ["listAddressesData", getUser.id, getUser.access_token],
     queryFn: () => getAllListAddressIsDefault(getUser?.id, getUser?.access_token),
     enabled: !!getUser?.id && !!getUser?.access_token,
@@ -107,7 +112,7 @@ const OrderPage = () => {
     return res.data;
   };
 
-  const { isLoading: isLoadingShop, data: shop } = useQuery({
+  const { data: shop } = useQuery({
     queryKey: ['shop'],
     queryFn: getDetailShop,
   });
@@ -126,7 +131,7 @@ const OrderPage = () => {
     return res?.data || [];
   };
 
-  const { isLoading: isLoadingProvince, data: provinces } = useQuery({
+  const { data: provinces } = useQuery({
     queryKey: ["provinces"],
     queryFn: getProvinces,
   });
@@ -137,7 +142,7 @@ const OrderPage = () => {
     return res?.data || [];
   };
 
-  const { isLoading: isLoadingDistrict, data: districts, refetch: refetchDistricts } = useQuery(
+  const { data: districts, refetch: refetchDistricts } = useQuery(
     ["districts", selectedProvince],
     () => getDistricts(selectedProvince),
     { enabled: !!selectedProvince }
@@ -149,7 +154,7 @@ const OrderPage = () => {
     return res?.data || [];
   };
 
-  const { isLoading: isLoadingCommune, data: communes, refetch: refetchCommunes } = useQuery(
+  const { data: communes, refetch: refetchCommunes } = useQuery(
     ["communes", selectedDistrict],
     () => getCommunes(selectedDistrict),
     { enabled: !!selectedDistrict }
@@ -226,12 +231,12 @@ const OrderPage = () => {
     };
 
     fetchProductDetails();
-  }, [JSON.stringify(order?.orderItems)]);
+  }, [order]);
 
   ////////////------------các phần của ui----------///////////////
   //card thông tin giao hàng
   useEffect(() => {
-    if (getUser, addressDetails) {
+    if (getUser && addressDetails) {
       setName(getUser.name || '');
       setPhone(addressDetails.phone || '');
     }
@@ -389,20 +394,31 @@ const OrderPage = () => {
     return res.data;
   };
 
-  const { isLoading: isLoadingPromo, data: promotions } = useQuery({
+  const { data: promotions } = useQuery({
     queryKey: ['promotions'],
     queryFn: getAllPromotion,
   });
+
+  const availablePromotions = React.useMemo(() => {
+    if (!promotions) return [];
+
+    const now = new Date();
+
+    return promotions.filter(promo => {
+      const startDate = new Date(promo.start);
+      const finishDate = new Date(promo.finish);
+      return now >= startDate && now <= finishDate && promo.quantity > promo.used;
+    });
+  }, [promotions]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const [selectedPromotion, setSelectedPromotion] = useState(null);
-
-  // Hàm xử lý khi người dùng chọn hoặc bỏ chọn mã khuyến mãi
   const totalPrice = order?.orderItemSelected?.reduce((total, item) => {
-    return total + (item.price * item.amount);
+    const numericPrice = Number(String(item.price || '0').replace(/,/g, ''));
+    const numericAmount = Number(item.amount || 0);
+    return total + (numericPrice * numericAmount);
   }, 0) || 0;
 
   const handlePromoSelection = (promotionId, condition) => {
@@ -423,23 +439,23 @@ const OrderPage = () => {
           <div className="promo">
             <div className="p-4 border rounded" style={{ maxWidth: '600px', margin: '0 auto' }}>
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="text-success mb-0">
-                  <i className="bi bi-percent me-2"></i>CHỌN MÃ KHUYẾN MÃI
+                <h5 className="text-success mb-0" style={{ fontWeight: "700", fontSize: "20px" }}>
+                  <i className="bi bi-percent me-2"></i> CHỌN MÃ KHUYẾN MÃI
                 </h5>
                 <button className="btn-close" aria-label="Close" onClick={closeModal}></button>
               </div>
 
               <div className="input-group mb-3">
-                <input type="text" className="form-control" placeholder="Nhập mã khuyến mãi" />
-                <button className="btn btn-success">Áp dụng</button>
+                <input type="text" className="form-control" style={{ fontSize: "14px" }} placeholder="Nhập mã khuyến mãi" />
+                <button className="btn btn-success" style={{ fontSize: "14px" }}>Áp dụng</button>
               </div>
 
               <div className="mb-4">
                 <h6 className="mb-2">Mã giảm giá</h6>
-                <small className="text-muted">Áp dụng tối đa: 1</small>
+                <small className="text-muted" >Áp dụng tối đa: 1</small>
 
-                {promotions && promotions.length > 0 ? (
-                  promotions.map((promotion) => (
+                {availablePromotions && availablePromotions.length > 0 ? (
+                  availablePromotions.map((promotion) => (
                     <PromoItemComponent
                       key={promotion._id}
                       value={promotion.value.toLocaleString()}
@@ -464,13 +480,13 @@ const OrderPage = () => {
 
   const getDetailPromotion = async (selectedPromotion) => {
     const res = await PromotionService.getDetailPromotion(selectedPromotion);
-    return res.data; 
+    return res.data;
   };
 
   const { isLoading: isLoadingDetailPromo, data: detailPromo } = useQuery({
-    queryKey: ['detailPromo', selectedPromotion], 
-    queryFn: () => getDetailPromotion(selectedPromotion), 
-    enabled: !!selectedPromotion, 
+    queryKey: ['detailPromo', selectedPromotion],
+    queryFn: () => getDetailPromotion(selectedPromotion),
+    enabled: !!selectedPromotion,
   });
 
 
@@ -478,7 +494,7 @@ const OrderPage = () => {
   const promotionInfo = (
     <div>
       <ButtonComponent2 textButton="Chọn mã khuyến mãi" onClick={openModal} />
-      <p style={{fontSize:'16px'}}>
+      <p style={{ fontSize: '16px' }}>
         Khuyến mãi bạn đã chọn: {detailPromo?.value ? `${detailPromo.value.toLocaleString()} ₫` : 'Chưa chọn mã nào'}
       </p>
       <PromoSelectionPage isOpen={isModalOpen} closeModal={closeModal} />
@@ -489,30 +505,32 @@ const OrderPage = () => {
   const deliveryFee = shop?.deliveryFee || 0;
   const navigate = useNavigate()
   const mutation = useMutationHook(data => OrderService.createOrder(data));
-  const { data, isLoading, isSuccess, isError } = mutation
+  const { data, isSuccess, isError } = mutation
+  // Trong file OrderPage.js
+
   useEffect(() => {
-    if (isSuccess && data?.status !== 'ERR') {
-      const arrayOrdered = [];
-      
-      // Sử dụng trực tiếp orderItemSelected nếu nó là một mảng
-      order?.orderItemSelected?.forEach((element) => {
-        arrayOrdered.push(element.product);
-      });
-  
-      dispatch(removeAllOrderProduct({ listChecked: arrayOrdered }));
-  
-      message.success();
-      alert('Đặt hàng thành công!');
-      navigate("/shoppingcart");
-    } else if (isError) {
-      message.error();
+    if (isSuccess && data?.status === 'OK') {
+      message.success('Đặt hàng thành công!');
+
+      const arrayOrdered = order?.orderItemSelected?.map(element => element.product) || [];
+      if (arrayOrdered.length > 0) {
+        dispatch(removeAllOrderProduct({ listChecked: arrayOrdered }));
+      }
+      const timer = setTimeout(() => {
+        navigate(`/order-detail/${newOrderId}`);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+
+    } else if (isError || (data && data.status === 'ERR')) {
+      message.error(data?.error || 'Đặt hàng thất bại, vui lòng thử lại.');
     }
-  }, [data?.status, isError, isSuccess, navigate]);
-  
-  
+
+  }, [isSuccess, isError, data, dispatch, navigate, order?.orderItemSelected]);
+
   const handleOnOrderClick = async () => {
     let a, b, c, d, e;
-  
+
     // Xử lý các giá trị địa chỉ dựa trên lựa chọn
     if (selectedOption === "default") {
       a = addressDetails.province;
@@ -525,17 +543,34 @@ const OrderPage = () => {
       c = selectedCommune;
       d = specificAddress;
     }
-  
+
     // Xử lý lựa chọn phương thức thanh toán
     if (selectedOption2 === "default") {
       e = true;
     } else if (selectedOption2 === "other") {
       e = false;
     }
-  
+
+    const cleanedOrderItems = order?.orderItemSelected?.map(item => {
+      const numericPrice = Number(String(item.price || '0').replace(/,/g, ''));
+      const numericAmount = Number(item.amount || 0);
+
+      return {
+        ...item,
+        price: numericPrice,
+        amount: numericAmount
+      };
+    }) || [];
+
+    const numericItemsPrice = Number(String(totalPrice || '0').replace(/,/g, ''));
+    const numericShippingPrice = Number(String(shop?.deliveryFee || '0').replace(/,/g, ''));
+    const numericDiscount = Number(String(detailPromo?.value || '0').replace(/,/g, ''));
+    const calculatedTotalMoney = numericItemsPrice + numericShippingPrice - numericDiscount;
+
+
     // Tạo đơn hàng mới
     const newOrder = {
-      orderItems: order?.orderItemSelected,
+      orderItems: cleanedOrderItems,
       phone: phone,
       name: name,
       specificAddress: d,
@@ -543,17 +578,17 @@ const OrderPage = () => {
       district: b,
       province: a,
       paymentMethod: e,
-      itemsPrice: totalPrice,
-      shippingPrice: shop?.deliveryFee,
-      discount: detailPromo?.value || 0,
-      totalMoney: totalPrice + shop?.deliveryFee - (detailPromo?.value || 0),
+      itemsPrice: numericItemsPrice,
+      shippingPrice: numericShippingPrice,
+      discount: numericDiscount,
+      totalMoney: calculatedTotalMoney,
       note: note,
       user: getUser?.id,
       activeNow: 'Chờ xác nhận',
     };
-  
+
     try {
-      // Kiểm tra và cập nhật khuyến mãi nếu có
+
       if (detailPromo && detailPromo._id) {
         const response = await PromotionService.updateUsedPromotion(detailPromo._id);
         console.log('Promotion updated successfully:', response);
@@ -563,18 +598,17 @@ const OrderPage = () => {
     } catch (error) {
       console.error('Error updating promotion:', error);
     }
-  
-    // Gọi mutation để tạo đơn hàng
-    console.log("Preparing to send order:", newOrder);  // Kiểm tra dữ liệu đơn hàng
-  
+
+    console.log("Preparing to send order:", newOrder);
+
     mutation.mutate(newOrder, {
       onSuccess: async (data) => {
-        console.log("Received data:", data);  // Kiểm tra phản hồi từ API
-  
+        console.log("Received data:", data);
+
         if (data?.status === 'OK' && data?.data && data.data.length > 0) {
-          const orderId = data.data[0]._id;  // Lấy ID của đơn hàng từ phần tử đầu tiên trong mảng
+          const orderId = data.data[0]._id;
           console.log("Order created with ID:", orderId);
-  
+          setNewOrderId(orderId);
           const orderActiveData = {
             order: orderId,
             activeList: [
@@ -584,12 +618,11 @@ const OrderPage = () => {
               },
             ],
           };
-  
+
           try {
-            // Gọi API để cập nhật trạng thái đơn hàng
             const response = await OrderActiveListService.createOrderActive(orderActiveData);
-            console.log(response);  // Kiểm tra phản hồi từ API
-  
+            console.log(response);
+
             if (response?.status === 'OK') {
               console.log('Order status updated successfully:', response);
             } else {
@@ -603,32 +636,42 @@ const OrderPage = () => {
         }
       },
       onError: (error) => {
-        console.error("Mutation failed:", error);  // Kiểm tra lỗi nếu mutation không thành công
+        console.error("Mutation failed:", error);
       }
     });
   };
-  
-  
+
+
 
   //card thông tin đơn hàng
 
   const orderInfo = (
     <>
-      {productDetails && productDetails.length > 0 ? (
-        productDetails.map((item, index) => (
-          order?.orderItemSelected[index] ? (
+      {order?.orderItemSelected && order.orderItemSelected.length > 0 ? (
+        order.orderItemSelected.map(selectedItem => {
+          // Tìm chi tiết sản phẩm tương ứng với sản phẩm được chọn
+          const productDetail = productDetails.find(p => p._id === selectedItem.product);
+
+          // Nếu chưa có chi tiết sản phẩm (đang tải), hiển thị thông báo
+          if (!productDetail) {
+            return <div key={selectedItem.product}>Đang tải thông tin sản phẩm...</div>;
+          }
+
+          return (
             <OrderProductComponent
-              imageSrc={item?.img}
-              name={item?.name}
-              price={order?.orderItemSelected[index].price}
-              initialQuantity={order?.orderItemSelected[index].amount}
+              key={selectedItem.product}
+              imageSrc={productDetail?.img[0]}
+              name={productDetail?.name}
+              price={selectedItem.price}
+              initialQuantity={selectedItem.amount}
             />
-          ) : null
-        ))
+          );
+        })
       ) : (
-        <p>Không có sản phẩm.</p>
+        <p>Không có sản phẩm nào trong đơn hàng.</p>
       )}
 
+      {/* Phần còn lại của card thông tin đơn hàng */}
       <svg height="20" width="100%">
         <line
           x1="0"
@@ -638,7 +681,7 @@ const OrderPage = () => {
           style={{ stroke: "#666666", strokeWidth: 1 }}
         />
       </svg>
-      <div className="card p-3" style={{fontSize:'16px'}}>
+      <div className="card p-3" style={{ fontSize: '16px' }}>
         <div className="mb-3">
           <div className="d-flex justify-content-between">
             <span>Tạm tính:</span>
@@ -646,13 +689,13 @@ const OrderPage = () => {
           </div>
           <div className="d-flex justify-content-between">
             <span>Phí vận chuyển</span>
-            <span>{shop.deliveryFee.toLocaleString()} ₫</span>
+            {/* Đảm bảo shop và deliveryFee tồn tại trước khi toLocaleString */}
+            <span>{shop?.deliveryFee?.toLocaleString() || 0} ₫</span>
           </div>
           <div className="d-flex justify-content-between">
             <span>Giảm giá</span>
             <span>{detailPromo?.value ? detailPromo.value.toLocaleString() : 0} ₫</span>
           </div>
-
         </div>
         <hr />
         <div className="d-flex justify-content-between fw-bold">
@@ -670,11 +713,11 @@ const OrderPage = () => {
 
 
   return (
-    <div style={{ backgroundColor: "#F9F6F2" }}>
+    <div style={{ backgroundColor: "#F9F6F2", padding: "30px" }}>
       <div className="container">
         <div className="row">
           <div className="col-5">
-            <div style={{ marginTop: "30px" }}>
+            <div>
               <CardComponent
                 title="Thông tin giao hàng"
                 bodyContent={info}
@@ -699,7 +742,7 @@ const OrderPage = () => {
             </div>
           </div>
 
-          <div className="col-7" style={{ marginTop: "30px" }}>
+          <div className="col-7">
             <div className="sticky-card" >
               <CardComponent
                 title="Xem lại đơn hàng"

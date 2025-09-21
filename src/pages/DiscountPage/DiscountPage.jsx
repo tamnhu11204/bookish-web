@@ -7,10 +7,10 @@ import * as ProductService from '../../services/ProductService';
 import * as PromotionService from '../../services/PromotionService';
 import PromotionTab from '../AdminPage/PromotionTab';
 import './DiscountPage.css';
+import { useNavigate } from 'react-router-dom';
 
 const DiscountCard = ({ promotion }) => {
   const { value = 0, condition = 0, finish, quantity = 100, used = 0, start } = promotion;
-
   const progress = quantity > 0 ? (used / quantity) * 100 : 0;
 
   const formatCurrency = (num) => `${num / 1000}K`;
@@ -55,6 +55,7 @@ const DiscountCard = ({ promotion }) => {
 };
 
 const DiscountPage = () => {
+  const navigate = useNavigate();
   const { data: promotions } =
     useQuery({
       queryKey: ['promotions'],
@@ -113,6 +114,10 @@ const DiscountPage = () => {
     setIsEditingBanner(false);
   };
 
+  const handleOnClickProduct = (id) => {
+    navigate(`/product-detail/${id}`);
+  }
+
   return (
     <div className="discount-page">
       <header className="discount-header text-center">
@@ -165,7 +170,22 @@ const DiscountPage = () => {
               <h4 className="section-title">SẢN PHẨM GIẢM GIÁ</h4>
               <div className="d-flex flex-wrap justify-content-center gap-3">
                 {isLoadingProducts ? (<div>Loading...</div>) : discountedProducts.length > 0 ? (
-                  discountedProducts.map((product) => (<CardProductComponent key={product._id} {...product} img={product.img?.[0] || ''} proName={product.name} currentPrice={((product.price * (100 - (product.discount || 0))) / 100).toLocaleString()} />))
+                  discountedProducts.map((product) => (
+                    <CardProductComponent
+                      key={product._id}
+                      id={product._id}
+                      img={product.img[0]}
+                      proName={product.name}
+                      currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+                      originalPrice={product.price}
+                      sold={product.sold}
+                      star={product.star}
+                      feedbackCount={product.feedbackCount}
+                      onClick={() => handleOnClickProduct(product._id)}
+                      view={product.view}
+                      stock={product.stock}
+                      discount={product.discount}
+                    />))
                 ) : (<div className="text-center">Không có sản phẩm giảm giá nào.</div>)}
               </div>
             </section>
