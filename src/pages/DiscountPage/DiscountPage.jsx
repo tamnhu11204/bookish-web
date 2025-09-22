@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import * as HomePageConfigService from '../../services/HomepageConfigService';
 import * as ProductService from '../../services/ProductService';
 import * as PromotionService from '../../services/PromotionService';
-import './DiscountPage.css'
 import PromotionTab from '../AdminPage/PromotionTab';
+import './DiscountPage.css';
+import { useNavigate } from 'react-router-dom';
 
 const DiscountCard = ({ promotion }) => {
   const { value = 0, condition = 0, finish, quantity = 100, used = 0, start } = promotion;
-
   const progress = quantity > 0 ? (used / quantity) * 100 : 0;
 
   const formatCurrency = (num) => `${num / 1000}K`;
@@ -55,27 +55,34 @@ const DiscountCard = ({ promotion }) => {
 };
 
 const DiscountPage = () => {
-  // Hooks lấy dữ liệu
-  const { data: promotions } = useQuery({ queryKey: ['promotions'], queryFn: async () => (await PromotionService.getAllPromotion()).data });
-  const { isLoading: isLoadingConfig, data: config } = useQuery({ queryKey: ['homePageConfig'], queryFn: async () => (await HomePageConfigService.getConfig()).data });
-  const { isLoading: isLoadingProducts, data: products } = useQuery({ queryKey: ['products'], queryFn: async () => (await ProductService.getAllProduct()).data });
+  const navigate = useNavigate();
+  const { data: promotions } =
+    useQuery({
+      queryKey: ['promotions'],
+      queryFn: async () => (await PromotionService.getAllPromotion()).data
+    });
+  const { isLoading: isLoadingConfig, data: config } =
+    useQuery({
+      queryKey: ['homePageConfig'],
+      queryFn: async () => (await HomePageConfigService.getConfig()).data
+    });
+  const { isLoading: isLoadingProducts, data: products } =
+    useQuery({
+      queryKey: ['products'],
+      queryFn: async () => (await ProductService.getAllProduct()).data
+    });
 
-  // Xử lý dữ liệu
   const validPromotions = promotions?.filter((p) => new Date(p.finish) > new Date()).sort((a, b) => b.value - a.value);
   const discountedProducts = products?.filter((p) => p.discount > 0) || [];
-  const currentMonth = new Date().toLocaleString('vi-VN', { month: 'long' });
 
-  // State và thông tin người dùng
   const user = useSelector(state => state.user);
   const isAdmin = user?.isAdmin === true;
   const [isEditingBanner, setIsEditingBanner] = useState(false);
   const [editBannerImage, setEditBannerImage] = useState(null);
   const queryClient = useQueryClient();
 
-  // === STATE MỚI ĐỂ QUẢN LÝ HIỂN THỊ PROMOTION TAB ===
   const [isManagingPromotions, setIsManagingPromotions] = useState(false);
 
-  // Mutation cho việc cập nhật banner
   const updateMutation = useMutation({
     mutationFn: async ({ data, token }) => HomePageConfigService.updateConfig(data, token),
     onSuccess: () => {
@@ -85,7 +92,6 @@ const DiscountPage = () => {
     onError: (error) => console.error("Lỗi khi cập nhật banner:", error)
   });
 
-  // Các hàm xử lý sự kiện
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -108,6 +114,10 @@ const DiscountPage = () => {
     setIsEditingBanner(false);
   };
 
+  const handleOnClickProduct = (id) => {
+    navigate(`/product-detail/${id}`);
+  }
+
   return (
     <div className="discount-page">
       <header className="discount-header text-center">
@@ -122,18 +132,15 @@ const DiscountPage = () => {
             </div>
           )}
         </div>
-        <h1 className="site-title">Bookish</h1>
-        <h3 className="month-title">Ưu Đãi {currentMonth} 2025</h3>
       </header>
 
       <div className='container'>
-        {/* === KHU VỰC NÚT ĐIỀU KHIỂN CỦA ADMIN === */}
         {isAdmin && (
           <div className="admin-controls">
-            <button className="edit-page-button" onClick={() => setIsEditingBanner(!isEditingBanner)}>
+            {!isEditingBanner && <button className="edit-page-button" onClick={() => setIsEditingBanner(!isEditingBanner)}>
               <i className={isEditingBanner ? "bi bi-x-circle" : "bi bi-pencil"}></i>
-              {isEditingBanner ? 'Hủy chỉnh sửa' : 'Chỉnh sửa Banner'}
-            </button>
+              Chỉnh sửa Banner
+            </button>}
 
             <button className="edit-promotion-button" onClick={() => setIsManagingPromotions(!isManagingPromotions)}>
               <i className={isManagingPromotions ? "bi bi-eye" : "bi bi-gear"}></i>
@@ -141,15 +148,12 @@ const DiscountPage = () => {
             </button>
           </div>
         )}
-
-        {/* === HIỂN THỊ CÓ ĐIỀU KIỆN GIỮA 2 GIAO DIỆN === */}
         {isManagingPromotions ? (
-          // 1. Nếu đang quản lý -> hiển thị PromotionTab
           <PromotionTab />
         ) : (
-          // 2. Nếu không -> hiển thị nội dung trang ưu đãi mặc định
           <>
             <section className="discount-section mb-5">
+              <h1 className="site-title">ƯU ĐÃI ĐẶC BIỆT ĐANG CHỜ BẠN</h1>
               <h4 className="section-title">ƯU ĐÃI</h4>
               <div className="row">
                 {validPromotions && validPromotions.length > 0 ? (
@@ -161,14 +165,27 @@ const DiscountPage = () => {
                 ) : (<div className="no-offers text-center">Hiện tại chưa có ưu đãi nào.</div>)}
               </div>
             </section>
-            <div className="special-offer-text text-center mb-5">
-              <h4>Ưu đãi đặc biệt đang chờ bạn</h4>
-            </div>
+
             <section className="discounted-products-section mb-5">
               <h4 className="section-title">SẢN PHẨM GIẢM GIÁ</h4>
               <div className="d-flex flex-wrap justify-content-center gap-3">
                 {isLoadingProducts ? (<div>Loading...</div>) : discountedProducts.length > 0 ? (
-                  discountedProducts.map((product) => (<CardProductComponent key={product._id} {...product} img={product.img?.[0] || ''} proName={product.name} currentPrice={((product.price * (100 - (product.discount || 0))) / 100).toLocaleString()} />))
+                  discountedProducts.map((product) => (
+                    <CardProductComponent
+                      key={product._id}
+                      id={product._id}
+                      img={product.img[0]}
+                      proName={product.name}
+                      currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+                      originalPrice={product.price}
+                      sold={product.sold}
+                      star={product.star}
+                      feedbackCount={product.feedbackCount}
+                      onClick={() => handleOnClickProduct(product._id)}
+                      view={product.view}
+                      stock={product.stock}
+                      discount={product.discount}
+                    />))
                 ) : (<div className="text-center">Không có sản phẩm giảm giá nào.</div>)}
               </div>
             </section>
@@ -178,7 +195,7 @@ const DiscountPage = () => {
 
       {isEditingBanner && (
         <div className="edit-actions-footer">
-          <button className="save-button" onClick={handleSubmitEdit}><i className="bi bi-check-circle"></i> Lưu Thay Đổi</button>
+          <button className="save-button" onClick={handleSubmitEdit}><i className="bi bi-check-circle"></i> Lưu</button>
           <button className="cancel-button" onClick={handleCancelEdit}><i className="bi bi-x-circle"></i> Hủy</button>
         </div>
       )}

@@ -213,15 +213,18 @@ const HomePage = () => {
       {newBooks.slice(0, 5).map((product) => (
         <CardProductComponent
           key={product._id}
-          {...product}
+          id={product._id}
           img={product.img[0]}
-          onClick={() => handleOnClickProduct(product._id)}
-          currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
           proName={product.name}
+          currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+          originalPrice={product.price}
           sold={product.sold}
           star={product.star}
           feedbackCount={product.feedbackCount}
+          onClick={() => handleOnClickProduct(product._id)}
           view={product.view}
+          stock={product.stock}
+          discount={product.discount}
         />
       ))}
       {newBooks.length > 5 && (
@@ -527,15 +530,18 @@ const HomePage = () => {
                   authorProducts?.map(product => (
                     <CardProductComponent
                       key={product._id}
-                      {...product}
+                      id={product._id}
                       img={product.img[0]}
-                      onClick={() => handleOnClickProduct(product._id)}
-                      currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
                       proName={product.name}
+                      currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+                      originalPrice={product.price}
                       sold={product.sold}
                       star={product.star}
                       feedbackCount={product.feedbackCount}
+                      onClick={() => handleOnClickProduct(product._id)}
                       view={product.view}
+                      stock={product.stock}
+                      discount={product.discount}
                     />
                   ))
                 )}
@@ -636,7 +642,7 @@ const HomePage = () => {
       {isEditing && (
         <div className="edit-actions-footer">
           <button className="save-button" onClick={handleSubmitEdit}>
-            <i className="bi bi-check-circle"></i> Lưu Thay Đổi
+            <i className="bi bi-check-circle"></i> Lưu
           </button>
           <button className="cancel-button" onClick={handleCancelEdit}>
             <i className="bi bi-x-circle"></i> Hủy

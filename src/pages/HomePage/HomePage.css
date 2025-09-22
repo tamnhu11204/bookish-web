@@ -425,7 +425,7 @@
     right: 20px;
     z-index: 1000;
     display: flex;
-    gap: 10px;
+    gap: 13px;
 }
 
 .edit-actions-footer button {
@@ -489,7 +489,7 @@
 }
 
 .inline-edit-textarea {
-    font-size: 16px;
+    font-size: 16px !important;
     min-height: 120px;
     resize: vertical;
 }

@@ -188,7 +188,11 @@ const AddProductForm = ({ isOpen, onCancel }) => {
   // --- PHẦN RENDER GIAO DIỆN (JSX) ---
   return (
     <div className="container my-4">
-      <h4>Thêm sản phẩm mới</h4>
+      <h4 style={{
+        color: "#198754",
+        fontSize: "25px",
+        fontWeight: "bold"
+      }}>Thêm sản phẩm mới</h4>
 
       <div className="row">
         {/* Hàng 1: Tên sản phẩm và nút Hủy */}

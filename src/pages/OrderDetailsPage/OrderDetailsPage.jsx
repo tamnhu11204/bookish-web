@@ -99,14 +99,14 @@ const OrderDetailsPage = () => {
     };
 
     fetchProductDetails();
-  }, [JSON.stringify(order?.orderItems)]);
+  }, [order]);
 
   const getAllOrderActive = async (id) => {
     const res = await OrderActiveListService.getAllOrderActive(id);
-    return res?.data ;
+    return res?.data;
   };
 
-  const { isLoading: isLoadingActiveList, data: activeLists } = useQuery(
+  const { data: activeLists } = useQuery(
     ["activeLists", id],
     () => getAllOrderActive(id)  // Truyền hàm vào queryFn
   );
@@ -114,6 +114,7 @@ const OrderDetailsPage = () => {
 
   return (
     <div className="container my-4">
+      <h1 className="site-title">CHI TIẾT ĐƠN HÀNG</h1>
       <div className="card shadow-sm">
         <div className="card-body">
           <h5 className="mb-4">Trạng thái: <span className="badge bg-success">{order?.activeNow}</span></h5>
@@ -137,8 +138,8 @@ const OrderDetailsPage = () => {
             </div>
           </div>
 
-          <h5 className="bg-light p-2" style={{fontSize:'16px'}}>Mã đơn: {customer.orderId}</h5>
-          <table className="table mt-3" style={{fontSize:'16px'}}>
+          <h5 className="bg-light p-2" style={{ fontSize: '16px' }}>Mã đơn: {customer.orderId}</h5>
+          <table className="table mt-3" style={{ fontSize: '16px' }}>
             <thead>
               <tr>
                 <th>Sản phẩm</th>
@@ -154,7 +155,7 @@ const OrderDetailsPage = () => {
                     <tr key={index}>
                       <td className="d-flex align-items-center">
                         <img
-                          src={item.img}
+                          src={item.img[0]}
                           alt={item.name}
                           className="img-thumbnail me-3"
                           style={{ width: "80px" }}
@@ -174,24 +175,24 @@ const OrderDetailsPage = () => {
 
           </table>
 
-          <div className="text-end" style={{fontSize:'16px'}}>
+          <div className="text-end" style={{ fontSize: '16px' }}>
             <p>Tạm tính: {order?.itemsPrice.toLocaleString()} đ</p>
             <p>Phí vận chuyển: {order?.shippingPrice.toLocaleString()} đ</p>
             <p>Giảm giá: {order?.discount.toLocaleString()} đ</p>
             <h5 className="fw-bold text-danger" style={{ fontSize: '20px' }}>Tổng tiền: {order?.totalMoney.toLocaleString()}đ</h5>
           </div>
 
-          <h5 className="bg-light p-2 mt-4" style={{fontSize:'16px'}}>Phương thức thanh toán: {paymentMethod}</h5>
-          <ul style={{fontSize:'16px'}}>
-          {activeLists && activeLists.length > 0 ? (
-            activeLists[0].activeList.map((item, index) => (
-              <li key={index}>
-                <strong>{item.active}</strong> : {new Date(item.date).toISOString().split('T')[0]}
-              </li>
-            ))
-          ) : (
-            <p>Không có trạng thái nào.</p>
-          )}
+          <h5 className="bg-light p-2 mt-4" style={{ fontSize: '16px' }}>Phương thức thanh toán: {paymentMethod}</h5>
+          <ul style={{ fontSize: '16px' }}>
+            {activeLists && activeLists.length > 0 ? (
+              activeLists[0].activeList.map((item, index) => (
+                <li key={index}>
+                  <strong>{item.active}</strong> : {new Date(item.date).toISOString().split('T')[0]}
+                </li>
+              ))
+            ) : (
+              <p>Không có trạng thái nào.</p>
+            )}
           </ul>
         </div>
       </div>

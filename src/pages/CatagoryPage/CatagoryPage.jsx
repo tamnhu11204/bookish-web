@@ -1,18 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import img1 from '../../assets/img/img1.png';
+import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 import CardComponent from '../../components/CardComponent2/CardComponent2';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
-import * as CategoryService from '../../services/CategoryService';
 import * as AuthorService from '../../services/AuthorService';
+import * as CategoryService from '../../services/CategoryService';
 import * as FormatService from '../../services/OptionService/FormatService';
 import * as LanguageService from '../../services/OptionService/LanguageService';
 import * as PublisherService from '../../services/OptionService/PublisherService';
 import * as ProductService from '../../services/ProductService';
+import CategoryTab from '../AdminPage/CategoryTab';
+import ProductTab from '../AdminPage/ProductTab';
 import './CatagoryPage.css';
-import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 
 const CatagoryPage = () => {
   const navigate = useNavigate();
@@ -26,12 +28,16 @@ const CatagoryPage = () => {
   const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 12;
+  const productsPerPage = 9;
   const [totalPages, setTotalPages] = useState(1);
   const [selectedSort, setSelectedSort] = useState('');
   const [openedCategories, setOpenedCategories] = useState([]);
   const [authorSearch, setAuthorSearch] = useState('');
+  const [isManagingPromotions, setIsManagingPromotions] = useState(false);
+  const user = useSelector(state => state.user);
+  const isAdmin = user?.isAdmin === true;
 
+  const [selectedAdminCategoryId, setSelectedAdminCategoryId] = useState(null);
   // Lấy tất cả sản phẩm
   const getAllProduct = async () => {
     try {
@@ -483,14 +489,18 @@ const CatagoryPage = () => {
         paginatedProducts.map((product) => (
           <CardProductComponent
             key={product._id}
-            img={product.img?.[0] || img1}
+            id={product._id}
+            img={product.img[0]}
             proName={product.name}
-            currentPrice={((product.price * (100 - (product.discount || 0))) / 100).toLocaleString()}
-            sold={product.sold || 0}
-            star={product.star || 0}
-            feedbackCount={product.feedbackCount || 0}
-            view={product.view || 0}
+            currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+            originalPrice={product.price}
+            sold={product.sold}
+            star={product.star}
+            feedbackCount={product.feedbackCount}
             onClick={() => handleOnClickProduct(product._id)}
+            view={product.view}
+            stock={product.stock}
+            discount={product.discount}
           />
         ))
       ) : (
@@ -602,185 +612,208 @@ const CatagoryPage = () => {
   return (
     <div style={{ backgroundColor: '#F9F6F2' }}>
       <div className="container">
-        <div className="row">
-          <div className="col-3">
-            <div className="card-catagory">
-              {selectedFiltersDisplay}
-              {selectedCategories.length + selectedPriceRanges.length + selectedAuthors.length + selectedPublishers.length + selectedLanguages.length + selectedFormats.length === 0 && (
-                <span className="text-muted">Chưa chọn bộ lọc nào</span>
-              )}
-              <div className="card-header-catagory">DANH MỤC SẢN PHẨM</div>
-              <div className="list-check">
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="selectAllCategories"
-                    checked={selectAllCategories}
-                    onChange={handleSelectAllCategoriesChange}
-                  />
-                  <label className="form-check-label" htmlFor="selectAllCategories">
-                    Tất cả
-                  </label>
-                </div>
-                {isLoadingCategory ? (
-                  <LoadingComponent />
-                ) : categoryTree?.length > 0 ? (
-                  renderCategoryTree(categoryTree)
-                ) : (
-                  <p>Không có danh mục nào để hiển thị.</p>
-                )}
-              </div>
-              <hr className="line" />
-              <div className="card-header-catagory">GIÁ</div>
-              <div className="list-check">
-                {[
-                  { id: 'price1', range: [0, 100000], label: '0đ - 100.000đ' },
-                  { id: 'price2', range: [100000, 200000], label: '100.000đ - 200.000đ' },
-                  { id: 'price3', range: [200000, 300000], label: '200.000đ - 300.000đ' },
-                  { id: 'price4', range: [300000, 400000], label: '300.000đ - 400.000đ' },
-                  { id: 'price5', range: [400000, 500000], label: '400.000đ - 500.000đ' },
-                  { id: 'price6', range: [500000, Infinity], label: '500.000đ - trở lên' }
-                ].map(({ id, range, label }) => {
-                  const rangeStr = `${range[0]}-${range[1] === Infinity ? 'Infinity' : range[1]}`;
-                  return (
-                    <div className="form-check" key={id}>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id={id}
-                        onChange={() => handlePriceRangeChange(range)}
-                        checked={selectedPriceRanges.includes(rangeStr)}
-                      />
-                      <label className="form-check-label" htmlFor={id}>
-                        {label}
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
-              <hr className="line" />
-              <div className="card-header-catagory">TÁC GIẢ</div>
-              <input
-                type="text"
-                className="form-control mb-2"
-                placeholder="Tìm kiếm tác giả..."
-                value={authorSearch}
-                onChange={(e) => setAuthorSearch(e.target.value)}
+        {isAdmin && (
+          <div className="admin-controls">
+            <button className="edit-page-button" onClick={() => setIsManagingPromotions(!isManagingPromotions)}>
+              <i className={isManagingPromotions ? "bi bi-eye" : "bi bi-gear"}></i>
+              {isManagingPromotions ? 'Xem trang danh mục' : 'Quản lý danh mục và sản phẩm'}
+            </button>
+          </div>
+        )}
+        {isManagingPromotions ? (
+          <div className="row">
+            <div className="col-4">
+              <CategoryTab
+                selectedCategoryIdForFilter={selectedAdminCategoryId}
+                onCategorySelect={setSelectedAdminCategoryId}
               />
-              <div className="list-check" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                {isLoadingAuthor ? (
-                  <LoadingComponent />
-                ) : filteredAuthors.length > 0 ? (
-                  filteredAuthors.map((author) => (
-                    <div className="form-check" key={author.value}>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        value={author.value}
-                        id={`author-${author.value}`}
-                        checked={selectedAuthors.includes(author.value)}
-                        onChange={() => handleAuthorChange(author.value)}
-                      />
-                      <label className="form-check-label" htmlFor={`author-${author.value}`}>
-                        {author.label}
-                      </label>
-                    </div>
-                  ))
-                ) : authorSearch ? (
-                  <p>Không tìm thấy tác giả.</p>
-                ) : (
-                  <p>Không có tác giả nào để hiển thị.</p>
-                )}
-              </div>
-              <hr className="line" />
-              <div className="card-header-catagory">NHÀ XUẤT BẢN</div>
-              <div className="list-check">
-                {isLoadingPublisher ? (
-                  <LoadingComponent />
-                ) : AllPub.length > 0 ? (
-                  AllPub.map((publisher) => (
-                    <div className="form-check" key={publisher.value}>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        value={publisher.value}
-                        id={`publisher-${publisher.value}`}
-                        checked={selectedPublishers.includes(publisher.value)}
-                        onChange={() => handlePublisherChange(publisher.value)}
-                      />
-                      <label className="form-check-label" htmlFor={`publisher-${publisher.value}`}>
-                        {publisher.label}
-                      </label>
-                    </div>
-                  ))
-                ) : (
-                  <p>Không có nhà xuất bản nào để hiển thị.</p>
-                )}
-              </div>
-              <hr className="line" />
-              <div className="card-header-catagory">NGÔN NGỮ</div>
-              <div className="list-check">
-                {isLoadingLanguage ? (
-                  <LoadingComponent />
-                ) : AllLanguages.length > 0 ? (
-                  AllLanguages.map((language) => (
-                    <div className="form-check" key={language.value}>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        value={language.value}
-                        id={`language-${language.value}`}
-                        checked={selectedLanguages.includes(language.value)}
-                        onChange={() => handleLanguageChange(language.value)}
-                      />
-                      <label className="form-check-label" htmlFor={`language-${language.value}`}>
-                        {language.label}
-                      </label>
-                    </div>
-                  ))
-                ) : (
-                  <p>Không có ngôn ngữ nào để hiển thị.</p>
-                )}
-              </div>
-              <hr className="line" />
-              <div className="card-header-catagory">HÌNH THỨC</div>
-              <div className="list-check">
-                {isLoadingFormat ? (
-                  <LoadingComponent />
-                ) : AllFormat.length > 0 ? (
-                  AllFormat.map((format) => (
-                    <div className="form-check" key={format.value}>
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        value={format.value}
-                        id={`format-${format.value}`}
-                        checked={selectedFormats.includes(format.value)}
-                        onChange={() => handleFormatChange(format.value)}
-                      />
-                      <label className="form-check-label" htmlFor={`format-${format.value}`}>
-                        {format.label}
-                      </label>
-                    </div>
-                  ))
-                ) : (
-                  <p>Không có hình thức nào để hiển thị.</p>
-                )}
-              </div>
+            </div>
+            <div className="col-8">
+              <ProductTab
+                selectedCategoryId={selectedAdminCategoryId}
+              />
             </div>
           </div>
-          <div className="col-9">
-            <div className="card-catagory">
-              <h4 style={{ marginTop: '-5px', marginBottom: "15px" }}>Sắp xếp theo:</h4>
-              {sortButtons}
-              <div style={{ backgroundColor: '#F9F6F2' }}>
-                <CardComponent bodyContent={BookInfo} />
+        ) : (
+          <div className="row">
+            <div className="col-3">
+              <div className="card-catagory">
+                {selectedFiltersDisplay}
+                {selectedCategories.length + selectedPriceRanges.length + selectedAuthors.length + selectedPublishers.length + selectedLanguages.length + selectedFormats.length === 0 && (
+                  <span className="text-muted">Chưa chọn bộ lọc nào</span>
+                )}
+                <div className="card-header-catagory">DANH MỤC SẢN PHẨM</div>
+                <div className="list-check">
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="selectAllCategories"
+                      checked={selectAllCategories}
+                      onChange={handleSelectAllCategoriesChange}
+                    />
+                    <label className="form-check-label" htmlFor="selectAllCategories">
+                      Tất cả
+                    </label>
+                  </div>
+                  {isLoadingCategory ? (
+                    <LoadingComponent />
+                  ) : categoryTree?.length > 0 ? (
+                    renderCategoryTree(categoryTree)
+                  ) : (
+                    <p>Không có danh mục nào để hiển thị.</p>
+                  )}
+                </div>
+                <hr className="line" />
+                <div className="card-header-catagory">GIÁ</div>
+                <div className="list-check">
+                  {[
+                    { id: 'price1', range: [0, 100000], label: '0đ - 100.000đ' },
+                    { id: 'price2', range: [100000, 200000], label: '100.000đ - 200.000đ' },
+                    { id: 'price3', range: [200000, 300000], label: '200.000đ - 300.000đ' },
+                    { id: 'price4', range: [300000, 400000], label: '300.000đ - 400.000đ' },
+                    { id: 'price5', range: [400000, 500000], label: '400.000đ - 500.000đ' },
+                    { id: 'price6', range: [500000, Infinity], label: '500.000đ - trở lên' }
+                  ].map(({ id, range, label }) => {
+                    const rangeStr = `${range[0]}-${range[1] === Infinity ? 'Infinity' : range[1]}`;
+                    return (
+                      <div className="form-check" key={id}>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id={id}
+                          onChange={() => handlePriceRangeChange(range)}
+                          checked={selectedPriceRanges.includes(rangeStr)}
+                        />
+                        <label className="form-check-label" htmlFor={id}>
+                          {label}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+                <hr className="line" />
+                <div className="card-header-catagory">TÁC GIẢ</div>
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Tìm kiếm tác giả..."
+                  value={authorSearch}
+                  onChange={(e) => setAuthorSearch(e.target.value)}
+                />
+                <div className="list-check" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                  {isLoadingAuthor ? (
+                    <LoadingComponent />
+                  ) : filteredAuthors.length > 0 ? (
+                    filteredAuthors.map((author) => (
+                      <div className="form-check" key={author.value}>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          value={author.value}
+                          id={`author-${author.value}`}
+                          checked={selectedAuthors.includes(author.value)}
+                          onChange={() => handleAuthorChange(author.value)}
+                        />
+                        <label className="form-check-label" htmlFor={`author-${author.value}`}>
+                          {author.label}
+                        </label>
+                      </div>
+                    ))
+                  ) : authorSearch ? (
+                    <p>Không tìm thấy tác giả.</p>
+                  ) : (
+                    <p>Không có tác giả nào để hiển thị.</p>
+                  )}
+                </div>
+                <hr className="line" />
+                <div className="card-header-catagory">NHÀ XUẤT BẢN</div>
+                <div className="list-check">
+                  {isLoadingPublisher ? (
+                    <LoadingComponent />
+                  ) : AllPub.length > 0 ? (
+                    AllPub.map((publisher) => (
+                      <div className="form-check" key={publisher.value}>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          value={publisher.value}
+                          id={`publisher-${publisher.value}`}
+                          checked={selectedPublishers.includes(publisher.value)}
+                          onChange={() => handlePublisherChange(publisher.value)}
+                        />
+                        <label className="form-check-label" htmlFor={`publisher-${publisher.value}`}>
+                          {publisher.label}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p>Không có nhà xuất bản nào để hiển thị.</p>
+                  )}
+                </div>
+                <hr className="line" />
+                <div className="card-header-catagory">NGÔN NGỮ</div>
+                <div className="list-check">
+                  {isLoadingLanguage ? (
+                    <LoadingComponent />
+                  ) : AllLanguages.length > 0 ? (
+                    AllLanguages.map((language) => (
+                      <div className="form-check" key={language.value}>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          value={language.value}
+                          id={`language-${language.value}`}
+                          checked={selectedLanguages.includes(language.value)}
+                          onChange={() => handleLanguageChange(language.value)}
+                        />
+                        <label className="form-check-label" htmlFor={`language-${language.value}`}>
+                          {language.label}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p>Không có ngôn ngữ nào để hiển thị.</p>
+                  )}
+                </div>
+                <hr className="line" />
+                <div className="card-header-catagory">HÌNH THỨC</div>
+                <div className="list-check">
+                  {isLoadingFormat ? (
+                    <LoadingComponent />
+                  ) : AllFormat.length > 0 ? (
+                    AllFormat.map((format) => (
+                      <div className="form-check" key={format.value}>
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          value={format.value}
+                          id={`format-${format.value}`}
+                          checked={selectedFormats.includes(format.value)}
+                          onChange={() => handleFormatChange(format.value)}
+                        />
+                        <label className="form-check-label" htmlFor={`format-${format.value}`}>
+                          {format.label}
+                        </label>
+                      </div>
+                    ))
+                  ) : (
+                    <p>Không có hình thức nào để hiển thị.</p>
+                  )}
+                </div>
               </div>
-              {paginationButtons}
             </div>
-          </div>
-        </div>
+            <div className="col-9">
+              <div className="card-catagory">
+                <h4 style={{ marginTop: '-5px', marginBottom: "15px" }}>Sắp xếp theo:</h4>
+                {sortButtons}
+                <div style={{ backgroundColor: '#F9F6F2' }}>
+                  <CardComponent bodyContent={BookInfo} />
+                </div>
+                {paginationButtons}
+              </div>
+            </div>
+          </div>)}
       </div>
     </div>
   );

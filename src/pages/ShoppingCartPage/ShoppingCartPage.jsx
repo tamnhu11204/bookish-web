@@ -1,255 +1,201 @@
+import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import { decreaseAmount, increaseAmount, removeAllOrderProduct, removeOrderProduct, seletedOrder } from '../../redux/slides/OrderSlide';
 import * as ProductService from '../../services/ProductService';
-import "../ShoppingCartPage/ShoppingCartPage.css";
+import * as PromotionService from '../../services/PromotionService';
+import "./ShoppingCartPage.css";
 
 export const ShoppingCartPage = () => {
   const order = useSelector((state) => state.order);
-  const user = useSelector((state) => state.user);
-  const [productDetails, setProductDetails] = useState([]);
   const dispatch = useDispatch();
-  const [listChecked, setListChecked] = useState([]);
   const navigate = useNavigate();
+  const [productDetails, setProductDetails] = useState([]);
+  const [listChecked, setListChecked] = useState([]);
+  const [selectedPromotion, setSelectedPromotion] = useState(null);
 
   useEffect(() => {
-    const fetchProductDetails = async () => {
-      if (order && order.orderItems && order.orderItems.length > 0) {
+    const productIds = order.orderItems.map(item => item.product);
+    if (productIds.length > 0) {
+      const fetchDetails = async () => {
         try {
-          const limitedOrderItems = order.orderItems.slice(0, 20); // Giới hạn số lượng (ví dụ: 20 sản phẩm)
-          const productData = await Promise.all(
-            limitedOrderItems.map(async (item) => {
-              const productDetail = await ProductService.getDetailProduct(item.product);
-              return productDetail.data;
-            })
+          const responses = await Promise.all(
+            productIds.map(id => ProductService.getDetailProduct(id))
           );
-          setProductDetails(productData);
-        } catch (error) {
-          console.error("Error fetching product details:", error);
-        }
-      } else {
-        setProductDetails([]);
+          setProductDetails(responses.map(res => res.data));
+        } catch (error) { console.error("Lỗi khi tải chi tiết sản phẩm:", error); }
+      };
+      fetchDetails();
+    } else {
+      setProductDetails([]);
+    }
+  }, [order.orderItems]);
+
+  const { data: promotions, isLoading: isLoadingPromotions } = useQuery({
+    queryKey: ['promotions'],
+    queryFn: async () => (await PromotionService.getAllPromotion()).data,
+  });
+
+  const availablePromotions = useMemo(() => {
+    if (!promotions) return [];
+    const now = new Date();
+    return promotions.filter(promo => {
+      const startDate = new Date(promo.start);
+      const finishDate = new Date(promo.finish);
+      return now >= startDate && now <= finishDate && promo.quantity > promo.used;
+    });
+  }, [promotions]);
+
+  const priceMemo = useMemo(() => {
+    return order.orderItemSelected.reduce((total, item) => {
+      const cleanPriceString = String(item.price || '0').replace(/,/g, '');
+      const price = Number(cleanPriceString) || 0;
+      const amount = Number(item.amount) || 0;
+      return total + (price * amount);
+    }, 0);
+  }, [order.orderItemSelected]);
+
+  const finalPriceMemo = useMemo(() => {
+    if (selectedPromotion && priceMemo >= selectedPromotion.condition) {
+      const final = priceMemo - selectedPromotion.value;
+      return final > 0 ? final : 0;
+    }
+    return priceMemo;
+  }, [priceMemo, selectedPromotion]);
+
+  const handleSelectPromotion = (promo) => setSelectedPromotion(prev => (prev?._id === promo._id ? null : promo));
+
+  const handleOrder = () => {
+    if (!order.orderItemSelected?.length) return alert('Vui lòng chọn sản phẩm để thanh toán.');
+    navigate('/order', {
+      state: {
+        promotion: priceMemo >= selectedPromotion?.condition ? selectedPromotion : null
       }
-    };
-
-    fetchProductDetails();
-  }, [JSON.stringify(order?.orderItems)]);
-
-  const handleOnClickCount = ({ type, idProduct }) => {
-    if (type === 'increase') {
-      dispatch(increaseAmount({ idProduct }));
-    } else {
-      dispatch(decreaseAmount({ idProduct }));
-    }
+    });
   };
 
-  const handleOnClickDelete = ({ idProduct }) => {
-    dispatch(removeOrderProduct({ idProduct }));
+  const handleCountChange = (idProduct, type) => dispatch(type === 'increase' ? increaseAmount({ idProduct }) : decreaseAmount({ idProduct }));
+  const handleDelete = (idProduct) => dispatch(removeOrderProduct({ idProduct }));
+  const handleDeleteAll = () => dispatch(removeAllOrderProduct({ listChecked }));
+  const handleCheckAll = (e) => setListChecked(e.target.checked ? order.orderItems.map(item => item.product) : []);
+  const handleCheck = (e) => {
+    const { value, checked } = e.target;
+    setListChecked(checked ? [...listChecked, value] : listChecked.filter(item => item !== value));
   };
 
-  const handleClickCheckBox = (e) => {
-    if (listChecked.includes(e.target.value)) {
-      const newListChecked = listChecked.filter((item) => item !== e.target.value);
-      setListChecked(newListChecked);
-    } else {
-      setListChecked([...listChecked, e.target.value]);
-    }
-  };
-
-  const handleOnClickAll = (e) => {
-    if (e.target.checked) {
-      const newListChecked = [];
-      order?.orderItems?.forEach((item) => {
-        newListChecked.push(item.product);
-      });
-      setListChecked(newListChecked);
-    } else {
-      setListChecked([]);
-    }
-  };
 
   useEffect(() => {
     dispatch(seletedOrder({ listChecked }));
-  }, [listChecked]);
-
-  const handleOnClickDeleteAll = () => {
-    if (listChecked && listChecked.length > 0) {
-      dispatch(removeAllOrderProduct({ listChecked }));
-    }
-  };
-
-  const priceMemo = useMemo(() => {
-    if (!order?.orderItemSelected) return 0; // Early return if orderItemSelected is undefined
-    
-    const result = order?.orderItemSelected.reduce((totalMoney, cur) => {
-      return totalMoney + ((cur.price * cur.amount) || 0); // Ensure price or amount is not undefined
-    }, 0);
-  
-    return result;
-  }, [order]);
-
-  const handleOrder = () => {
-    if (user?.active) {
-      alert('Bạn bị admin chặn mua hàng! Hãy liên hệ với shop để biết thêm thông tin.');
-    } else if (!order?.orderItemSelected?.length) {
-      alert('Vui lòng chọn sản phẩm');
-    } else {
-      // Kiểm tra số lượng tồn kho cho từng sản phẩm được chọn
-      const outOfStockItems = order.orderItemSelected.filter((orderItem) => {
-        const productDetail = productDetails.find((product) => product._id === orderItem.product);
-        return productDetail && orderItem.amount > productDetail.stock;
-      });
-
-      if (outOfStockItems.length > 0) {
-        const errorMessages = outOfStockItems.map((item) => {
-          const productDetail = productDetails.find((product) => product._id === item.product);
-          return `${productDetail.name}: Số lượng yêu cầu (${item.amount}) vượt quá tồn kho (${productDetail.stock}).`;
-        });
-        alert(`Không thể đặt hàng:\n${errorMessages.join('\n')}`);
-      } else {
-        navigate('/order');
-      }
-    }
-  };
+  }, [listChecked, dispatch]);
 
   return (
-    <div className="container">
-      <div className="cart-page">
-        <h3 className="cart-title mb-4">Giỏ Hàng sản phẩm</h3>
+    <div className="shopping-cart-container">
+      <div className="container">
+        <h1 className="site-title">GIỎ HÀNG ({order.orderItems.length} sản phẩm)</h1>
         <div className="row">
-          {/* Cột Checkbox */}
-          <div className="col-3">
-            <input
-              type="checkbox"
-              className="me-3 mt-2"
-              onChange={handleOnClickAll}
-              checked={listChecked?.length === order?.orderItems?.length}
-            />
-            <span className="header-label flex-grow-1">Chọn tất cả</span>
-          </div>
+          {/* Cột trái: Danh sách sản phẩm */}
+          <div className="col-lg-8">
+            <div className="cart-card header-card">
+              <div className="d-flex align-items-center">
+                <input
+                  type="checkbox"
+                  onChange={handleCheckAll}
+                  checked={order.orderItems.length > 0 && listChecked.length === order.orderItems.length}
+                />
+                <span className="ms-3">Chọn tất cả ({order.orderItems.length} sản phẩm)</span>
+                <div className="ms-auto d-flex align-items-center gap-5">
+                  <span style={{ width: '200px', textAlign: 'center' }}>Số lượng</span>
+                  <span style={{ width: '90px', textAlign: 'center' }}>Thành tiền</span>
+                  <i className="bi bi-trash header-delete" onClick={handleDeleteAll}></i>
+                </div>
+              </div>
+            </div>
 
-          {/* Cột sản phẩm */}
-          <div className="col-3">
-            <span className="header-quantity text-end">Sản phẩm</span>
-          </div>
+            {order.orderItems.length > 0 ? order.orderItems.map(orderItem => {
+              const productDetail = productDetails.find(p => p._id === orderItem.product);
+              if (!productDetail) {
+                return <div key={orderItem.product} className="cart-card item-card">Đang tải thông tin sản phẩm...</div>;
+              }
 
-          {/* Cột Giá tiền */}
-          <div className="col-2">
-            <span className="header-quantity text-center">Giá tiền</span>
-          </div>
+              const cleanPrice = Number(String(orderItem.price || '0').replace(/,/g, ''));
+              const amount = Number(orderItem.amount || 0);
+              const subtotal = cleanPrice * amount;
 
-          {/* Cột Số lượng */}
-          <div className="col-2 ">
-            <span className="header-quantity text-center">Số lượng</span>
-          </div>
-
-          {/* Cột Thành tiền */}
-          <div className="col-1">
-            <span className="header-quantity text-center">Thành tiền</span>
-          </div>
-
-          <div className="col-1">
-            <button
-              type="button"
-              className="btn btn-danger"
-              onClick={() => handleOnClickDeleteAll()}
-            >
-              <i className="bi bi-trash"></i>
-            </button>
-          </div>
-
-          {/* Hiển thị danh sách sản phẩm */}
-          <div className="cart-items">
-            {productDetails && productDetails.length > 0 ? (
-              productDetails.map((item, index) => (
-                order?.orderItems[index] ? (
-                  <div className="cart-item d-flex align-items-center border-bottom py-3" key={index}>
-                    <div className="col-1">
-                      <input
-                        type="checkbox"
-                        className="me-3 mt-2"
-                        onChange={handleClickCheckBox}
-                        value={order.orderItems[index].product}
-                        checked={listChecked.includes(order.orderItems[index].product)}
-                      />
+              return (
+                <div className="cart-card item-card" key={orderItem.product}>
+                  <div className="d-flex align-items-center">
+                    <input type="checkbox" value={orderItem.product} onChange={handleCheck} checked={listChecked.includes(orderItem.product)} />
+                    <img src={productDetail.img[0]} alt={productDetail.name} className="item-image ms-3" />
+                    <div className="item-info">
+                      <p className="item-name">{productDetail.name}</p>
+                      <span className="current-price">{cleanPrice.toLocaleString()}đ</span>
+                      {productDetail.price > cleanPrice && <span className="original-price">{productDetail.price.toLocaleString()}đ</span>}
                     </div>
-
-                    <div className="col-2">
-                      <img
-                        src={item.img[0]}
-                        alt={item.name}
-                        className="item-image"
-                        style={{ width: '80px', height: '100px' }}
-                      />
+                    <div className="quantity-selector">
+                      <button onClick={() => handleCountChange(orderItem.product, 'decrease')}>-</button>
+                      <input type="text" value={orderItem.amount} readOnly />
+                      <button onClick={() => handleCountChange(orderItem.product, 'increase')}>+</button>
                     </div>
-
-                    <div className="col-3">
-                      <h5 className="mb-2">{item.name}</h5>
-                    </div>
-
-                    <div className="col-2">
-                      <p className="mb-0">{order.orderItems[index]?.price.toLocaleString()}đ</p>
-                    </div>
-
-                    <div className="col-2 d-flex align-items-center">
-                      <button
-                        type="button"
-                        className="btn btn-light"
-                        onClick={() => handleOnClickCount({ type: 'decrease', idProduct: order.orderItems[index]?.product })}
-                      >
-                        <i className="bi bi-dash"></i>
-                      </button>
-                      <input
-                        id="quantity"
-                        className="form-control"
-                        style={{ width: '30px', fontSize: '16px' }}
-                        value={order.orderItems[index]?.amount || 1}
-                        min="1"
-                        max="10"
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-light"
-                        onClick={() => handleOnClickCount({ type: 'increase', idProduct: order.orderItems[index]?.product })}
-                      >
-                        <i className="bi bi-plus"></i>
-                      </button>
-                    </div>
-
-                    <div className="col-2">
-                      <span className="total-price">
-                        {(order.orderItems[index]?.amount * order.orderItems[index]?.price || 0).toLocaleString()}đ
-                      </span>
-                    </div>
-
-                    <div className="col-1">
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => handleOnClickDelete({ idProduct: order.orderItems[index]?.product })}
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </div>
+                    <span className="subtotal">{subtotal.toLocaleString()}đ</span>
+                    <i className="bi bi-trash item-delete" onClick={() => handleDelete(orderItem.product)}></i>
                   </div>
-                ) : null
-              ))
-            ) : (
-              <p>Không có sản phẩm trong giỏ hàng.</p>
-            )}
+                </div>
+              )
+            }) : <div className="cart-card"><p>Không có sản phẩm nào trong giỏ hàng.</p></div>}
           </div>
-        </div>
 
-        {/* Phần Thanh toán */}
-        <div className="payment-section border-top pt-2">
-          <div className="d-flex justify-content-between">
-            <span>Tổng tiền:</span>
-            <span>{priceMemo.toLocaleString()}đ</span>
-          </div>
-          <div style={{ marginBottom: '30px', marginTop: '20px' }}>
-            <ButtonComponent textButton="Đặt hàng" onClick={handleOrder} />
+          {/* Cột phải: Khuyến mãi và thanh toán */}
+          <div className="col-lg-4">
+            <div className="cart-card promotion-card">
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0"><i className="bi bi-ticket-perforated me-2"></i>KHUYẾN MÃI</h5>
+                <a href="/discount" className="see-more">Xem thêm &gt;</a>
+              </div>
+              {isLoadingPromotions ? <p>Đang tải khuyến mãi...</p> :
+                availablePromotions.map(promo => {
+                  const isApplicable = priceMemo >= promo.condition;
+                  return (
+                    <div className="promotion-item" key={promo._id}>
+                      <p className="promo-title">{promo.name}</p>
+                      <p className="promo-details">Điều kiện: Đơn hàng từ {promo.condition.toLocaleString()}đ</p>
+                      <p className="promo-details">HSD: {new Date(promo.finish).toLocaleDateString('vi-VN')}</p>
+                      <button
+                        className={`btn ${selectedPromotion?._id === promo._id ? 'btn-success' : 'btn-primary'} w-100`}
+                        onClick={() => handleSelectPromotion(promo)}
+                        disabled={!isApplicable}
+                      >
+                        {selectedPromotion?._id === promo._id ? 'Bỏ chọn' : 'Áp dụng'}
+                      </button>
+                    </div>
+                  )
+                })
+              }
+            </div>
+
+            <div className="cart-card checkout-card">
+              <div className="d-flex justify-content-between">
+                <span>Thành tiền</span>
+                <span>{priceMemo.toLocaleString()}đ</span>
+              </div>
+              {selectedPromotion && priceMemo >= selectedPromotion.condition && (
+                <div className="d-flex justify-content-between text-danger">
+                  <span>Giảm giá</span>
+                  <span>-{selectedPromotion.value.toLocaleString()}đ</span>
+                </div>
+              )}
+              <hr />
+              <div className="d-flex justify-content-between fw-bold">
+                <span>Tổng Số Tiền</span>
+                <span className="final-price">{finalPriceMemo.toLocaleString()}đ</span>
+              </div>
+              <ButtonComponent
+                textButton="THANH TOÁN"
+                onClick={handleOrder}
+                disabled={!order.orderItemSelected.length}
+              />
+            </div>
           </div>
         </div>
       </div>

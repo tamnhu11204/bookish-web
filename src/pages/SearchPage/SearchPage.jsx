@@ -1,20 +1,15 @@
-import React, { useMemo, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
-import './SearchPage.css'
-import SliderComponent from '../../components/SliderComponent/SliderComponent'
-import img1 from '../../assets/img/img1.png'
-import img2 from '../../assets/img/img2.png'
-import CardProductComponent from '../../components/CardProductComponent2/CardProductComponent2'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import CardComponent from '../../components/CardComponent2/CardComponent2'
-import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
+import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent"
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent'
-import MiniCardComponent from '../../components/MiniCardComponent/MiniCardComponent'
+import * as CategoryService from '../../services/CategoryService'
+import * as FormatService from "../../services/OptionService/FormatService"
 import * as PublisherService from '../../services/OptionService/PublisherService'
 import * as ProductService from '../../services/ProductService'
-import * as CategoryService from '../../services/CategoryService'
-import * as FormatService from "../../services/OptionService/FormatService";
-import { useLocation } from 'react-router-dom';
+import './SearchPage.css'
+import CardProductComponent from '../../components/CardProductComponent/CardProductComponent'
 
 
 const SearchPage = () => {
@@ -61,7 +56,7 @@ const SearchPage = () => {
   };
 
 
-  const { isLoading: isLoadingCategory, data: categories } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: getAllCategory,
 
@@ -80,7 +75,7 @@ const SearchPage = () => {
   };
 
 
-  const { isLoading: isLoadingPublisher, data: publishers } = useQuery({
+  const { data: publishers } = useQuery({
     queryKey: ['publishers'],
     queryFn: getAllPublisher,
 
@@ -100,7 +95,7 @@ const SearchPage = () => {
   };
 
 
-  const { isLoading: isLoadingFormat, data: formats } = useQuery({
+  const { data: formats } = useQuery({
     queryKey: ['formats'],
     queryFn: getAllFormat,
 
@@ -269,7 +264,7 @@ const SearchPage = () => {
       )}
     </div>
   );
-  const startIndex = (currentPage - 1) * productsPerPage;
+  // const startIndex = (currentPage - 1) * productsPerPage;
   const paginatedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * productsPerPage;
     return filteredProducts.slice(startIndex, startIndex + productsPerPage);
@@ -283,13 +278,18 @@ const SearchPage = () => {
           paginatedProducts.map((product) => (
             <CardProductComponent
               key={product._id}
+              id={product._id}
               img={product.img[0]}
               proName={product.name}
               currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+              originalPrice={product.price}
               sold={product.sold}
               star={product.star}
               feedbackCount={product.feedbackCount}
               onClick={() => handleOnClickProduct(product._id)}
+              view={product.view}
+              stock={product.stock}
+              discount={product.discount}
             />
           ))
         ) : (
@@ -459,7 +459,7 @@ const SearchPage = () => {
                   </label>                                </div>
               </div>
               {/* Phần chọn giá */}
-              <div className="price-filter" style={{ fontSize: '16px', padding:'0 10px' }}>
+              <div className="price-filter" style={{ fontSize: '16px', padding: '0 10px' }}>
 
                 <div className="card-header-catagory">Hoặc tự chọn mức giá</div>
                 <div className="d-flex gap-2 mb-2">
@@ -530,8 +530,8 @@ const SearchPage = () => {
           </div>
 
           <div className="col-9" >
-            <div className="card-catagory" style={{ fontSize: '16px', padding:'0 10px'}}>
-              <h1  style={{marginTop:'10px' }}>Kết quả tìm kiếm cho: "{searchTerm}"</h1>
+            <div className="card-catagory" style={{ fontSize: '16px', padding: '0 10px' }}>
+              <h1 style={{ marginTop: '10px' }}>Kết quả tìm kiếm cho: "{searchTerm}"</h1>
               <h4>   Sắp xếp theo : </h4>
               <div className="col-md-4 mb-3">
 

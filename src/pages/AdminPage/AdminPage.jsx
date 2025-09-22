@@ -67,7 +67,7 @@ const AdminPage = () => {
                         </div>
                     </button>
 
-                    <button
+                    {/* <button
                         className={`nav-link ${activeTab === 'productManagement' ? 'active' : ''}`}
                         onClick={() => handleTabChange('productManagement')}
                     >
@@ -85,7 +85,7 @@ const AdminPage = () => {
                             <div className="col-1"><i className="bi-nav bi-ui-checks-grid"></i></div>
                             <div className="col"><p className="nav-title">Quản lý danh mục</p></div>
                         </div>
-                    </button>
+                    </button> */}
 
                     <button
                         className={`nav-link ${activeTab === 'promotionManagement' ? 'active' : ''}`}
