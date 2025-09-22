@@ -8,7 +8,7 @@ import * as ProductService from '../../services/ProductService';
 import * as ImportService from '../../services/ImportService';
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as message from "../../components/MessageComponent/MessageComponent";
-import ConfirmAddItemModal from '../../components/AddItemComponent/AddItem'; // Import modal mới
+import ConfirmAddItemModal from '../../components/AddItemComponent/AddItem';
 
 const AddImport = ({ isOpen, type, onCancel }) => {
   const [supplier, setSupplier] = useState("");
@@ -17,8 +17,8 @@ const AddImport = ({ isOpen, type, onCancel }) => {
   const [importPrice, setImportPrice] = useState("");
   const [quantity, setQuantity] = useState("");
   const [importItems, setImportItems] = useState([]);
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // Trạng thái hiển thị modal xác nhận
-  const [pendingItem, setPendingItem] = useState(null); // Lưu thông tin sản phẩm đang chờ xác nhận
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingItem, setPendingItem] = useState(null);
 
   const handleOnChangeDate = (value) => setOrderDate(value);
   const handleOnChangeImportPrice = (value) => setImportPrice(value);
@@ -61,6 +61,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
   const productOptions = products.map((product) => ({
     value: product._id,
     label: product.name,
+    image: Array.isArray(product.img) ? product.img[0] : product.img || 'https://placehold.co/40x40', // Thêm ảnh sản phẩm cho dropdown
   }));
 
   const handleProductChange = (e) => {
@@ -85,7 +86,6 @@ const AddImport = ({ isOpen, type, onCancel }) => {
     const product = products.find((p) => p._id === selectedProduct);
     if (!product) return;
 
-    // Lưu thông tin sản phẩm vào pendingItem và hiển thị modal xác nhận
     const newItem = {
       id: product._id,
       code: product.code,
@@ -94,13 +94,12 @@ const AddImport = ({ isOpen, type, onCancel }) => {
       priceImport: price,
       quantity: qty,
       image: Array.isArray(product.img) ? product.img[0] : product.img || 'https://placehold.co/80x80',
-      stock: product.stock, // Lưu số lượng tồn kho
+      stock: product.stock,
     };
     setPendingItem(newItem);
     setShowConfirmModal(true);
   };
 
-  // Xác nhận thêm sản phẩm
   const handleConfirmAddItem = () => {
     if (pendingItem) {
       setImportItems([...importItems, pendingItem]);
@@ -112,7 +111,6 @@ const AddImport = ({ isOpen, type, onCancel }) => {
     setPendingItem(null);
   };
 
-  // Hủy bỏ thêm sản phẩm
   const handleCancelAddItem = () => {
     setShowConfirmModal(false);
     setPendingItem(null);
@@ -183,7 +181,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
           <div className="mb-3">
             <FormSelectComponent
               label="Nhà cung cấp"
-              placeholder={"Chọn nhà cung cấp"}
+              placeholder="Chọn nhà cung cấp"
               options={AllSupplier}
               selectedValue={selectedSupplier}
               onChange={handleOnChangeSupplier}
@@ -265,7 +263,6 @@ const AddImport = ({ isOpen, type, onCancel }) => {
 
       <hr />
 
-      
       <table className="table table-bordered">
         <thead>
           <tr className="table-success">
@@ -284,11 +281,11 @@ const AddImport = ({ isOpen, type, onCancel }) => {
             <tr key={index}>
               <td>{item.code}</td>
               <td>
-              <img
-                        src={item.image}
-                        alt={item.name}
-                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                      />
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                />
               </td>
               <td>{item.name}</td>
               <td>{item.priceOriginal.toLocaleString()}đ</td>
@@ -320,7 +317,6 @@ const AddImport = ({ isOpen, type, onCancel }) => {
         <ButtonComponent textButton="Hủy bỏ" onClick={onCancel} />
       </div>
 
-      {/* Modal xác nhận thêm sản phẩm */}
       <ConfirmAddItemModal
         isOpen={showConfirmModal}
         product={pendingItem}

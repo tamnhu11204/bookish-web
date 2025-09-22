@@ -1,0 +1,208 @@
+.news-page {
+  margin-top: 30px;
+}
+
+.page-title {
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #1a3d2f;
+}
+
+.sidebar {
+  padding-right: 20px;
+}
+
+.sidebar-section {
+  margin-bottom: 30px;
+}
+
+.sidebar-section h5 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #222;
+}
+
+.category-list {
+  list-style: none;
+  padding: 0;
+}
+
+.category-item {
+  font-size: 16px;
+  margin: 8px 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  color: #333;
+}
+
+.category-item:hover {
+  color: #d32f2f;
+}
+
+.promotion-list {
+  list-style: none;
+  padding: 0;
+}
+
+.promotion-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.promotion-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.promo-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.promo-date {
+  font-size: 12px;
+  color: #777;
+}
+
+.news-detail {
+  max-width: 800px;
+}
+
+.news-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.news-meta {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.news-summary {
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.news-content {
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.news-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.news-create-page {
+  max-width: 1000px; /* Tăng chiều rộng so với NewsDetail */
+  margin: 0 auto;
+  padding: 40px 20px; /* Tăng padding cho rộng rãi */
+}
+
+.page-title {
+  font-size: 2.5rem; /* Tăng font so với NewsDetail (2rem) */
+  margin-bottom: 30px;
+  color: #333;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 30px; /* Tăng khoảng cách */
+}
+
+.form-label {
+  font-size: 1.2rem; /* Tăng font cho rõ ràng */
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 12px; /* Tăng padding cho input */
+  border: 1px solid #ddd;
+  border-radius: 6px; /* Tăng border-radius */
+  font-size: 1.1rem; /* Tăng font */
+  color: #333;
+  line-height: 1.6;
+}
+
+.form-textarea {
+  min-height: 120px; /* Tăng chiều cao textarea */
+  resize: vertical;
+}
+
+.summary-textarea {
+  min-height: 100px;
+}
+
+.segment-container {
+  border: 1px solid #eee;
+  padding: 20px; /* Tăng padding */
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.btn {
+  padding: 10px 20px; /* Tăng kích thước nút */
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  border: none;
+}
+
+.btn-save {
+  background: #28a745;
+  color: white;
+}
+
+.btn-cancel {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-add-segment {
+  background: #6c757d;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.btn-remove-segment {
+  background: #dc3545;
+  color: white;
+  margin-top: 15px;
+}
+
+.image-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-note {
+  font-size: 1rem;
+  color: #666;
+  margin-top: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 40px;
+}

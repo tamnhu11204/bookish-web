@@ -1,0 +1,502 @@
+.import-tab-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.title-section {
+    margin-bottom: 20px;
+}
+
+.title-section h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a5276;
+    margin: 0;
+}
+
+.action-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.action-section .form-component {
+    flex: 1;
+    min-width: 200px;
+}
+
+.action-section input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.action-section input[type="text"]:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.button-component {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.button-component i {
+    margin-right: 8px;
+}
+
+.button-component:hover {
+    transform: translateY(-2px);
+}
+
+.excel-button {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.excel-button:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+}
+
+.excel-button i {
+    margin-right: 8px;
+}
+
+.table-section {
+    overflow-x: auto;
+}
+
+.import-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.import-table th,
+.import-table td {
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 15px;
+    color: #374151;
+}
+
+.import-table th {
+    background: #e6f3fa;
+    font-weight: 600;
+}
+
+.import-table tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.import-table tr:hover {
+    background: #f9fafb;
+}
+
+.supplier-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.view-btn {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.view-btn:hover {
+    background: #1e40af;
+}
+
+.delete-btn {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.delete-btn:hover {
+    background: #b91c1c;
+}
+
+.text-center {
+    text-align: center;
+    color: #6b7280;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .action-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .button-group {
+        justify-content: flex-end;
+    }
+}
+
+.import-tab-container, .add-import-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.title-section {
+    margin-bottom: 20px;
+}
+
+.title-section h3, .modal-header h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a5276;
+    margin: 0;
+}
+
+.action-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.action-section .form-component {
+    flex: 1;
+    min-width: 200px;
+}
+
+.action-section input[type="text"], .form-component input, .form-component select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.action-section input[type="text"]:focus, .form-component input:focus, .form-component select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.button-component {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.button-component i {
+    margin-right: 8px;
+}
+
+.button-component:hover {
+    transform: translateY(-2px);
+}
+
+.excel-button {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.excel-button:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+}
+
+.excel-button i {
+    margin-right: 8px;
+}
+
+.table-section {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.import-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.import-table th, .import-table td {
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 15px;
+    color: #374151;
+}
+
+.import-table th {
+    background: #e6f3fa;
+    font-weight: 600;
+}
+
+.import-table tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.import-table tr:hover {
+    background: #f9fafb;
+}
+
+.supplier-img, .product-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.view-btn {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.view-btn:hover {
+    background: #1e40af;
+}
+
+.delete-btn {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.delete-btn:hover {
+    background: #b91c1c;
+}
+
+.text-center {
+    text-align: center;
+    color: #6b7280;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    max-width: 1000px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: #374151;
+}
+
+.modal-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-info p {
+    margin: 8px 0;
+    font-size: 15px;
+    color: #374151;
+}
+
+.modal-info strong {
+    color: #1a5276;
+}
+
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-group label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-group-button {
+    display: flex;
+    align-items: flex-end;
+}
+
+.add-button {
+    width: 100%;
+    padding: 12px;
+    background: #16a34a;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.add-button:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 20px 0;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+
+    .action-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .button-group {
+        justify-content: flex-end;
+    }
+}

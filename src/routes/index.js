@@ -25,6 +25,9 @@ import EnterNewPassword from "../pages/ForgotPasswordPage/EnterNewPassword";
 import AdminChatPage from "../pages/AdminChat/AdminChatPage";
 import ReviewFeedbackChatbot from "../pages/ReviewFeedbackChatbot/ReviewFeedbackChatbot";
 import FavoriteProducts from "../pages/ProfilePage/ProductTab";
+import NewsPage from "../pages/NewsPage/NewsPage";
+import NewsDetail from "../pages/NewsPage/NewDetail";
+import NewsCreatePage from "../pages/NewsPage/NewsCreatePage";
 
 export const routes = [
     {
@@ -158,5 +161,26 @@ export const routes = [
         path: '/admin-profile',
         page: AccountTab,
         isPrivate: true,
+    },
+    {
+        path: '/news',
+        page: NewsPage,
+        isShowHeader: true,
+    },
+     {
+        path: '/news/:id',
+        page: NewsDetail,
+        isShowHeader: true,
+    },
+    {
+        path: '/news/create',
+        page: NewsCreatePage,
+        isShowHeader: true,
+    },
+
+    {
+        path: '/news/edit/:id',
+        page: NewsCreatePage,
+        isShowHeader: true,
     },
 ];

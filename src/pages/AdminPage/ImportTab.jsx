@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import './AdminPage.css';
+import { useMutationHook } from "../../hooks/useMutationHook";
+import * as ImportService from '../../services/ImportService';
+import * as message from "../../components/MessageComponent/MessageComponent";
 import FormComponent from '../../components/FormComponent/FormComponent';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import ImportDetails from './ImportDetailTab';
 import AddImport from './AddImportTab';
-import DeleteImportModal from './DeleteImportModal'; // Import modal mới
-import * as ImportService from '../../services/ImportService';
-import * as message from "../../components/MessageComponent/MessageComponent";
-import { useMutationHook } from "../../hooks/useMutationHook";
+import DeleteImportModal from './DeleteImportModal';
+import * as XLSX from 'xlsx';
+import './Import.css';
 
 const ImportTab = () => {
     const [imports, setImports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-
     const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState(null); // 'add', 'details', hoặc 'delete'
+    const [modalType, setModalType] = useState(null);
     const [selectedImportId, setSelectedImportId] = useState(null);
-    const [selectedImportData, setSelectedImportData] = useState(null); // Dữ liệu của lần nhập hàng được chọn để xóa
+    const [selectedImportData, setSelectedImportData] = useState(null);
 
-    // Lấy danh sách nhập hàng từ backend
+    // Lấy danh sách nhập hàng
     useEffect(() => {
         const fetchImports = async () => {
             try {
@@ -58,7 +58,7 @@ const ImportTab = () => {
     const mutationDelete = useMutationHook((id) => ImportService.deleteImport(id));
 
     const handleDeleteImport = (importItem) => {
-        setSelectedImportData(importItem); // Lưu dữ liệu của lần nhập hàng để hiển thị trong modal
+        setSelectedImportData(importItem);
         setModalType('delete');
         setShowModal(true);
     };
@@ -79,6 +79,51 @@ const ImportTab = () => {
         }
     };
 
+    // Xử lý nhập từ Excel
+    const handleImportExcel = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                // Kiểm tra cấu trúc Excel
+                if (!jsonData.length || !jsonData[0].productId || !jsonData[0].quantity || !jsonData[0].importPrice) {
+                    message.error('File Excel không đúng định dạng! Cần cột: productId, name, quantity, importPrice, imageUrl.');
+                    return;
+                }
+
+                // Chuẩn bị FormData
+                const fd = new FormData();
+                fd.append('products', JSON.stringify(jsonData));
+                fd.append('importDate', new Date().toISOString());
+                // Giả định supplier mặc định hoặc lấy từ form khác
+                fd.append('supplier', JSON.stringify({ name: 'Default Supplier', img: '' }));
+
+                try {
+                    const response = await ImportService.createImport(fd);
+                    if (response.status === 'OK') {
+                        message.success('Nhập hàng từ Excel thành công!');
+                        setImports([...imports, response.data]);
+                    } else {
+                        message.error('Có lỗi khi nhập hàng từ Excel!');
+                    }
+                } catch (error) {
+                    message.error('Lỗi khi nhập hàng từ Excel: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        } catch (error) {
+            message.error('Lỗi khi đọc file Excel: ' + error.message);
+        }
+    };
+
     const handleSearchChange = (value) => {
         setSearchTerm(value);
     };
@@ -89,46 +134,55 @@ const ImportTab = () => {
     );
 
     if (showModal === false) return (
-        <div style={{ padding: '0 20px' }}>
+        <div className="import-tab-container">
             <div className="title-section">
-                <h3 className="text mb-0">LỊCH SỬ NHẬP HÀNG</h3>
+                <h3>LỊCH SỬ NHẬP HÀNG</h3>
             </div>
 
-            <div className="content-section" style={{ marginTop: '30px' }}>
-                <div className="row align-items-center mb-3">
-                    <div className="col-6">
-                        <FormComponent
-                            id="searchInput"
-                            type="text"
-                            placeholder="Tìm kiếm theo thời gian hoặc nhà cung cấp"
-                            enable={true}
-                            onChange={handleSearchChange}
+            <div className="action-section">
+                <FormComponent
+                    id="searchInput"
+                    type="text"
+                    placeholder="Tìm kiếm theo thời gian hoặc nhà cung cấp"
+                    enable={true}
+                    onChange={handleSearchChange}
+                />
+                <div className="button-group">
+                    <ButtonComponent
+                        textButton="Nhập hàng"
+                        icon={<i className="bi bi-plus-circle"></i>}
+                        onClick={handleAddImport}
+                    />
+                    <label className="excel-button">
+                        <i className="bi bi-file-earmark-excel"></i> Nhập từ Excel
+                        <input
+                            type="file"
+                            accept=".xlsx,.xls"
+                            onChange={handleImportExcel}
+                            hidden
                         />
-                    </div>
-                    <div className="col-6 text-end">
-                        <ButtonComponent
-                            textButton="Nhập hàng"
-                            icon={<i className="bi bi-plus-circle"></i>}
-                            onClick={handleAddImport}
-                        />
-                    </div>
+                    </label>
                 </div>
+            </div>
 
-                <table className="table custom-table" style={{ marginTop: '30px' }}>
-                    <thead className="table-light">
+            <div className="table-section">
+                <table className="import-table">
+                    <thead>
                         <tr>
-                            <th scope="col" style={{ width: '10%' }}>Mã</th>
-                            <th scope="col" style={{ width: '15%' }}>Hình ảnh</th>
-                            <th scope="col" style={{ width: '20%' }}>Nhà cung cấp</th>
-                            <th scope="col" style={{ width: '30%' }}>Ngày nhập hàng</th>
-                            <th scope="col" style={{ width: '15%' }}>Tổng số tiền</th>
-                            <th scope="col" style={{ width: '10%' }}>Hành động</th>
+                            <th>Mã</th>
+                            <th>Hình ảnh</th>
+                            <th>Nhà cung cấp</th>
+                            <th>Ngày nhập hàng</th>
+                            <th>Tổng số tiền</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
-                    <tbody className="table-content">
+                    <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan="6" className="text-center">Đang tải...</td>
+                                <td colSpan="6" className="text-center">
+                                    <div className="spinner"></div>
+                                </td>
                             </tr>
                         ) : filteredImports.length > 0 ? (
                             filteredImports.map((importItem) => (
@@ -138,7 +192,7 @@ const ImportTab = () => {
                                         <img
                                             src={importItem.supplier?.img || 'https://placehold.co/50x50'}
                                             alt={importItem.supplier?.name || 'Nhập hàng'}
-                                            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                            className="supplier-img"
                                         />
                                     </td>
                                     <td>{importItem.supplier?.name || 'Không xác định'}</td>
@@ -146,13 +200,13 @@ const ImportTab = () => {
                                     <td>{importItem.totalImportPrice.toLocaleString('vi-VN')}đ</td>
                                     <td>
                                         <button
-                                            className="btn btn-sm btn-primary me-2"
+                                            className="action-btn view-btn"
                                             onClick={() => handleViewImportDetails(importItem)}
                                         >
                                             <i className="bi bi-eye"></i>
                                         </button>
                                         <button
-                                            className="btn btn-sm btn-danger"
+                                            className="action-btn delete-btn"
                                             onClick={() => handleDeleteImport(importItem)}
                                         >
                                             <i className="bi bi-trash"></i>

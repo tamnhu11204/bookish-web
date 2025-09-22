@@ -1,8 +1,9 @@
+/* Styles từ file CSS hiện có */
 .card-detail {
   background-color: #FFFFFF;
   border: 1px solid #198754;
   border-radius: 10px;
-  margin-top: 30px
+  margin-top: 30px;
 }
 
 .custom-img {
@@ -12,7 +13,6 @@
   object-fit: cover;
 }
 
-
 .card-body-detail {
   padding: 1rem;
 }
@@ -20,7 +20,7 @@
 .card-title-detail {
   font-size: 25px;
   margin-bottom: 0.75rem;
-  color: #198754
+  color: #198754;
 }
 
 .card-text-detail {
@@ -63,4 +63,129 @@
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Styles mới từ JSX */
+.page-wrapper {
+  background-color: #F9F6F2;
+}
+
+.sticky-card {
+  margin-top: 20px;
+}
+
+.card-image-container {
+  max-width: 400px;
+  margin: auto;
+}
+
+.image-nav-btn {
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.image-nav-btn:last-child {
+  right: 10px;
+  left: auto;
+}
+
+.quantity-wrapper {
+  align-items: center;
+}
+
+.quantity-label {
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 15px;
+  white-space: nowrap;
+}
+
+.quantity-control {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  overflow: hidden;
+  display: inline-flex;
+}
+
+.quantity-btn {
+  width: 40px;
+  height: 38px;
+  font-size: 16px;
+  border-radius: 0;
+}
+
+.quantity-btn:first-child {
+  border-right: none;
+}
+
+.quantity-btn:last-child {
+  border-left: none;
+}
+
+.quantity-input {
+  width: 60px;
+  height: 38px;
+  font-size: 16px;
+  border: none;
+  outline: none;
+  flex: 0 0 auto;
+}
+
+.product-card {
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+
+.favorite-btn {
+  border: none;
+  background: none;
+  padding: 0 10px;
+  height: 40px;
+}
+
+.favorite-text {
+  font-size: 18px;
+}
+
+.price-text {
+  color: red;
+  font-size: 25px;
+}
+
+.discount-badge {
+  width: fit-content;
+  font-size: 16px;
+  background-color: #E4F7CB;
+  margin-top: 5px;
+  color: #198754;
+}
+
+.original-price {
+  font-size: 16px;
+  margin-top: -20px;
+  text-decoration: line-through;
+}
+
+.stats-row {
+  font-size: 14px;
+}
+
+.stock-badge {
+  width: fit-content;
+  font-size: 14px;
+  background-color: #FFFFFF;
+  border: 1px solid #198754;
+  color: #198754;
+}
+
+.section-wrapper {
+  background-color: #F9F6F2;
+}
+
+.product-name {
+  font-size: 20px;
+  font-weight: bold;
 }
