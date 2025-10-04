@@ -17,6 +17,7 @@ const FormSelectComponent = ({
                     display: "block",
                     marginBottom: "5px",
                     fontSize: "16px",
+                    fontWeight: "600"
                 }}
             >
                 {required && <span style={{ color: "red" }}>*</span>}
@@ -30,7 +31,7 @@ const FormSelectComponent = ({
                 style={{
                     padding: "0 20px",
                     backgroundColor: "#E4F7CB",
-                    fontSize: "14px",
+                    fontSize: "16px",
                     width: "100%",
                     height: "35px",
                     border: "none",

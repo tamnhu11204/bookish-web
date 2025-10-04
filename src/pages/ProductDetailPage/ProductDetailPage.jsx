@@ -164,9 +164,9 @@ const ProductDetailPage = () => {
     { criteria: 'Nhà xuất bản', detail: publisher?.name || 'N/A' },
     {
       criteria: 'Năm xuất bản',
-detail: product?.publishDate
-  ? new Date(product.publishDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-  : 'N/A'
+      detail: product?.publishDate
+        ? new Date(product.publishDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        : 'N/A'
     },
     { criteria: 'Ngôn ngữ', detail: language?.name || 'N/A' },
     { criteria: 'Trọng lượng', detail: product?.weight || 'N/A' },
@@ -259,6 +259,10 @@ detail: product?.publishDate
     }
   };
 
+  const handleOnClickCompare = () => {
+    navigate(`/comparison/${id}`);
+  }
+
   const feedbackProduct = (
     <div>
       {feedbacks.length > 0 ? (
@@ -326,213 +330,218 @@ detail: product?.publishDate
   };
 
   return (
-  <div className="page-wrapper">
-    <div className="container">
-      <div className="row">
-        <div className="col-4">
-          <div className="sticky-card">
-            <div className="card p-3 card-image-container">
-              <div className="custom-img-container position-relative">
-                <img
-                  src={mainImage}
-                  className="custom-img"
-                  alt="Product"
-                />
-                {images.length > 1 && (
-                  <>
-                    <button
-                      className="btn btn-outline-secondary position-absolute image-nav-btn"
-                      onClick={handlePrevImage}
-                    >
-                      <i className="bi bi-chevron-left"></i>
-                    </button>
-                    <button
-                      className="btn btn-outline-secondary position-absolute image-nav-btn"
-                      onClick={handleNextImage}
-                    >
-                      <i className="bi bi-chevron-right"></i>
-                    </button>
-                  </>
-                )}
-              </div>
-              <div className="card-body text-center">
-                {images.length > 0 && (
-                  <div className="d-flex justify-content-center my-2 flex-wrap">
-                    {images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`Thumbnail ${index + 1}`}
-                        className={`img-thumbnail mx-1 ${index === currentImageIndex ? 'border border-primary' : ''}`}
-                        onClick={() => setCurrentImageIndex(index)}
-                      />
-                    ))}
-                  </div>
-                )}
-                <div className="col-10">
-                  <div className="d-flex align-items-center mt-3 quantity-wrapper">
-                    {/* Chữ Số lượng */}
-                    <strong className="quantity-label">
-                      Số lượng:
-                    </strong>
-
-                    {/* Khung điều chỉnh số lượng */}
-                    <div className="quantity-control">
-                      {/* Nút - */}
+    <div className="page-wrapper">
+      <div className="container">
+        <div className="row">
+          <div className="col-4">
+            <div className="sticky-card-pro">
+              <div className="card p-3 card-image-container">
+                <div className="custom-img-container position-relative">
+                  <img
+                    src={mainImage}
+                    className="custom-img"
+                    alt="Product"
+                  />
+                  {images.length > 1 && (
+                    <>
                       <button
-                        className="btn btn-outline-secondary d-flex align-items-center justify-content-center quantity-btn"
-                        onClick={() => setAmount((prev) => Math.max(1, prev - 1))}
+                        className="btn btn-outline-secondary position-absolute image-nav-btn"
+                        onClick={handlePrevImage}
                       >
-                        −
+                        <i className="bi bi-chevron-left"></i>
                       </button>
-
-                      {/* Ô input */}
-                      <input
-                        id="quantity"
-                        type="number"
-                        className="form-control text-center quantity-input"
-                        value={amount}
-                        min="1"
-                        max="10"
-                        onChange={(e) => {
-                          const value = Math.max(
-                            1,
-                            Math.min(10, Number(e.target.value) || 1)
-                          );
-                          setAmount(value);
-                        }}
-                      />
-
-                      {/* Nút + */}
                       <button
-                        className="btn btn-outline-secondary d-flex align-items-center justify-content-center quantity-btn"
-                        onClick={() => setAmount((prev) => Math.min(10, prev + 1))}
+                        className="btn btn-outline-secondary position-absolute image-nav-btn"
+                        onClick={handleNextImage}
                       >
-                        +
+                        <i className="bi bi-chevron-right"></i>
                       </button>
+                    </>
+                  )}
+                </div>
+                <div className="card-body text-center">
+                  {images.length > 0 && (
+                    <div className="d-flex justify-content-center my-2 flex-wrap">
+                      {images.map((image, index) => (
+                        <img
+                          key={index}
+                          src={image}
+                          alt={`Thumbnail ${index + 1}`}
+                          className={`img-thumbnail mx-1 ${index === currentImageIndex ? 'border border-primary' : ''}`}
+                          onClick={() => setCurrentImageIndex(index)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <div className="col-10">
+                    <div className="d-flex align-items-center mt-3 quantity-wrapper">
+                      {/* Chữ Số lượng */}
+                      <strong className="quantity-label">
+                        Số lượng:
+                      </strong>
+
+                      {/* Khung điều chỉnh số lượng */}
+                      <div className="quantity-control">
+                        {/* Nút - */}
+                        <button
+                          className="btnd-flex align-items-center justify-content-center quantity-btn"
+                          onClick={() => setAmount((prev) => Math.max(1, prev - 1))}
+                        >
+                          −
+                        </button>
+
+                        {/* Ô input */}
+                        <input
+                          id="quantity"
+                          type="text"
+                          className="form-control text-center quantity-input"
+                          value={amount}
+                          min="1"
+                          max="10"
+                          onChange={(e) => {
+                            const value = Math.max(
+                              1,
+                              Math.min(10, Number(e.target.value) || 1)
+                            );
+                            setAmount(value);
+                          }}
+                        />
+
+                        {/* Nút + */}
+                        <button
+                          className="btnd-flex align-items-center justify-content-center quantity-btn"
+                          onClick={() => setAmount((prev) => Math.min(10, prev + 1))}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="d-flex justify-content-between mt-3">
-                  <ButtonComponent textButton="Thêm vào giỏ hàng" onClick={handleOnAddToCart} />
+                  <div className="row" style={{ marginTop: "10px" }}>
+                    <div className="col-8 d-flex justify-content-start">
+                      <ButtonComponent textButton="Thêm vào giỏ hàng" onClick={handleOnAddToCart} />
+                    </div>
+                    <div className="col-4 d-flex justify-content-end">
+                      <ButtonComponent textButton="So sánh" onClick={handleOnClickCompare} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="col-8">
-          <div className="card p-3 mb-4 product-card">
-            <div className="card-body">
-              <div className="row">
-                <div className="col">
-                  <h5 className="card-title-detail fw-bold">{product.name}</h5>
-                </div>
-                <div className="col d-flex justify-content-end">
-                  <button
-                    className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'} d-flex align-items-center favorite-btn`}
-                    onClick={handleAddToFavorite}
-                  >
-                    <i
-                      className={`bi ${isFavorite ? 'bi-heart-fill' : 'bi-heart'}`}
-                      style={{ fontSize: '24px', color: isFavorite ? 'red' : 'red', marginRight: '8px' }}
-                    ></i>
-                    <span className="favorite-text" style={{ fontSize: '18px', color: isFavorite ? '#198754' : 'red' }}>
+          <div className="col-8">
+            <div className="card p-3 mb-4 product-card">
+              <div className="card-body">
+                <div className="row">
+                  <div className="col-10 d-flex justify-content-start">
+                    <h5 className="card-title-detail fw-bold">{product.name}</h5>
+                  </div>
+                  <div className="col-2 d-flex justify-content-end">
+                    <button
+                      className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'} d-flex align-items-center favorite-btn`}
+                      onClick={handleAddToFavorite}
+                    >
+                      <i
+                        className={`bi ${isFavorite ? 'bi-heart-fill' : 'bi-heart'}`}
+                        style={{ fontSize: '24px', color: isFavorite ? 'red' : 'red' }}
+                      ></i>
+                      {/* <span className="favorite-text" style={{ fontSize: '18px', color: isFavorite ? '#198754' : 'red' }}>
                       {isFavorite ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
-                    </span>
-                  </button>
+                    </span> */}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <p className="card-text-detail mb-2">
-                Tác giả: <strong>{author?.name || 'N/A'}</strong>
-              </p>
-              <p className="card-text-detail mb-2">
-                Nhà xuất bản: <strong>{publisher?.name || 'N/A'}</strong>
-              </p>
-              <p className="card-text-detail mb-2">
-                Nhà cung cấp: <strong>{supplier?.name || 'N/A'}</strong>
-              </p>
-              <div className="row">
-                <div className="col-4">
-                  <p className="price-text"><strong>{priceCurrent.toLocaleString()}đ</strong></p>
+                <p className="card-text-detail mb-2 d-flex justify-content-start">
+                  Tác giả:  <strong>{author?.name || 'N/A'}</strong>
+                </p>
+                <p className="card-text-detail mb-2 d-flex justify-content-start">
+                  Nhà xuất bản:  <strong>{publisher?.name || 'N/A'}</strong>
+                </p>
+                <p className="card-text-detail mb-2 d-flex justify-content-start">
+                  Nhà cung cấp:  <strong>{supplier?.name || 'N/A'}</strong>
+                </p>
+                <div className="row">
+                  <div className="col-4">
+                    <p className="price-text d-flex justify-content-start"><strong>{priceCurrent.toLocaleString()}đ</strong></p>
+                  </div>
+                  {product.discount > 0 && (
+                    <div className="col-2">
+                      <div className="badge text-wrap discount-badge">
+                        -{product.discount}%
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {product.discount > 0 && (
-                  <div className="col-2">
-                    <div className="badge text-wrap discount-badge">
-                      -{product.discount}%
-                    </div>
-                  </div>
+                  <p className="text-decoration-line-through original-price d-flex justify-content-start">
+                    {product.price.toLocaleString()}đ
+                  </p>
                 )}
-              </div>
-              {product.discount > 0 && (
-                <p className="text-decoration-line-through original-price">
-                  {product.price.toLocaleString()}đ
-                </p>
-              )}
-              <div className="mt-3 text-muted row stats-row">
-                <div className="col">
-                  <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán | {product.view} lượt xem
-                </div>
-                <div className="col d-flex justify-content-end">
-                  <div className="badge text-wrap stock-badge">
-                    Còn {product.stock} sản phẩm
+                <div className="mt-3 text-muted d-flex justify-content-start">
+                  <div className="col">
+                    <strong>{product.star}/5⭐</strong> ({product.feedbackCount} đánh giá) | {product.sold} lượt bán | {product.view} lượt xem
+                  </div>
+                  <div className="col d-flex justify-content-end">
+                    <div className="badge text-wrap stock-badge">
+                      Còn {product.stock || 0} sản phẩm
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="section-wrapper">
-            <div className="container" style={{ marginTop: '30px' }}>
-              <CardComponent title="Thông tin chi tiết" bodyContent={detailInfo} icon="bi bi-card-list" />
+            <div className="section-wrapper">
+              <div className="container" >
+                <CardComponent title="Thông tin chi tiết" bodyContent={detailInfo} icon="bi bi-card-list" />
+              </div>
             </div>
-          </div>
 
-          <div className="section-wrapper">
-            <div className="container" style={{ marginTop: '30px' }}>
-              <CardComponent
-                title="Mô tả sản phẩm"
-                icon="bi bi-blockquote-left"
-                bodyContent={
-                  <>
-                    <p className="product-name">{product.name}</p>
-                    <div className={!expanded ? "truncate-5" : ""}>
-                      {product.description ? parse(product.description) : 'Không có mô tả.'}
-                    </div>
-
-                    {product.description && (
-                      <div className="w-100 text-center mt-4">
-                        <ButtonComponent2
-                          textButton={expanded ? "Thu gọn" : "Xem thêm"}
-                          onClick={() => setExpanded(!expanded)}
-                        />
+            <div className="section-wrapper">
+              <div className="container" >
+                <CardComponent
+                  title="Mô tả sản phẩm"
+                  icon="bi bi-blockquote-left"
+                  bodyContent={
+                    <>
+                      <p className="product-name">{product.name}</p>
+                      <div className={!expanded ? "truncate-5" : ""}>
+                        {product.description ? parse(product.description) : 'Không có mô tả.'}
                       </div>
-                    )}
-                  </>
-                }/>
+
+                      {product.description && (
+                        <div className="w-100 text-center mt-4">
+                          <ButtonComponent2
+                            textButton={expanded ? "Thu gọn" : "Xem thêm"}
+                            onClick={() => setExpanded(!expanded)}
+                          />
+                        </div>
+                      )}
+                    </>
+                  } />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="row">
-        <div className="section-wrapper">
-          <div className="container" style={{ marginTop: '30px' }}>
-            <CardComponent title="Có thể bạn sẽ quan tâm" bodyContent={relatedProductInfo} icon="bi bi-bag-heart" />
+        <div className="row">
+          <div className="section-wrapper">
+            <div className="container">
+              <CardComponent title="Có thể bạn sẽ quan tâm" bodyContent={relatedProductInfo} icon="bi bi-bag-heart" />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="row">
-        <div className="section-wrapper">
-          <div className="container" style={{ marginTop: '30px', marginBottom: '30px' }}>
-            <CardComponent title="Đánh giá" bodyContent={feedbackProduct} icon="bi bi-bookmark-star" />
+        <div className="row">
+          <div className="section-wrapper">
+            <div className="container" style={{ marginTop: '30px', marginBottom: '30px' }}>
+              <CardComponent title="Đánh giá" bodyContent={feedbackProduct} icon="bi bi-bookmark-star" />
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default ProductDetailPage;

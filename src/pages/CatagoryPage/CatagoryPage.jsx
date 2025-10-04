@@ -15,6 +15,7 @@ import * as ProductService from '../../services/ProductService';
 import CategoryTab from '../AdminPage/CategoryTab';
 import ProductTab from '../AdminPage/ProductTab';
 import './CatagoryPage.css';
+import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 
 const CatagoryPage = () => {
   const navigate = useNavigate();
@@ -59,7 +60,6 @@ const CatagoryPage = () => {
   const getTreeCategory = async () => {
     try {
       const res = await CategoryService.getTreeCategory();
-      console.log('Category tree:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy danh mục:', error);
@@ -76,7 +76,6 @@ const CatagoryPage = () => {
   const getAllCategory = async () => {
     try {
       const res = await CategoryService.getAllCategory();
-      console.log('All categories:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy danh mục:', error);
@@ -100,7 +99,6 @@ const CatagoryPage = () => {
   const getAllPublisher = async () => {
     try {
       const res = await PublisherService.getAllPublisher();
-      console.log('All publishers:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy nhà xuất bản:', error);
@@ -124,7 +122,6 @@ const CatagoryPage = () => {
   const getAllAuthor = async () => {
     try {
       const res = await AuthorService.getAllAuthor();
-      console.log('All authors:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy tác giả:', error);
@@ -152,7 +149,6 @@ const CatagoryPage = () => {
   const getAllLanguage = async () => {
     try {
       const res = await LanguageService.getAllLanguage();
-      console.log('All languages:', res.data);
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy ngôn ngữ:', error);
@@ -176,7 +172,7 @@ const CatagoryPage = () => {
   const getAllFormat = async () => {
     try {
       const res = await FormatService.getAllFormat();
-      console.log('All formats:', res.data);
+
       return res.data;
     } catch (error) {
       console.error('Lỗi khi lấy hình thức:', error);
@@ -229,7 +225,6 @@ const CatagoryPage = () => {
     };
     traverse(categories);
     const result = Array.from(allIds);
-    console.log('All category IDs for filtering:', result, 'Selected:', selectedIds);
     return result;
   };
 
@@ -437,7 +432,6 @@ const CatagoryPage = () => {
         return categoryMatch && publisherMatch && authorMatch && languageMatch && formatMatch && priceMatch;
       });
 
-      console.log('Filtered products count:', filtered.length, 'Total products:', products.length);
 
       filtered = sortProducts(filtered, selectedSort);
       setTotalPages(Math.ceil(filtered.length / productsPerPage));
@@ -465,13 +459,22 @@ const CatagoryPage = () => {
           onClick={() => setCurrentPage(currentPage - 1)}
         />
       )}
-      {[...Array(totalPages)].map((_, index) => (
-        <ButtonComponent2
-          key={index}
-          textButton={String(index + 1)}
-          onClick={() => setCurrentPage(index + 1)}
-        />
-      ))}
+      {[...Array(totalPages)].map((_, index) => {
+        const pageNumber = index + 1;
+        return currentPage === pageNumber ? (
+          <ButtonComponent
+            key={pageNumber}
+            textButton={String(pageNumber)}
+            onClick={() => setCurrentPage(pageNumber)}
+          />
+        ) : (
+          <ButtonComponent2
+            key={pageNumber}
+            textButton={String(pageNumber)}
+            onClick={() => setCurrentPage(pageNumber)}
+          />
+        );
+      })}
       {currentPage < totalPages && (
         <ButtonComponent2
           textButton="Tiếp theo"

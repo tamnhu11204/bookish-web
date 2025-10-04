@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import FormComponent from '../../components/FormComponent/FormComponent';
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
@@ -190,8 +190,13 @@ const AuthorSubTab = () => {
         }
     }, [searchTerm, authors]);
 
+    const stripHtml = (html) => {
+        if (!html) return "";
+        return html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ");
+    };
+
     return (
-        <div style={{ padding: '0 20px' }}>
+        <div>
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center mb-3">
                     <div className="col-6">
@@ -241,7 +246,13 @@ const AuthorSubTab = () => {
                                         />
                                     </td>
                                     <td>{author.name.length > 20 ? author.name.slice(0, 20) + '...' : author.name}</td>
-                                    <td>{author.info && author.info.length > 30 ? author.info.slice(0, 30) + '...' : author.info || 'Không có'}</td>
+                                    <td>
+                                        {author.info
+                                            ? stripHtml(author.info).length > 30
+                                                ? stripHtml(author.info).slice(0, 30) + "..."
+                                                : stripHtml(author.info)
+                                            : "Không có"}
+                                    </td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"

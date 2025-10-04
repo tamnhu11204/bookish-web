@@ -1,0 +1,78 @@
+.profile-container {
+    margin-top: 30px;
+}
+
+.info-container {
+    margin-bottom: 30px;
+}
+
+.nav-pills {
+    width: 210px;
+    height: fit-content;
+    /* Adjust width as needed */
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Style for each navigation link/button */
+.nav-pills .nav-link {
+    background-color: transparent !important;
+    border: none;
+    padding: 12px 10px;
+    margin-bottom: 5px;
+    text-align: left;
+    width: 100%;
+    border-radius: 8px;
+    border-left: 5px solid transparent;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.nav-link .nav-title {
+    margin-top: 3px !important;
+    margin-left: 15px !important;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333333;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.nav-link .bi-nav {
+    font-size: 20px;
+    color: #555555;
+    vertical-align: middle;
+}
+
+.nav-pills .nav-link:hover {
+    background-color: #f8f9fa !important;
+}
+
+.nav-pills .nav-link.active {
+    background-color: transparent !important;
+    border-left: 5px solid #198754;
+}
+
+.nav-pills .nav-link.active .nav-title {
+
+    color: #198754;
+    font-weight: bold;
+}
+
+.nav-pills .nav-link.active .bi-nav {
+    color: #198754;
+}
+
+.nav-pills .nav-link:focus {
+    box-shadow: none;
+}
+
+.nav-link .bi.bi-bookmark-star {
+    font-size: 20px;
+    color: #555555;
+}
+
+.nav-link.active .bi.bi-bookmark-star {
+    color: #198754;
+}

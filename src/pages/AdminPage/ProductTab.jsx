@@ -93,11 +93,44 @@ const ProductTab = ({ selectedCategoryId }) => {
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-    const paginationButtons = totalPages > 1 && (
-        <div className="pagination-category d-flex justify-content-center gap-2 mt-4">
-            {currentPage > 1 && (<ButtonComponent2 textButton="Trước" onClick={() => setCurrentPage(currentPage - 1)} />)}
-            {[...Array(totalPages)].map((_, index) => (<ButtonComponent2 key={index} textButton={String(index + 1)} onClick={() => setCurrentPage(index + 1)} className={currentPage === index + 1 ? 'active' : ''} />))}
-            {currentPage < totalPages && (<ButtonComponent2 textButton="Tiếp theo" onClick={() => setCurrentPage(currentPage + 1)} />)}
+    // const paginationButtons = totalPages > 1 && (
+    //     <div className="pagination-category d-flex justify-content-center gap-2 mt-4" style={{ marginBottom: "30px" }}>
+    //         {currentPage > 1 && (<ButtonComponent2 textButton="Trước" onClick={() => setCurrentPage(currentPage - 1)} />)}
+    //         {[...Array(totalPages)].map((_, index) => (<ButtonComponent2 key={index} textButton={String(index + 1)} onClick={() => setCurrentPage(index + 1)} className={currentPage === index + 1 ? 'active' : ''} />))}
+    //         {currentPage < totalPages && (<ButtonComponent2 textButton="Tiếp theo" onClick={() => setCurrentPage(currentPage + 1)} />)}
+    //     </div>
+    // );
+
+    const paginationButtons = (
+        <div className="pagination-category d-flex justify-content-center gap-2" style={{ marginBottom: "30px" }}>
+            {currentPage > 1 && (
+                <ButtonComponent2
+                    textButton="Trước"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                />
+            )}
+            {[...Array(totalPages)].map((_, index) => {
+                const pageNumber = index + 1;
+                return currentPage === pageNumber ? (
+                    <ButtonComponent
+                        key={pageNumber}
+                        textButton={String(pageNumber)}
+                        onClick={() => setCurrentPage(pageNumber)}
+                    />
+                ) : (
+                    <ButtonComponent2
+                        key={pageNumber}
+                        textButton={String(pageNumber)}
+                        onClick={() => setCurrentPage(pageNumber)}
+                    />
+                );
+            })}
+            {currentPage < totalPages && (
+                <ButtonComponent2
+                    textButton="Tiếp theo"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                />
+            )}
         </div>
     );
 

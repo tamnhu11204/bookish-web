@@ -141,7 +141,7 @@ const UnitSubTab = () => {
 
 
     return (
-        <div style={{ padding: '0 20px' }}>
+        <div>
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center mb-3">
                     <div className="col-6">

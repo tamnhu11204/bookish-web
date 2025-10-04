@@ -22,6 +22,12 @@ import * as ShopProfileService from '../../services/ShopProfileService';
 import * as UserService from '../../services/UserService';
 import "./OrderPage.css";
 
+const CLIENT_ID = "631eca7f-30f7-442c-acb2-774ffa89c6af";
+const API_KEY = "c756fafc-09f0-4c4c-a39b-4d9adb9eebac"; // Từ vietqr.io
+const ACCOUNT_NO = "1032121879"; // Số TK nhận
+const ACCOUNT_NAME = "Bookish"; // Tên chủ TK
+const ACQ_ID = "970436"; // Mã ngân hàng (VietinBank)
+
 const OrderPage = () => {
   const order = useSelector((state) => state.order)
   const [selectedOption, setSelectedOption] = useState("default");
@@ -34,6 +40,10 @@ const OrderPage = () => {
 
   const getUser = useSelector((state) => state.user);
   const dispatch = useDispatch()
+  const [qrUrl, setQrUrl] = useState("");
+  const [transactionId, setTransactionId] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [totalAmount, setTotalAmount] = useState(0);
 
   const getAllListAddressIsDefault = async (user, token) => {
     const res = await UserService.getAllListAddressIsDefault(user, token);
@@ -208,7 +218,6 @@ const OrderPage = () => {
   };
   const handleOnChangeSpecificAddress = (value) => setSpecificAddress(value);
 
-  //
   const [productDetails, setProductDetails] = useState([]);
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -346,48 +355,6 @@ const OrderPage = () => {
     </>
   );
 
-  //card phương thức thanh toán
-  const paymentMethodInfo = (
-    <>
-      <div className="form-check mb-2">
-        <input
-          className="form-check-input"
-          type="radio"
-          name="paymentOption"
-          id="cashOnDelivery"
-          checked={selectedOption2 === "default"}
-          onChange={() => setSelectedOption2("default")}
-        />
-        <label className="form-check-label" style={{ fontSize: "16px" }}>
-          Thanh toán khi nhận hàng
-        </label>
-      </div>
-
-      <div className="form-check mb-3">
-        <input
-          className="form-check-input"
-          type="radio"
-          name="paymentOption"
-          id="bankPayment"
-          checked={selectedOption2 === "other"}
-          onChange={() => setSelectedOption2("other")}
-        />
-        <label className="form-check-label" style={{ fontSize: "16px" }}>
-          Thanh toán bằng ngân hàng
-        </label>
-      </div>
-
-      {selectedOption2 === "other" && (
-        <div className="mb-3">
-          Mã thanh toán momo
-          <img src={shop.momo} className="card-img-top" alt="QR Momo" />
-          Mã thanh toán ngân hàng
-          <img src={shop.bank} className="card-img-top" alt="QR Bank" />
-        </div>
-      )}
-    </>
-  );
-
   //card khuyến mãi
   const getAllPromotion = async () => {
     const res = await PromotionService.getAllPromotion();
@@ -483,7 +450,7 @@ const OrderPage = () => {
     return res.data;
   };
 
-  const { isLoading: isLoadingDetailPromo, data: detailPromo } = useQuery({
+  const { data: detailPromo } = useQuery({
     queryKey: ['detailPromo', selectedPromotion],
     queryFn: () => getDetailPromotion(selectedPromotion),
     enabled: !!selectedPromotion,
@@ -500,6 +467,130 @@ const OrderPage = () => {
       <PromoSelectionPage isOpen={isModalOpen} closeModal={closeModal} />
     </div>
   );
+
+  useEffect(() => {
+    const totalPrice = order?.orderItemSelected?.reduce((total, item) => {
+      const numericPrice = Number(String(item.price || '0').replace(/,/g, ''));
+      const numericAmount = Number(item.amount || 0);
+      return total + (numericPrice * numericAmount);
+    }, 0) || 0;
+
+    const deliveryFee = shop?.deliveryFee || 0;
+    const numericDiscount = Number(String(detailPromo?.value || '0').replace(/,/g, ''));
+
+    setTotalAmount(totalPrice + deliveryFee - numericDiscount);
+  }, [order?.orderItemSelected, shop?.deliveryFee, detailPromo?.value]);
+
+  // Hàm tạo mã QR VietQR
+  const generateVietQR = async () => {
+    if (!totalAmount) return;
+    setIsGenerating(true);
+    try {
+      const newTransactionId = "TXN_" + Math.random().toString(36).substr(2, 9).toUpperCase();
+      setTransactionId(newTransactionId);
+
+      const response = await fetch("https://api.vietqr.io/v2/generate", {
+        method: "POST",
+        headers: {
+          "x-client-id": CLIENT_ID,
+          "x-api-key": API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accountNo: ACCOUNT_NO,
+          accountName: ACCOUNT_NAME,
+          acqId: ACQ_ID,
+          amount: totalAmount.toString(),
+          addInfo: newTransactionId,
+          template: "compact",
+        }),
+      });
+
+      if (!response.ok) throw new Error("Lỗi tạo QR");
+      const data = await response.json();
+      if (data.code === "00") {
+        setQrUrl(data.data.qrDataURL);
+      } else {
+        throw new Error(data.desc || "Lỗi tạo QR");
+      }
+    } catch (error) {
+      console.error("Lỗi VietQR:", error);
+      alert("Không thể tạo mã QR. Vui lòng thử lại!");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Tạo QR khi chọn "Thanh toán bằng ngân hàng"
+  useEffect(() => {
+    if (selectedOption2 === "other") {
+      generateVietQR();
+    } else {
+      setQrUrl("");
+      setTransactionId("");
+    }
+  }, [selectedOption2, totalAmount]);
+
+  const paymentMethodInfo = (
+    <>
+      <div className="form-check mb-2">
+        <input
+          className="form-check-input"
+          type="radio"
+          name="paymentOption"
+          id="cashOnDelivery"
+          checked={selectedOption2 === "default"}
+          onChange={() => setSelectedOption2("default")}
+        />
+        <label className="form-check-label" style={{ fontSize: "16px" }}>
+          Thanh toán khi nhận hàng
+        </label>
+      </div>
+
+      <div className="form-check mb-3">
+        <input
+          className="form-check-input"
+          type="radio"
+          name="paymentOption"
+          id="bankPayment"
+          checked={selectedOption2 === "other"}
+          onChange={() => setSelectedOption2("other")}
+        />
+        <label className="form-check-label" style={{ fontSize: "16px" }}>
+          Thanh toán bằng ngân hàng
+        </label>
+      </div>
+
+      {selectedOption2 === "other" && (
+        <div className="mb-3">
+          <h4>Thanh toán bằng chuyển khoản ngân hàng</h4>
+          {isGenerating ? (
+            <p>Đang tạo mã QR...</p>
+          ) : qrUrl ? (
+            <div>
+              <img
+                src={qrUrl}
+                className="card-img-top"
+                alt="QR VietQR"
+                style={{ width: "500px", height: "500px" }}
+              />
+              <div style={{ fontSize: "16px", marginTop: "10px" }}>
+                <p><strong>Số tiền:</strong> {totalAmount.toLocaleString()} VND</p>
+                <p><strong>Ngân hàng:</strong> Vietcombank</p>
+                <p><strong>Số tài khoản:</strong> {ACCOUNT_NO}</p>
+                <p><strong>Tên tài khoản:</strong> {ACCOUNT_NAME}</p>
+                <p><strong>Nội dung chuyển khoản:</strong> {transactionId}</p>
+                <p><strong>Lưu ý:</strong> Quét mã QR hoặc chuyển khoản theo thông tin trên. Gửi xác nhận qua email/hotline.</p>
+              </div>
+            </div>
+          ) : (
+            <p>Lỗi tạo mã QR. Vui lòng thử lại!</p>
+          )}
+        </div>
+      )}
+    </>
+  );
+
 
   ///////////---------xử lý order------------//////////
   const deliveryFee = shop?.deliveryFee || 0;

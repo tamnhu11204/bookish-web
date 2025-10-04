@@ -20,7 +20,7 @@
 }
 
 .title-section {
-  width: 100vw;
+  /* width: 100vw; */
   background-color: #E4F7CB;
   padding: 15px;
   border-bottom: 2px solid #198754;
@@ -91,6 +91,17 @@
   padding: 5px 10px;
   transition: all 0.2s ease;
   margin-left: 5px;
+
+}
+
+.btn-cate {
+  font-size: 14px;
+  padding: 5px 10px;
+  transition: all 0.2s ease;
+  margin-left: 5px;
+  border: none;
+  border-radius: 4px;
+  color: #fff
 }
 
 .custom-table .btn-primary {
@@ -109,6 +120,26 @@
 }
 
 .custom-table .btn-danger:hover {
+  background-color: #bb2d3b;
+  border-color: #bb2d3b;
+}
+
+.btn-primary {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.btn-primary:hover {
+  background-color: #146c43;
+  border-color: #146c43;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
   background-color: #bb2d3b;
   border-color: #bb2d3b;
 }
@@ -133,6 +164,7 @@
 
 .title-profile {
   margin-top: 40px;
+  margin-bottom: 15px;
   color: #198754;
   font-size: 24px;
 }

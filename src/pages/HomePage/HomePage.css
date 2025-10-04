@@ -85,9 +85,9 @@
     fill: #198754;
 }
 
-.section-wrapper {
+/* .section-wrapper {
     padding: 50px 0;
-}
+} */
 
 .section-wrapper.green-bg {
     background-color: #198754;
@@ -635,7 +635,7 @@
 
 .author-name-below h4 {
     margin: 0;
-    font-size: 1rem;
+    /* font-size: 1rem; */
     font-weight: 600;
     color: #333;
 }

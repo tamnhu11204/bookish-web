@@ -1,23 +1,28 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
+import PieChart from "../../components/PieChartComponent/PieChartComponent";
 import * as OrderService from "../../services/OrderService";
 import * as ProductService from "../../services/ProductService";
-import PieChart from "../../components/PieChartComponent/PieChartComponent";
-
 
 const BestSellingBooksSubTab = () => {
-    const [order, setOrder] = useState([]);
-    const [filters, setFilters] = useState({ year: "2024", month: "" });
+    const [orders, setOrders] = useState([]);
+    const [filters, setFilters] = useState({ year: "2025", month: "" });
     const [productDetailsMap, setProductDetailsMap] = useState(new Map());
     const [isDataFetched, setIsDataFetched] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchOrders = async () => {
+            setIsLoading(true);
             try {
-                const orders = await OrderService.getAllOrder();
-                setOrder(orders.data);
+                const response = await OrderService.getAllOrder();
+                setOrders(response?.data || []);
             } catch (error) {
-                console.error("Error fetching order:", error);
+                console.error("Error fetching orders:", error);
+                setError("Không thể tải dữ liệu đơn hàng.");
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchOrders();
@@ -51,22 +56,23 @@ const BestSellingBooksSubTab = () => {
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters((prev) => ({ ...prev, [name]: value }));
+        setIsDataFetched(false); // Reset khi thay đổi filter
     };
 
-    const filteredData = order.filter((item) => {
+    const filteredData = orders.filter((item) => {
         const updatedAtDate = new Date(item.updatedAt);
         const itemYear = updatedAtDate.getFullYear().toString();
         const itemMonth = (updatedAtDate.getMonth() + 1).toString();
-
         return (
             itemYear === filters.year &&
             (filters.month === "" || itemMonth === filters.month)
         );
     });
 
-    // Lọc và gộp các sản phẩm từ các order
-    const productList = filteredData.flatMap((item) => item.orderItems)
+    const productList = filteredData
+        .flatMap((item) => item.orderItems)
         .reduce((acc, orderItem) => {
+            if (!orderItem.product) return acc; // Bỏ qua nếu productId không hợp lệ
             const existingProduct = acc.get(orderItem.product);
             if (existingProduct) {
                 existingProduct.amount += orderItem.amount;
@@ -83,42 +89,56 @@ const BestSellingBooksSubTab = () => {
 
     useEffect(() => {
         if (productList.size === 0) {
+            setIsDataFetched(true);
             return;
         }
 
         const fetchProductDetails = async () => {
-            const productIds = [...productList.keys()]; // Lấy các productId duy nhất
+            setIsLoading(true);
+            const productIds = [...productList.keys()];
             const productDetailsMap = new Map();
 
             await Promise.all(
                 productIds.map(async (productId) => {
                     try {
                         const productDetail = await ProductService.getDetailProduct(productId);
-                        if (productDetail && productDetail.data) {
-                            productDetailsMap.set(productId, productDetail.data);
+                        if (productDetail?.data) {
+                            const img = typeof productDetail.data.img === 'string'
+                                ? productDetail.data.img
+                                : productDetail.data.img?.[0] || '';
+                            productDetailsMap.set(productId, {
+                                ...productDetail.data,
+                                img,
+                            });
                         }
                     } catch (error) {
-                        console.error("Error fetching product details for", productId, error);
+                        console.error(`Error fetching product details for ${productId}:`, error);
                     }
                 })
             );
 
             setProductDetailsMap(productDetailsMap);
             setIsDataFetched(true);
+            setIsLoading(false);
         };
 
         fetchProductDetails();
     }, [productList]);
 
-    // Chuẩn bị dữ liệu cho PieChart
     const chartData = [...productList.values()].map((product) => product.revenue);
     const chartLabels = [...productList.values()].map(
-        (product) => productDetailsMap.get(product.productId)?.name || "N/A"
+        (product) => productDetailsMap.get(product.productId)?.name || "Không xác định"
     );
     const chartColors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#FF9F40", "#9966FF"];
 
     return (
         <div className="container mt-5">
+            {isLoading && <div className="text-center">Đang tải dữ liệu...</div>}
+            {error && <div className="alert alert-danger">{error}</div>}
+            {!isLoading && productList.size === 0 && isDataFetched && (
+                <div className="alert alert-info">Không có dữ liệu để hiển thị.</div>
+            )}
+
             <div className="mb-4">
                 <form className="row">
                     <div className="col-md-6">
@@ -144,49 +164,55 @@ const BestSellingBooksSubTab = () => {
                 </form>
             </div>
 
-            <div className="mb-4">
-                <PieChart data={chartData} labels={chartLabels} colors={chartColors} />
-            </div>
+            {isDataFetched && productList.size > 0 && (
+                <>
+                    <div className="mb-4">
+                        <PieChart data={chartData} labels={chartLabels} colors={chartColors} />
+                    </div>
 
-            <table className="table table-striped" style={{ fontSize: "16px", marginTop: "20px" }}>
-                <thead>
-                    <tr>
-                        <th scope="col">Tháng</th>
-                        <th scope="col">Năm</th>
-                        <th scope="col">Mã sách</th>
-                        <th scope="col">Hình ảnh</th>
-                        <th scope="col">Tên sản phẩm</th>
-                        <th scope="col">Số lượng bán</th>
-                        <th scope="col">Doanh thu</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {[...productList.values()].map((product, idx) => {
-                        const productDetails = productDetailsMap.get(product.productId);
-                        return (
-                            <tr key={idx}>
-                                <td>{filters.month}</td>
-                                <td>{filters.year}</td>
-                                <td>{product.productId}</td>
-                                <td>
-                                    {productDetails ? (
-                                        <img
-                                            src={productDetails.img}
-                                            alt={productDetails.name}
-                                            style={{ width: "50px" }}
-                                        />
-                                    ) : (
-                                        "N/A"
-                                    )}
-                                </td>
-                                <td>{productDetails ? productDetails.name : "N/A"}</td>
-                                <td>{product.amount}</td>
-                                <td>{product.revenue.toLocaleString()}</td>
+                    {/* Chỉ hiển thị bảng khi có dữ liệu */}
+                    <table className="table custom-table" style={{ fontSize: "16px", marginTop: "20px" }}>
+                        <thead>
+                            <tr>
+                                <th scope="col">Tháng</th>
+                                <th scope="col">Năm</th>
+                                <th scope="col">Mã sách</th>
+                                <th scope="col">Hình ảnh</th>
+                                <th scope="col">Tên sản phẩm</th>
+                                <th scope="col">Số lượng bán</th>
+                                <th scope="col">Doanh thu</th>
                             </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+                        </thead>
+                        <tbody>
+                            {[...productList.values()].map((product, idx) => {
+                                const productDetails = productDetailsMap.get(product.productId);
+                                return (
+                                    <tr key={idx}>
+                                        <td>{filters.month || "Tất cả"}</td>
+                                        <td>{filters.year}</td>
+                                        <td>{product.productId}</td>
+                                        <td>
+                                            {productDetails?.img ? (
+                                                <img
+                                                    src={productDetails.img}
+                                                    alt={productDetails.name || "Sản phẩm"}
+                                                    style={{ width: "50px", height: "auto" }}
+                                                    onError={(e) => (e.target.src = "/fallback-image.jpg")}
+                                                />
+                                            ) : (
+                                                "N/A"
+                                            )}
+                                        </td>
+                                        <td>{productDetails?.name || "Không xác định"}</td>
+                                        <td>{product.amount}</td>
+                                        <td>{product.revenue.toLocaleString()} VND</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </>
+            )}
         </div>
     );
 };

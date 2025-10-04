@@ -34,7 +34,7 @@ const AdminPage = () => {
     return (
         <>
             <HeaderComponent isHiddenSearch isHiddenCart isHiddenNoti />
-            <div className="d-flex">
+            <div className="d-flex container profile-container">
                 {/* Tabs dọc */}
                 <div className="nav flex-column nav-pills me-3" style={{ width: '200px', fontSize: '16px', fontWeight: 'bold' }}>
                     <button
@@ -43,7 +43,7 @@ const AdminPage = () => {
                     >
                         <div className="row">
                             <div className="col-1"><i className="bi-nav bi-shop"></i></div>
-                            <div className="col"><p className="nav-title">Hồ sơ cửa hàng</p></div>
+                            <div className="col"><p className="nav-title">Cửa hàng</p></div>
                         </div>
                     </button>
 
@@ -53,7 +53,7 @@ const AdminPage = () => {
                     >
                         <div className="row">
                             <div className="col-1"><i className="bi-nav bi-person-vcard"></i></div>
-                            <div className="col"><p className="nav-title">Quản lý người dùng</p></div>
+                            <div className="col"><p className="nav-title">Người dùng</p></div>
                         </div>
                     </button>
 
@@ -63,7 +63,7 @@ const AdminPage = () => {
                     >
                         <div className="row">
                             <div className="col-1"><i className="bi-nav bi-box2"></i></div>
-                            <div className="col"><p className="nav-title">Quản lý đơn hàng</p></div>
+                            <div className="col"><p className="nav-title">Đơn hàng</p></div>
                         </div>
                     </button>
 
@@ -87,7 +87,7 @@ const AdminPage = () => {
                         </div>
                     </button> */}
 
-                    <button
+                    {/* <button
                         className={`nav-link ${activeTab === 'promotionManagement' ? 'active' : ''}`}
                         onClick={() => handleTabChange('promotionManagement')}
                     >
@@ -95,7 +95,7 @@ const AdminPage = () => {
                             <div className="col-1"><i className="bi-nav bi-gift"></i></div>
                             <div className="col"><p className="nav-title">Quản lý ưu đãi</p></div>
                         </div>
-                    </button>
+                    </button> */}
 
                     <button
                         className={`nav-link ${activeTab === 'importManagement' ? 'active' : ''}`}
@@ -103,7 +103,7 @@ const AdminPage = () => {
                     >
                         <div className="row">
                             <div className="col-1"><i className="bi-nav bi-cart4"></i></div>
-                            <div className="col"><p className="nav-title">Quản lý nhập hàng</p></div>
+                            <div className="col"><p className="nav-title">Nhập hàng</p></div>
                         </div>
                     </button>
 

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import * as CategoryService from '../../services/CategoryService';
+import * as HomepageConfigService from '../../services/HomepageConfigService';
 import './CategoryDropdown.css';
 
 const CategoryDropdown = () => {
@@ -12,6 +13,12 @@ const CategoryDropdown = () => {
         select: (data) => data.data || [],
         staleTime: 1000 * 60 * 10,
     });
+
+    const { data: config } =
+        useQuery({
+            queryKey: ['homePageConfig'],
+            queryFn: async () => (await HomepageConfigService.getConfig()).data
+        });
 
     const handleCategoryClick = (categoryId) => {
         navigate('/category', { state: { selectedCategory: categoryId } });
@@ -46,7 +53,7 @@ const CategoryDropdown = () => {
                 )}
             </div>
             <div className="dropdown-promo">
-                <img src="your-promo-image.png" alt="Khuyến mãi" />
+                <img src={config?.bannerPromotion} alt="Khuyến mãi" />
             </div>
         </div>
     );

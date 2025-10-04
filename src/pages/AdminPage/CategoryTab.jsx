@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -141,8 +142,8 @@ const CategoryTab = ({ selectedCategoryIdForFilter, onCategorySelect }) => {
                             <span title={cat.name} className="text-truncate">{cat.name}</span>
                         </div>
                         <div className="ms-2">
-                            <button className="btn btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); handleEditCategory(cat); }}><i className="bi bi-pencil-square"></i></button>
-                            <button className="btn btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat); }}><i className="bi bi-trash"></i></button>
+                            <button className="btn-cate btn-sm btn-primary" onClick={(e) => { e.stopPropagation(); handleEditCategory(cat); }}><i className="bi bi-pencil-square"></i></button>
+                            <button className="btn-cate btn-sm btn-danger" onClick={(e) => { e.stopPropagation(); handleDeleteCategory(cat); }}><i className="bi bi-trash"></i></button>
                         </div>
                     </div>
                     {cat.children && openedCategories.includes(cat._id) && (<div style={{ marginTop: '5px', marginLeft: '20px' }}>{renderCategoryTree(cat.children, level + 1)}</div>)}

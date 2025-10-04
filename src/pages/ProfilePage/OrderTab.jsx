@@ -159,7 +159,7 @@ const OrderTab = () => {
             <div className="title-section">
                 <h3 className="text mb-0">LỊCH SỬ ĐƠN HÀNG</h3>
             </div>
-            <div className="content-section" style={{ marginTop: '30px' }}>
+            <div className="content-section">
                 <div className="row align-items-center mb-3">
                     <div className="col-12">
                         <ul className="nav nav-tabs" style={{ marginTop: '20px' }}>
