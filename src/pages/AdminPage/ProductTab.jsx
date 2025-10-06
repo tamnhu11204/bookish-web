@@ -118,7 +118,7 @@ const ProductTab = ({ selectedCategoryId }) => {
         queryClient.invalidateQueries(['products']);
     };
 
-    const deleteMutation = useMutationHook((id) => ProductService.deleteProduct(id));
+    const deleteMutation = useMutationHook((id) => ProductService.softDeleteProduct(id));
     const { isSuccess: isSuccessDelete, isError: isErrorDelete } = deleteMutation;
 
     useEffect(() => {
@@ -165,8 +165,9 @@ const ProductTab = ({ selectedCategoryId }) => {
                     <tbody className="table-content">
                         {isLoadingProduct || isLoadingCategories ? (
                             <tr><td colSpan="7" className="text-center"><LoadingComponent /></td></tr>
-                        ) : paginatedProducts.length > 0 ? (
-                            paginatedProducts.map((product) => (
+                        ) : paginatedProducts.length > 0 ? (paginatedProducts
+  .filter((product) => !product.isDelete) // chỉ lấy sản phẩm chưa xóa
+  .map((product) => (
                                 <tr key={product._id}>
                                     <td>{product.img?.[0] ? (<img src={product.img[0]} alt={product.name} style={{ width: '80px', height: '100px', objectFit: 'cover' }} onError={(e) => (e.target.src = '/default-image.png')} />) : ('No image')}</td>
                                     <td title={product.name}>{product.name.length > 20 ? `${product.name.slice(0, 20)}...` : product.name}</td>

@@ -81,5 +81,8 @@ export const getAllProductBySort = async (params = {}) => {
   return response.data;
 };
 
-
+export const softDeleteProduct = async (id) => {
+  const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/soft-delete/${id}`)
+  return res.data
+}
 

@@ -13,6 +13,7 @@ import * as OrderService from '../../services/OrderService';
 import './AdminPage.css';
 import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 import { useNavigate } from 'react-router-dom';
+import EnhancedModalComponent from '../../components/EnhancedModalComponent/EnhancedModalComponent';
 
 const OrderTab = () => {
     const [activeTab, setActiveTab] = useState("all");
@@ -22,6 +23,7 @@ const OrderTab = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [selectedActive, setSelectedActive] = useState("");
+    const [initialShippingCode, setInitialShippingCode] = useState(""); 
 
     const getAllOrder = async () => {
         const res = await OrderService.getAllOrder();
@@ -54,11 +56,13 @@ const OrderTab = () => {
         }))
         : [];
 
-    const handleOnChangeActive = (e) => setSelectedActive(e.target.value);
+    //const handleOnChangeActive = (e) => setSelectedActive(e.target.value);
 
-    const handleActive = (id) => {
+    const handleActive = (id,shipmentCode,activeNow) => {
         setSelectedOrder(id);
         setShowModal(true);
+        setInitialShippingCode(shipmentCode);
+        setSelectedActive(activeNow);
     };
 
     const resetForm = () => {
@@ -84,7 +88,7 @@ const OrderTab = () => {
     }, [mutationData, isError, isSuccess]);
 
     const onSave = async () => {
-    const payload = { active: selectedActive, date: new Date() };
+    const payload = { active: selectedActive, date: new Date() ,shipmentCode: initialShippingCode};
     console.log('Payload sent:', { orderId: selectedOrder, data: payload });
     mutation.mutate({ orderId: selectedOrder, data: payload });
 
@@ -201,7 +205,7 @@ const OrderTab = () => {
                                         <td>
                                             <ButtonComponent
                                                 textButton="Duyệt"
-                                                onClick={() => handleActive(order._id)}
+                                                onClick={() => handleActive(order._id,order.shipmentCode,order.activeNow)}
                                             />
                                         </td>
                                         <td>
@@ -223,31 +227,19 @@ const OrderTab = () => {
                     </table>
                 </div>
 
-                <ModalComponent
+                
+
+                <EnhancedModalComponent
                     isOpen={showModal}
                     title="TRẠNG THÁI ĐƠN HÀNG"
-                    body={
-                        <>
-                            <FormComponent
-                                id="idInput"
-                                label="Mã đơn hàng"
-                                type="text"
-                                value={selectedOrder}
-                                enable={false}
-                            />
-                            <FormSelectComponent
-                                label="Trạng thái đơn hàng"
-                                placeholder={isLoadingActive ? "Đang tải..." : "Chọn trạng thái đơn hàng"}
-                                options={allActives}
-                                selectedValue={selectedActive}
-                                onChange={handleOnChangeActive}
-                                required={true}
-                            />
-                        </>
-                    }
+                    selectedOrder={selectedOrder}
+                    allActives={allActives}
+                    initialStatus={selectedActive}
+                    initialShippingCode={initialShippingCode}
                     textButton1="Cập nhật"
                     onClick1={onSave}
                     onClick2={onCancel}
+                    isLoading={mutation.isLoading}
                 />
             </div>
         </div>
