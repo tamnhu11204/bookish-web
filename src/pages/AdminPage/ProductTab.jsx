@@ -199,7 +199,7 @@ const ProductTab = ({ selectedCategoryId }) => {
                         {isLoadingProduct || isLoadingCategories ? (
                             <tr><td colSpan="7" className="text-center"><LoadingComponent /></td></tr>
                         ) : paginatedProducts.length > 0 ? (paginatedProducts
-  .filter((product) => !product.isDelete) // chỉ lấy sản phẩm chưa xóa
+  .filter((product) => product.isDeleted !== true) // chỉ lấy sản phẩm chưa xóa
   .map((product) => (
                                 <tr key={product._id}>
                                     <td>{product.img?.[0] ? (<img src={product.img[0]} alt={product.name} style={{ width: '80px', height: '100px', objectFit: 'cover' }} onError={(e) => (e.target.src = '/default-image.png')} />) : ('No image')}</td>

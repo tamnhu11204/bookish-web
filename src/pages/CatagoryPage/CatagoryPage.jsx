@@ -489,7 +489,8 @@ const CatagoryPage = () => {
       {isLoadingPro ? (
         <LoadingComponent />
       ) : paginatedProducts.length > 0 ? (
-        paginatedProducts.map((product) => (
+        (paginatedProducts
+  .filter((product) => product.isDeleted !== true)).map((product) => (
           <CardProductComponent
             key={product._id}
             id={product._id}
