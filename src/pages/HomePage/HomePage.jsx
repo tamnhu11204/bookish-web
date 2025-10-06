@@ -56,7 +56,7 @@ const AuthorCard = ({ author }) => {
   const totalProducts = authorProductsData?.total || 0;
 
   const handleNavigate = () => {
-    navigate(`/author/${author.slug || author._id}`);
+    navigate(`/author/${author._id}`);
   };
 
   return (

@@ -9,7 +9,7 @@ const NewsCreatePage = () => {
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
 
-  console.log("ID từ useParams:", id, "Type:", typeof id); // Debug ID và kiểu
+  console.log("ID từ useParams:", id, "Type:", typeof id);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -22,24 +22,40 @@ const NewsCreatePage = () => {
     image: null,
   });
 
-  // Chỉ chạy useQuery nếu id hợp lệ
+  // Lấy dữ liệu tin tức để chỉnh sửa
   const { data: initialData, isLoading, error } = useQuery({
     queryKey: ["news", id],
     queryFn: async () => {
-      console.log("Fetching news with ID:", id); // Debug fetch
+      console.log("Fetching news with ID:", id);
       const response = await NewsService.getNewsDetail(id);
       console.log("initialData:", response.data);
       return response.data;
     },
-    enabled: !!id && id !== "", // Chỉ chạy nếu id không rỗng
-    retry: 1, // Thử lại 1 lần
-    staleTime: 5 * 60 * 1000, // Cache 5 phút
+    enabled: !!id && id !== "",
+    retry: 1,
+    staleTime: 5 * 60 * 1000,
   });
 
-  console.log("isLoading:", isLoading, "error:", error); // Debug trạng thái query
+  console.log("isLoading:", isLoading, "error:", error);
 
   useEffect(() => {
     if (initialData) {
+      console.log("initialData:", initialData); // Debug dữ liệu
+      console.log("initialData.publishedAt:", initialData.publishedAt); // Debug publishedAt
+      let formattedPublishDate = "";
+      if (initialData.publishedAt) {
+        try {
+          const date = new Date(initialData.publishedAt);
+          if (!isNaN(date)) {
+            formattedPublishDate = date.toISOString().split("T")[0];
+          } else {
+            console.warn("initialData.publishedAt không phải là ngày hợp lệ:", initialData.publishedAt);
+          }
+        } catch (error) {
+          console.error("Lỗi khi định dạng publishedAt:", error);
+        }
+      }
+      console.log("Formatted publishDate:", formattedPublishDate);
       setFormData({
         title: initialData.title || "",
         segments: initialData.segments?.length > 0 ? initialData.segments : [{ title: "", content: "" }],
@@ -47,7 +63,7 @@ const NewsCreatePage = () => {
         source: initialData.source || "",
         author: initialData.author || "",
         category: initialData.category || "",
-        publishDate: initialData.publishDate ? new Date(initialData.publishDate).toISOString().split("T")[0] : "",
+        publishDate: formattedPublishDate,
         image: null,
       });
     }
@@ -103,10 +119,20 @@ const NewsCreatePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.segments.some((segment) => segment.content.trim())) {
-      alert("Vui lòng điền tiêu đề và ít nhất một đoạn nội dung!");
+    // Kiểm tra các trường bắt buộc
+    if (!formData.title.trim()) {
+      alert("Vui lòng điền tiêu đề bài viết!");
       return;
     }
+    if (!formData.segments.some((segment) => segment.content.trim())) {
+      alert("Vui lòng điền ít nhất một đoạn nội dung!");
+      return;
+    }
+    if (!formData.publishDate) {
+      alert("Vui lòng chọn ngày đăng!");
+      return;
+    }
+
     setIsSaving(true);
     const fd = new FormData();
     fd.append("title", formData.title);
@@ -115,37 +141,48 @@ const NewsCreatePage = () => {
     fd.append("source", formData.source || "");
     fd.append("author", formData.author || "");
     fd.append("category", formData.category || "");
-    fd.append("publishDate", formData.publishDate || "");
+    fd.append("publishDate", formData.publishDate);
     if (formData.image instanceof File) {
       fd.append("image", formData.image);
     }
     if (initialData?.image) {
       fd.append("existingImage", initialData.image);
     }
+
+    // Debug FormData
     console.log("FormData entries:", [...fd.entries()]);
+    for (const [key, value] of fd.entries()) {
+      console.log(`Key: ${key}, Value: ${value}`);
+    }
+
     try {
       if (id && id !== "") {
-        await NewsService.updateNews(id, fd);
+        console.log("Sending update request with FormData:", [...fd.entries()]);
+        const response = await NewsService.updateNews(id, fd);
+        console.log("Update response:", response);
         alert("Cập nhật tin tức thành công!");
       } else {
-        await NewsService.createNews(fd);
+        console.log("Sending create request with FormData:", [...fd.entries()]);
+        const response = await NewsService.createNews(fd);
+        console.log("Create response:", response);
         alert("Tạo tin tức thành công!");
       }
       navigate("/news");
     } catch (error) {
       console.error("Error saving news:", error);
-      alert("Lỗi khi lưu tin tức: " + error.message);
+      console.log("Error response:", error.response?.data);
+      alert("Lỗi khi lưu tin tức: " + (error.response?.data?.message || error.message));
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Kiểm tra id bằng if-else
+  // Chế độ tạo mới
   if (!id || id === "") {
-    console.log("Rendering create mode"); // Debug chế độ tạo mới
+    console.log("Rendering create mode");
     return (
       <div className="news-create-page container py-5">
-        <h1 className="page-title">Thêm tin tức mới</h1>
+        <h1 className="site-title">Thêm tin tức</h1>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Tiêu đề bài viết</label>
@@ -280,12 +317,12 @@ const NewsCreatePage = () => {
 
   // Chế độ chỉnh sửa: kiểm tra trạng thái tải và lỗi
   if (isLoading) {
-    console.log("Rendering loading state"); // Debug trạng thái tải
+    console.log("Rendering loading state");
     return <div className="container py-5 text-center">Đang tải dữ liệu...</div>;
   }
 
   if (error) {
-    console.log("Rendering error state:", error.message); // Debug lỗi
+    console.log("Rendering error state:", error.message);
     return (
       <div className="container py-5 text-center">
         Lỗi khi tải tin tức: {error.message}
@@ -297,11 +334,11 @@ const NewsCreatePage = () => {
     );
   }
 
-  // Chế độ chỉnh sửa: hiển thị form với dữ liệu điền sẵn
-  console.log("Rendering edit mode"); // Debug chế độ chỉnh sửa
+  // Chế độ chỉnh sửa
+  console.log("Rendering edit mode");
   return (
     <div className="news-create-page container py-5">
-      <h1 className="page-title">Chỉnh sửa tin tức</h1>
+      <h1 className="site-title">Chỉnh sửa tin tức</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label className="form-label">Tiêu đề bài viết</label>
@@ -438,6 +475,4 @@ const NewsCreatePage = () => {
       </form>
     </div>
   );
-};
-
-export default NewsCreatePage;
+}; export default NewsCreatePage;

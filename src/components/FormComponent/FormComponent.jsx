@@ -7,7 +7,7 @@ const FormComponent = (props) => {
 
     return (
         <div style={{ marginBottom: '10px' }}>
-            <label className="form-label" style={{ display: 'block', marginBottom: '5px', fontSize: '16px' }}>
+            <label className="form-label" style={{ display: 'block', marginBottom: '5px', fontSize: '16px', fontWeight: '600' }}>
                 {props.required && <span style={{ color: 'red' }}>*</span>}
                 {props.label} {/* Thêm dấu * nếu trường bắt buộc */}
             </label>

@@ -29,6 +29,7 @@ import AboutUsPage from "../pages/AboutUsPage/AboutUsPage";
 import NewsPage from "../pages/NewsPage/NewsPage";
 import NewsDetail from "../pages/NewsPage/NewDetail";
 import NewsCreatePage from "../pages/NewsPage/NewsCreatePage";
+import AuthorPage from "../pages/AuthorPage/AuthorPage";
 
 export const routes = [
     {
@@ -90,7 +91,7 @@ export const routes = [
         isShowHeader: true,
     },
     {
-        path: '/comparison',
+        path: '/comparison/:id',
         page: ComparisonPage,
         isShowHeader: true,
     },
@@ -112,6 +113,16 @@ export const routes = [
     {
         path: '/order-detail/:id',
         page: OrderDetailsPage,
+        isShowHeader: true,
+    },
+    {
+        path: '/author/:authorId',
+        page: AuthorPage,
+        isShowHeader: true,
+    },
+    {
+        path: '/author',
+        page: AuthorPage,
         isShowHeader: true,
     },
     {
@@ -173,7 +184,7 @@ export const routes = [
         page: NewsPage,
         isShowHeader: true,
     },
-     {
+    {
         path: '/news/:id',
         page: NewsDetail,
         isShowHeader: true,

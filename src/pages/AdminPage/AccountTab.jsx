@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import FormComponent from '../../components/FormComponent/FormComponent';
@@ -167,7 +168,7 @@ const AccountTab = () => {
 
     return (
         <><HeaderComponent isHiddenSearch isHiddenCart isHiddenNoti />
-            <div style={{ padding: '0 20px' }}>
+            <div className="container profile-container" style={{ padding: '0 20px' }}>
                 <div className="title-section">
                     <h3 className="text mb-0">TÀI KHOẢN CỦA TÔI</h3>
                 </div>
@@ -234,7 +235,7 @@ const AccountTab = () => {
                         />
 
                         <div className="mb-3">
-                            <label className="form-label">Giới tính</label>
+                            <label style={{ fontSize: '16px', fontWeight: '600' }}>Giới tính</label>
                             <div>
                                 <div className="form-check form-check-inline">
                                     <input

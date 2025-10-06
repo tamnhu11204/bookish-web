@@ -9,6 +9,7 @@ import AddImport from './AddImportTab';
 import DeleteImportModal from './DeleteImportModal';
 import * as XLSX from 'xlsx';
 import './Import.css';
+import SupplierSubTab from './SupplierSubTab';
 
 const ImportTab = () => {
     const [imports, setImports] = useState([]);
@@ -136,8 +137,10 @@ const ImportTab = () => {
     if (showModal === false) return (
         <div className="import-tab-container">
             <div className="title-section">
-                <h3>LỊCH SỬ NHẬP HÀNG</h3>
+                <h3>NHẬP HÀNG</h3>
             </div>
+
+            <SupplierSubTab />
 
             <div className="action-section">
                 <FormComponent
@@ -166,7 +169,7 @@ const ImportTab = () => {
             </div>
 
             <div className="table-section">
-                <table className="import-table">
+                <table className="table custom-table">
                     <thead>
                         <tr>
                             <th>Mã</th>

@@ -9,6 +9,8 @@ import * as message from "../../components/MessageComponent/MessageComponent";
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent';
 import { updateUser } from '../../redux/slides/UserSlide';
 import Compressor from 'compressorjs';
+import "./ProfilePage.css"
+import TextEditor from '../AdminPage/partials/TextEditor';
 
 const ProfileTab = () => {
   const user = useSelector((state) => state.user);
@@ -18,6 +20,7 @@ const ProfileTab = () => {
   const [img, setImg] = useState('');
   const [birthday, setBirthday] = useState('');
   const [gender, setGender] = useState('');
+  const [description, setDescription] = useState('');
 
   const mutation = useMutationHook(
     async (data) => {
@@ -44,6 +47,7 @@ const ProfileTab = () => {
         setBirthday('');
       }
       setGender(user.gender || '');
+      setDescription(user.description)
     }
   }, [user]);
 
@@ -67,6 +71,11 @@ const ProfileTab = () => {
   const handleOnChangePhone = (value) => setPhone(value);
   const handleOnChangeBirthday = (value) => setBirthday(value);
   const handleOnChangeGender = (value) => setGender(value);
+  const handleOnChangeDescription = (value) => {
+    console.log("new description:", value);
+    setDescription(value);
+  };
+
 
   const handleOnChangeImg = (event) => {
     const file = event.target.files[0];
@@ -91,10 +100,9 @@ const ProfileTab = () => {
   };
 
   const handleUpdate = () => {
-    // Kiểm tra xem ảnh có phải là file hay base64 URL
     const imgData = img instanceof File ? img : img;
 
-    mutation.mutate({ id: user?.id, email, name, phone, img: imgData, gender, birthday, access_token: user?.access_token });
+    mutation.mutate({ id: user?.id, email, name, phone, img: imgData, gender, birthday, description, access_token: user?.access_token });
   };
 
   return (
@@ -102,8 +110,8 @@ const ProfileTab = () => {
       <div className="title-section">
         <h3 className="text mb-0">HỒ SƠ CỦA TÔI</h3>
       </div>
-      <div className="container mt-5">
-        <form className="p-4 border rounded" style={{ fontSize: '16px' }}>
+      <div className="container mt-5 info-container">
+        <form className="p-4 border rounded" style={{ fontSize: '16px', backgroundColor: "#ffffff" }}>
           {/* Avatar */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column', marginBottom: '10px' }}>
             {/* Hình đại diện */}
@@ -173,7 +181,7 @@ const ProfileTab = () => {
 
           {/* Giới tính */}
           <div className="mb-3">
-            <label className="form-label">Giới tính</label>
+            <label className="form-label" style={{ display: 'block', marginBottom: '5px', fontSize: '16px', fontWeight: '600' }}>Giới tính</label>
             <div>
               <div className="form-check form-check-inline">
                 <input
@@ -227,6 +235,11 @@ const ProfileTab = () => {
             onChange={handleOnChangeBirthday}
             enable={true}
           />
+
+          <label className="form-label" style={{ display: 'block', marginBottom: '5px', fontSize: '16px', fontWeight: '600' }}>
+            Giới thiệu về bản thân để Bookish hiểu thêm về bạn
+          </label>
+          <TextEditor value={description} onChange={handleOnChangeDescription} />
 
           {data?.status === 'ERR' &&
             <span style={{ color: 'red', fontSize: '16px' }}>{data?.message}</span>}

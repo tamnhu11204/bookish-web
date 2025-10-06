@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import './AdminPage.css';
-import SupplierSubTab from './SupplierSubTab';
-import PublisherSubTab from './PublisherSubTab';
-import LanguageSubTab from './LanguageSubTab';
-import StatusSubTab from './StatusSubTab';
-import FormSubTab from './FormSubTab';
-import UnitSubTab from './UnitSubTab';
 import AuthorSubTab from './AuthorSubTab';
+import FormSubTab from './FormSubTab';
+import LanguageSubTab from './LanguageSubTab';
+import PublisherSubTab from './PublisherSubTab';
+import StatusSubTab from './StatusSubTab';
+import UnitSubTab from './UnitSubTab';
 
 const OptionTab = () => {
     const [activeTab, setActiveTab] = useState("language");
@@ -63,6 +62,14 @@ const OptionTab = () => {
                                 Tác giả
                             </button>
                         </li>
+                        <li className="nav-item">
+                            <button
+                                className={`nav-link ${activeTab === "status" ? "active" : ""}`}
+                                onClick={() => setActiveTab("status")}
+                            >
+                                Loại trạng thái đơn hàng
+                            </button>
+                        </li>
                     </ul>
                 </div>
 
@@ -72,36 +79,7 @@ const OptionTab = () => {
                     {activeTab === "unit" && <UnitSubTab />}
                     {activeTab === "publisher" && <PublisherSubTab />}
                     {activeTab === "author" && <AuthorSubTab />}
-                </div>
-            </div>
-
-            {/* Tabs về các tùy chọn khác */}
-            <div className="content-section" style={{ marginTop: '30px' }}>
-                <div className="row mt-4">
-                    <h4>VỀ CÁC TÙY CHỌN KHÁC</h4>
-                    <ul className="nav nav-tabs" style={{ marginTop: '20px' }}>
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab1 === "supplier" ? "active" : ""}`}
-                                onClick={() => setActiveTab1("supplier")}
-                            >
-                                Nhà cung cấp
-                            </button>
-                        </li>
-                        <li className="nav-item">
-                            <button
-                                className={`nav-link ${activeTab1 === "status" ? "active" : ""}`}
-                                onClick={() => setActiveTab1("status")}
-                            >
-                                Loại trạng thái đơn hàng
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-
-                <div className="tab-content" style={{ flexGrow: 1 }}>
-                    {activeTab1 === "supplier" && <SupplierSubTab />}
-                    {activeTab1 === "status" && <StatusSubTab />}
+                    {activeTab === "status" && <StatusSubTab />}
                 </div>
             </div>
         </div>

@@ -139,7 +139,7 @@ const FeedbackTab = () => {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container" style={{ padding: '0 20px' }}>
             <div className="title-section mb-3">
                 <h3 className="text mb-0">LỊCH SỬ ĐÁNH GIÁ</h3>
             </div>

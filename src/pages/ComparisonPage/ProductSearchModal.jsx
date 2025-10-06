@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
-import { useDispatch, useSelector } from 'react-redux';
-import { addSelectedProduct } from '../../redux/slides/ComparisonSlide';
 
-const ProductSearchModal = ({ isOpen, products, onClose, index }) => {
-  const dispatch = useDispatch();
-  const selectedProducts = useSelector((state) => state.comparison.selectedProducts);
+const ProductSearchModal = ({ isOpen, products, onClose, onSelectProduct, index }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProducts, setFilteredProducts] = useState(products);
+
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
 
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
@@ -20,22 +20,49 @@ const ProductSearchModal = ({ isOpen, products, onClose, index }) => {
   };
 
   const handleProductSelect = (product) => {
-    dispatch(addSelectedProduct({ index, product })); // Truyền index và sản phẩm
-    onClose(); // Đóng modal sau khi chọn
+    console.log('Product selected in modal:', product);
+    // Chuẩn hóa dữ liệu sản phẩm
+    const standardizedProduct = {
+      _id: product._id,
+      name: product.name || 'Không có tên',
+      img: Array.isArray(product.img) ? product.img[0] || '' : product.img || '', // Lấy ảnh đầu tiên
+      price: product.price || 0,
+      sold: product.sold || 0,
+      star: product.star || 0,
+      score: product.score || 0,
+      feedbackCount: product.feedbackCount || 0,
+      view: product.view || 0,
+      code: product.code || '',
+      author: product.author?._id || product.author || '', // Lấy ID của author nếu là object
+      publishDate: product.publishDate || '',
+      language: product.language || '',
+      weight: product.weight || 0,
+      length: product.length || 0,
+      width: product.width || 0,
+      height: product.height || 0,
+      page: product.page || 0,
+      format: product.format || '',
+      publisher: product.publisher || '',
+      supplier: product.supplier || '',
+      unit: product.unit || '',
+      category: product.category?._id || product.category || '',
+    };
+    onSelectProduct(index, standardizedProduct);
+    onClose();
   };
 
   const bodyContent = (
     <div
       style={{
         maxHeight: '400px',
-        minHeight:'400px', // Chiều cao cố định cho toàn bộ nội dung modal
-        overflowY: 'hidden', // Loại bỏ thanh cuộn từ wrapper
+        minHeight: '400px',
+        overflowY: 'hidden',
       }}
     >
       <input
         style={{
           fontSize: '16px',
-          position: 'sticky', // Giữ thanh tìm kiếm cố định
+          position: 'sticky',
           top: 0,
           zIndex: 10,
           backgroundColor: '#fff',
@@ -53,8 +80,8 @@ const ProductSearchModal = ({ isOpen, products, onClose, index }) => {
       <div
         className="product-list"
         style={{
-          maxHeight: '330px', // Chiều cao còn lại sau khi trừ input (khoảng 70px)
-          overflowY: 'auto', // Chỉ danh sách có thanh cuộn
+          maxHeight: '330px',
+          overflowY: 'auto',
           fontSize: '16px',
         }}
       >
@@ -72,7 +99,7 @@ const ProductSearchModal = ({ isOpen, products, onClose, index }) => {
             >
               <div className="d-flex align-items-center">
                 <img
-                  src={product.img}
+                  src={Array.isArray(product.img) ? product.img[0] : product.img}
                   alt={product.name}
                   style={{ width: '50px', height: '50px', marginRight: '10px' }}
                 />
@@ -82,13 +109,11 @@ const ProductSearchModal = ({ isOpen, products, onClose, index }) => {
                 </div>
               </div>
               <button
-                className={`btn ${
-                  selectedProducts[index]?._id === product?._id ? 'btn-success' : 'btn-primary'
-                }`}
+                className="btn btn-primary"
                 onClick={() => handleProductSelect(product)}
                 style={{ backgroundColor: '#198754', color: 'white', borderColor: '#198754' }}
               >
-                {selectedProducts[index]?._id === product?._id ? 'Đã chọn' : 'Chọn'}
+                Chọn
               </button>
             </div>
           ))

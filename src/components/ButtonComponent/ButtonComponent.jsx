@@ -2,11 +2,11 @@ import React from "react";
 
 const ButtonComponent = ({ textButton, onClick, icon, isLoading }) => {
   return (
-    <button 
-      type="button" 
-      className="btn btn-success" 
-      style={{ fontSize: '16px', height: '35px' }} 
-      onClick={onClick} 
+    <button
+      type="button"
+      className="btn btn-success"
+      style={{ fontSize: '16px' }}
+      onClick={onClick}
       disabled={isLoading} // Vô hiệu hóa khi đang loading
     >
       {isLoading ? (

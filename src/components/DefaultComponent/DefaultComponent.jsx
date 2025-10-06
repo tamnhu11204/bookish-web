@@ -10,7 +10,7 @@ const DefaultComponent = ({ children }) => {
   return (
     <div className="d-flex flex-column min-vh-100">
       <HeaderComponent />
-      <main className="flex-grow-1">
+      <main className="flex-grow-1" style={{ backgroundColor: "#F9F6F2" }}>
         {children}
       </main>
       {!hideFooter && <FooterComponent />}

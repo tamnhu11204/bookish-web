@@ -17,7 +17,7 @@ const StatusSubTab = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const queryClient = useQueryClient(); // Get query client for manual cache updates
 
-    const [searchTerm, setSearchTerm] = useState(''); 
+    const [searchTerm, setSearchTerm] = useState('');
     const [filteredStatuses, setFilteredStatuses] = useState([]);
 
     const handleOnChangeName = (value) => setName(value);
@@ -63,32 +63,32 @@ const StatusSubTab = () => {
             setShowModal(false);
             queryClient.invalidateQueries(['statuses']); // Invalidate the cache to refetch Statuss
         }
-        
+
         if (isError || isErrorUpdate || isErrorDelete) {
             message.error();
         }
-    }, [isSuccess, isError,   data?.status, queryClient]);
+    }, [isSuccess, isError, data?.status, queryClient, isErrorUpdate, isErrorDelete]);
 
-     useEffect(() => {
-            if (isSuccessDelete ) {
-                message.success();
-                alert('Xóa trạng thái đơn hàng thành công!');
-                resetForm();
-            }
-            if (isErrorDelete) {
-                message.error();
-            }
-        }, [isSuccessDelete, isErrorDelete]);
+    useEffect(() => {
+        if (isSuccessDelete) {
+            message.success();
+            alert('Xóa trạng thái đơn hàng thành công!');
+            resetForm();
+        }
+        if (isErrorDelete) {
+            message.error();
+        }
+    }, [isSuccessDelete, isErrorDelete]);
 
-        useEffect(() => {
-            if (isSuccessUpdate && data?.status !== 'ERR') {
-                message.success();
-                alert('Cập nhật trạng thái đơn hàng thành công!');
-                resetForm();
-                setShowModal(false);
-                queryClient.invalidateQueries(['statuses']); // Invalidate the cache to refetch Statuss
-            }
-        }, [isSuccessUpdate, isErrorUpdate]);
+    useEffect(() => {
+        if (isSuccessUpdate && data?.status !== 'ERR') {
+            message.success();
+            alert('Cập nhật trạng thái đơn hàng thành công!');
+            resetForm();
+            setShowModal(false);
+            queryClient.invalidateQueries(['statuses']); // Invalidate the cache to refetch Statuss
+        }
+    }, [isSuccessUpdate, isErrorUpdate]);
 
 
 
@@ -130,19 +130,19 @@ const StatusSubTab = () => {
     };
 
     const handleOnChange = (value) => {
-            setSearchTerm(value);
-        };
-    
-        useEffect(() => {
-                if (statuses) {
-                    setFilteredStatuses(
-                        statuses.filter(status => status.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                    );
-                }
-            }, [searchTerm, statuses]);
+        setSearchTerm(value);
+    };
+
+    useEffect(() => {
+        if (statuses) {
+            setFilteredStatuses(
+                statuses.filter(status => status.name.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+    }, [searchTerm, statuses]);
 
     return (
-        <div style={{ padding: '0 20px' }}>
+        <div >
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center mb-3">
                     <div className="col-6">
@@ -150,7 +150,7 @@ const StatusSubTab = () => {
                             id="searchInput"
                             type="text"
                             placeholder="Tìm kiếm theo tên trạng thái đơn hàng"
-                            enable = {true}
+                            enable={true}
                             onChange={handleOnChange}
                         />
                     </div>
@@ -185,7 +185,7 @@ const StatusSubTab = () => {
                                 <tr key={status._id}>
                                     <td>{status._id}</td>
                                     <td>{status.name}</td>
-                                    <td>{status.note||'*'}</td>
+                                    <td>{status.note || '*'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"

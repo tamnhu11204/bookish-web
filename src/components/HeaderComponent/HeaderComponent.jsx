@@ -21,7 +21,6 @@ const HeaderComponent = () => {
     if (user?.id) {
       try {
         const favoriteData = await FavoriteProductService.getAllFavoriteProductByUser(user.id);
-        console.log('favoriteData', favoriteData);
 
         if (favoriteData?.data && Array.isArray(favoriteData.data)) {
           const productDetailsPromises = favoriteData.data.map(async (favoriteItem) => {

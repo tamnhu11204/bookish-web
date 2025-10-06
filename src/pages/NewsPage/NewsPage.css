@@ -24,6 +24,11 @@
   color: #222;
 }
 
+.sidebar-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
 .category-list {
   list-style: none;
   padding: 0;
@@ -84,7 +89,7 @@
 
 .news-meta {
   color: #666;
-  font-size: 0.9rem;
+  font-size: 12px;
 }
 
 .news-summary {
@@ -107,24 +112,29 @@
 }
 
 .news-create-page {
-  max-width: 1000px; /* Tăng chiều rộng so với NewsDetail */
+  max-width: 1000px;
+  /* Tăng chiều rộng so với NewsDetail */
   margin: 0 auto;
-  padding: 40px 20px; /* Tăng padding cho rộng rãi */
+  padding: 40px 20px;
+  /* Tăng padding cho rộng rãi */
 }
 
 .page-title {
-  font-size: 2.5rem; /* Tăng font so với NewsDetail (2rem) */
+  font-size: 2.5rem;
+  /* Tăng font so với NewsDetail (2rem) */
   margin-bottom: 30px;
   color: #333;
   text-align: center;
 }
 
 .form-group {
-  margin-bottom: 30px; /* Tăng khoảng cách */
+  margin-bottom: 30px;
+  /* Tăng khoảng cách */
 }
 
 .form-label {
-  font-size: 1.2rem; /* Tăng font cho rõ ràng */
+  font-size: 16px;
+  /* Tăng font cho rõ ràng */
   color: #333;
   margin-bottom: 8px;
   display: block;
@@ -133,16 +143,20 @@
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 12px; /* Tăng padding cho input */
+  padding: 12px;
+  /* Tăng padding cho input */
   border: 1px solid #ddd;
-  border-radius: 6px; /* Tăng border-radius */
-  font-size: 1.1rem; /* Tăng font */
+  border-radius: 6px;
+  /* Tăng border-radius */
+  font-size: 16px;
+  /* Tăng font */
   color: #333;
   line-height: 1.6;
 }
 
 .form-textarea {
-  min-height: 120px; /* Tăng chiều cao textarea */
+  min-height: 120px;
+  /* Tăng chiều cao textarea */
   resize: vertical;
 }
 
@@ -152,21 +166,28 @@
 
 .segment-container {
   border: 1px solid #eee;
-  padding: 20px; /* Tăng padding */
+  padding: 20px;
+  /* Tăng padding */
   border-radius: 6px;
   margin-bottom: 30px;
 }
 
 .btn {
-  padding: 10px 20px; /* Tăng kích thước nút */
+  padding: 10px 20px;
+  /* Tăng kích thước nút */
   border-radius: 6px;
   cursor: pointer;
-  font-size: 1.1rem;
-  border: none;
+  font-size: 16px;
+  /* border: none; */
 }
 
 .btn-save {
   background: #28a745;
+  color: white;
+}
+
+.btn-save:hover {
+  background: #1a712e;
   color: white;
 }
 
@@ -175,16 +196,33 @@
   color: white;
 }
 
+.btn-cancel:hover {
+  background: #911c27;
+  color: white;
+}
+
 .btn-add-segment {
   background: #6c757d;
   color: white;
   margin-bottom: 30px;
+  font-size: 16px;
+}
+
+.btn-add-segment:hover {
+  background: #93979a;
+  color: white;
 }
 
 .btn-remove-segment {
   background: #dc3545;
   color: white;
   margin-top: 15px;
+  font-size: 16px;
+}
+
+.btn-remove-segment:hover {
+  background: #911c27;
+  color: white;
 }
 
 .image-preview img {
@@ -195,7 +233,7 @@
 }
 
 .image-note {
-  font-size: 1rem;
+  font-size: 14px;
   color: #666;
   margin-top: 8px;
 }
@@ -205,4 +243,10 @@
   justify-content: flex-end;
   gap: 15px;
   margin-top: 40px;
+}
+
+.category-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #198754
 }

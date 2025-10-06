@@ -48,7 +48,7 @@ const ProductTab = () => {
     }, [user?.id]);
 
     const handleOnClickProduct = (productId) => {
-        navigate(`/product/${productId}`);
+        navigate(`/product-detail/${productId}`);
     };
 
     const paginatedProducts = useMemo(() => {

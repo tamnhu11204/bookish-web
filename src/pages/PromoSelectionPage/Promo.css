@@ -4,9 +4,11 @@
 .mb-2,
 .mb-4,
 .input-group {
-    font-size : 16px ;
-};
+    font-size: 16px;
+}
+
+;
 
 .btn {
-    font-size : 16px ;
+    font-size: 16px;
 }

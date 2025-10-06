@@ -199,12 +199,13 @@ const AddProductForm = ({ isOpen, onCancel }) => {
         <div className="col-md-6 mb-3">
           <FormComponent
             id="name"
-            label="Tên sản phẩm (*)"
+            label="Tên sản phẩm"
             type="text"
             placeholder="Nhập tên sản phẩm"
             value={name}
             onChange={handleOnChangeName}
             required
+            enable={true}
           />
         </div>
         <div className="col-6 d-flex justify-content-end align-items-start pt-3">
@@ -245,6 +246,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             type="date"
             value={pubdate}
             onChange={handleOnChangeDate}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -266,6 +268,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             placeholder="gram"
             value={weight}
             onChange={handleOnChangeWeight}
+            enable={true}
           />
         </div>
         <div className="col-md-3 mb-3">
@@ -276,6 +279,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             placeholder="cm"
             value={height}
             onChange={handleOnChangeHeight}
+            enable={true}
           />
         </div>
         <div className="col-md-3 mb-3">
@@ -286,6 +290,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             placeholder="cm"
             value={width}
             onChange={handleOnChangeWidth}
+            enable={true}
           />
         </div>
         <div className="col-md-3 mb-3">
@@ -296,6 +301,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             placeholder="cm"
             value={length}
             onChange={handleOnChangeLength}
+            enable={true}
           />
         </div>
 
@@ -308,6 +314,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             placeholder="Nhập số trang"
             value={page}
             onChange={handleOnChangePage}
+            enable={true}
           />
         </div>
         <div className="col-md-6 mb-3">
@@ -400,12 +407,13 @@ const AddProductForm = ({ isOpen, onCancel }) => {
         <div className="col-md-4 mb-3">
           <FormComponent
             id="price"
-            label="Giá (*)"
+            label="Giá"
             type="number"
             placeholder="Nhập giá"
             value={price}
             onChange={handleOnChangePrice}
             required
+            enable={true}
           />
         </div>
         <div className="col-md-4 mb-3">
@@ -416,6 +424,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             placeholder="Nhập % giảm giá"
             value={discount}
             onChange={handleOnChangeDiscount}
+            enable={true}
           />
         </div>
         <div className="col-md-4 mb-3">

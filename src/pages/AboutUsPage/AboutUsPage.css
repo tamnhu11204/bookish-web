@@ -1,8 +1,8 @@
 .about-us-container {
     font-family: Arial, sans-serif;
     color: #333;
-    background-color: #fff;
-    padding-bottom: 80px;
+    background-color: #F9F6F2;
+    padding: 30px 0px 30px 0px;
 }
 
 .inline-edit-input,
@@ -28,8 +28,7 @@
 
 .about-hero-section {
     text-align: center;
-    padding: 60px 20px;
-    background-color: #fff;
+    background-color: #F9F6F2;
 }
 
 .about-hero-section h1 {

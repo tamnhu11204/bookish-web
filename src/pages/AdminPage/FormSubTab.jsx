@@ -17,20 +17,20 @@ const FormSubTab = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredFormats, setFilteredFormats] = useState([]);
     const queryClient = useQueryClient();
-    
+
     // Hàm thay đổi tên hình thức
     const handleOnChangeName = (value) => setName(value);
-    
+
     // Hàm thay đổi ghi chú
     const handleOnChangeNote = (value) => setNote(value);
-    
+
     // Reset form
     const resetForm = () => {
         setName('');
         setNote('');
         setSelectedFormat(null);
     };
-    
+
     // Kiểm tra form có hợp lệ không
     const validateForm = () => {
         if (!name) {
@@ -40,7 +40,7 @@ const FormSubTab = () => {
         setErrorMessage(""); // Xóa lỗi khi dữ liệu hợp lệ
         return true;
     };
-    
+
     // Hook thêm hình thức
     const addMutation = useMutation(data => FormatService.addFormat(data), {
         onSuccess: () => {
@@ -53,7 +53,7 @@ const FormSubTab = () => {
             message.error("Thêm hình thức thất bại!");
         }
     });
-    
+
     // Hook cập nhật hình thức
     const updateMutation = useMutation(data => {
         if (!selectedFormat) return;
@@ -69,7 +69,7 @@ const FormSubTab = () => {
             message.error("Cập nhật thất bại!");
         }
     });
-    
+
     // Hook xóa hình thức
     const deleteMutation = useMutation(id => FormatService.deleteFormat(id), {
         onSuccess: () => {
@@ -80,18 +80,18 @@ const FormSubTab = () => {
             message.error("Xóa thất bại!");
         }
     });
-    
+
     // Lấy danh sách hình thức từ API
     const getAllFormats = async () => {
         const res = await FormatService.getAllFormat();
         return res.data;
     };
-    
+
     const { isLoading: isLoadingFormat, data: formats } = useQuery({
         queryKey: ['formats'],
         queryFn: getAllFormats,
     });
-    
+
     // Tìm kiếm hình thức theo tên
     useEffect(() => {
         if (formats) {
@@ -102,14 +102,14 @@ const FormSubTab = () => {
             );
         }
     }, [searchTerm, formats]);
-    
+
     // Mở modal để thêm hình thức
     const handleAddFormat = () => {
         resetForm();
         setShowModal(true);
         setSelectedFormat(null);
     };
-    
+
     // Mở modal để sửa hình thức
     const handleEditFormat = (format) => {
         if (!format) return;
@@ -118,7 +118,7 @@ const FormSubTab = () => {
         setSelectedFormat(format);
         setShowModal(true);
     };
-    
+
     // Xử lý xóa hình thức
     const handleDeleteFormat = (format) => {
         if (!format || !format._id) return;
@@ -126,7 +126,7 @@ const FormSubTab = () => {
             deleteMutation.mutate(format._id);
         }
     };
-    
+
     // Xử lý lưu hình thức (thêm mới hoặc cập nhật)
     const onSave = () => {
         if (validateForm()) {
@@ -138,22 +138,22 @@ const FormSubTab = () => {
             }
         }
     };
-    
+
     // Hủy thao tác thêm/sửa hình thức
     const onCancel = () => {
         resetForm();
         setShowModal(false);
     };
-    
+
     // Xử lý thay đổi ô tìm kiếm
     const handleOnChange = (value) => {
         setSearchTerm(value);
     };
-    
+
 
 
     return (
-        <div style={{ padding: '0 20px' }}>
+        <div>
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row align-items-center mb-3">
                     <div className="col-6">

@@ -152,7 +152,7 @@ const DiscountPage = () => {
           <PromotionTab />
         ) : (
           <>
-            <section className="discount-section mb-5">
+            <section className="discount-section">
               <h1 className="site-title">ƯU ĐÃI ĐẶC BIỆT ĐANG CHỜ BẠN</h1>
               <h4 className="section-title">ƯU ĐÃI</h4>
               <div className="row">
@@ -166,7 +166,7 @@ const DiscountPage = () => {
               </div>
             </section>
 
-            <section className="discounted-products-section mb-5">
+            <section className="discounted-products-section">
               <h4 className="section-title">SẢN PHẨM GIẢM GIÁ</h4>
               <div className="d-flex flex-wrap justify-content-center gap-3">
                 {isLoadingProducts ? (<div>Loading...</div>) : discountedProducts.length > 0 ? (

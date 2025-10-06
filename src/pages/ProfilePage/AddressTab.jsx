@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import FormComponent from "../../components/FormComponent/FormComponent";
 import FormSelectComponent from "../../components/FormSelectComponent/FormSelectComponent";
+import * as message from "../../components/MessageComponent/MessageComponent";
 import ModalComponent from "../../components/ModalComponent/ModalComponent";
 import { useMutationHook } from "../../hooks/useMutationHook";
 import * as ListAddressService from "../../services/ListAddressService";
-import { useQuery } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
-import * as message from "../../components/MessageComponent/MessageComponent";
 import * as UserService from '../../services/UserService';
-import Compressor from 'compressorjs';
 
 // Khung chứa các địa chỉ
 const AddressItem = ({ phone, province, district, commune, specificAddress, isDefault, onEdit, onDelete }) => {
   return (
-    <div className="list-group-item d-flex justify-content-between align-items-center" style={formStyle}>
+    <div className="list-group-item d-flex justify-content-between align-items-center" style={{ fontSize: '16px' }}>
       <div>
         {isDefault ? (
           <p style={{ color: 'red' }}>Mặc định</p>
@@ -44,9 +43,6 @@ const AddressItem = ({ phone, province, district, commune, specificAddress, isDe
   );
 };
 
-const formStyle = {
-  fontSize: "16px",
-};
 
 const AddressTab = () => {
   // Lấy dữ liệu user từ Redux
@@ -190,12 +186,12 @@ const AddressTab = () => {
   const handleOnChangeCommune = (e) => setSelectedCommune(e.target.value);
   const handleOnChangeDistrict = (e) => {
     setSelectedDistrict(e.target.value);
-    setSelectedCommune(""); 
+    setSelectedCommune("");
   };
   const handleOnChangeProvince = (e) => {
     setSelectedProvince(e.target.value);
-    setSelectedDistrict(""); 
-    setSelectedCommune(""); 
+    setSelectedDistrict("");
+    setSelectedCommune("");
   };
   const handleOnChangeSpecificAddress = (value) => setSpecificAddress(value);
 
@@ -272,7 +268,7 @@ const AddressTab = () => {
       commune: selectedCommune,
       specificAddress: editSpecificAddress,
     };
-  
+
     try {
       const response = await UserService.updateListAddress(
         getUser?.id,
@@ -290,7 +286,7 @@ const AddressTab = () => {
       console.error("Error updating address: ", error.response ? error.response.data : error);
       alert("Đã xảy ra lỗi khi cập nhật địa chỉ.");
     }
-    
+
   };
 
   const onCancel2 = () => {
@@ -304,10 +300,10 @@ const AddressTab = () => {
     try {
       // eslint-disable-next-line no-restricted-globals
       const isConfirmed = confirm("Bạn có chắc chắn muốn xóa địa chỉ này?");
-        if (isConfirmed) {
-          await UserService.deleteListAddress(getUser?.id,addressId._id,getUser?.access_token);
-          alert("Xóa địa chỉ thành công!");
-        }
+      if (isConfirmed) {
+        await UserService.deleteListAddress(getUser?.id, addressId._id, getUser?.access_token);
+        alert("Xóa địa chỉ thành công!");
+      }
     } catch (error) {
       console.error("Error deleting address: ", error);
       alert("Đã xảy ra lỗi khi xóa địa chỉ.");
@@ -315,13 +311,13 @@ const AddressTab = () => {
   };
 
   return (
-    <div className="container mt-4" style={formStyle}>
+    <div className="container" style={{ padding: '0 20px', fontSize: '16px' }}>
       <div className="title-section">
         <h3 className="text mb-0">ĐỊA CHỈ</h3>
       </div>
-      <div className="content-section" style={{ marginTop: "30px",  marginBottom: "30px" }}>
+      <div className="content-section" style={{ marginTop: "30px", marginBottom: "30px" }}>
 
-            <ButtonComponent textButton="Thêm địa chỉ" icon={<i className="bi bi-plus-circle"></i>} onClick={handleAddListAddress} />
+        <ButtonComponent textButton="Thêm địa chỉ" icon={<i className="bi bi-plus-circle"></i>} onClick={handleAddListAddress} />
 
       </div>
 
@@ -342,7 +338,7 @@ const AddressTab = () => {
               isDefault={item.isDefault}
               onEdit={() => handleEditAddress(item)}
               onDelete={() => handleDeleteAddress(item)}
-              //onDelete={() => handleDeleteAddress(item._id)}
+            //onDelete={() => handleDeleteAddress(item._id)}
             />
           ))
         )}

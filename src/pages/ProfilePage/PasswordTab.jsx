@@ -8,7 +8,7 @@ import * as message from "../../components/MessageComponent/MessageComponent";
 import LoadingComponent from "../../components/LoadingComponent/LoadingComponent";
 
 const PasswordTab = () => {
-    const formStyle = { fontSize: "16px" };
+    const formStyle = { fontSize: "16px", backgroundColor: "#ffffff" };
     const user = useSelector((state) => state.user);
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -27,7 +27,7 @@ const PasswordTab = () => {
         const response = await UserService.resetPassword(id, { oldPassword, newPassword }, access_token);
         return response;
     });
-    
+
 
     const { data, isLoading, isSuccess, isError } = mutation;
 
@@ -57,7 +57,7 @@ const PasswordTab = () => {
         }
     }, [data?.status, isError, isSuccess]);
 
-    const handleUpdate = async() => {
+    const handleUpdate = async () => {
         if (newPassword !== confirmPassword) {
             setErrorMessage("Xác nhận mật khẩu không khớp! Vui lòng nhập lại.");
             return;
@@ -69,7 +69,7 @@ const PasswordTab = () => {
             newPassword,
             access_token: user?.access_token,
         });
-        console.log('data',user?.id)
+        console.log('data', user?.id)
     };
 
     return (
@@ -86,7 +86,7 @@ const PasswordTab = () => {
                         type="password"
                         value={oldPassword}
                         onChange={handleOnChangeOld}
-                        enable = {true}
+                        enable={true}
                     />
                     <FormComponent
                         id="newPassword"
@@ -95,7 +95,7 @@ const PasswordTab = () => {
                         type="password"
                         value={newPassword}
                         onChange={handleOnChangeNew}
-                        enable = {true}
+                        enable={true}
                     />
                     <FormComponent
                         id="confirmPassword"
@@ -104,7 +104,7 @@ const PasswordTab = () => {
                         type="password"
                         value={confirmPassword}
                         onChange={handleOnChangeConfirm}
-                        enable = {true}
+                        enable={true}
                     />
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
                         {errorMessage && (

@@ -1,5 +1,7 @@
 .discount-page {
     font-size: 16px;
+    background-color: #F9F6F2;
+    padding: 0px 0px 30px 0px;
 }
 
 .discount-header {
@@ -19,8 +21,7 @@
     color: #333;
 }
 
-.discount-section,
-.discounted-products-section {
+.discount-section {
     margin-bottom: 40px;
 }
 
@@ -55,7 +56,7 @@
 
 .text-muted {
     color: #6c757d;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .code-input {

@@ -55,16 +55,19 @@ const StaticPageManagement = () => {
   };
 
   return (
-    <div>
+    <div style={{ padding: '0 20px' }}>
+      <div className="title-section">
+        <h3 className="text mb-0">TRANG HỖ TRỢ KHÁCH HÀNG</h3>
+      </div>
       <h3 className="title-profile">Chính sách hỗ trợ</h3>
       <TextEditor value={policy} onChange={setPolicy} />
-      <div className="card-footer" style={{ marginTop: '20px' }}>
+      <div className="card-footer" style={{ marginTop: '20px', textAlign: "right" }}>
         <ButtonComponent textButton="Cập nhật" onClick={handleUpdatePolicy} />
       </div>
 
       <h3 className="title-profile">Hướng dẫn đặt hàng</h3>
       <TextEditor value={instruction} onChange={setInstruction} />
-      <div className="card-footer" style={{ marginTop: '20px' }}>
+      <div className="card-footer" style={{ marginBottom: "30px", marginTop: '20px', textAlign: "right" }}>
         <ButtonComponent textButton="Cập nhật" onClick={handleUpdateInstruction} />
       </div>
     </div>
