@@ -45,7 +45,7 @@ const ProductTab = ({ selectedCategoryId }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 20;
     const queryClient = useQueryClient();
 
     const { isLoading: isLoadingCategories, data: categories } = useQuery({
@@ -101,6 +101,37 @@ const ProductTab = ({ selectedCategoryId }) => {
     //     </div>
     // );
 
+    const maxVisible = 5;
+
+    const pageNumbers = [];
+
+    if (totalPages <= maxVisible) {
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+    } else {
+        pageNumbers.push(1);
+
+        if (currentPage > 3) {
+            pageNumbers.push('...');
+        }
+
+        const startPage = Math.max(2, currentPage - 2);
+        const endPage = Math.min(totalPages - 1, currentPage + 2);
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        if (currentPage < totalPages - 2) {
+            pageNumbers.push('...');
+        }
+
+        if (endPage < totalPages) {
+            pageNumbers.push(totalPages);
+        }
+    }
+
     const paginationButtons = (
         <div className="pagination-category d-flex justify-content-center gap-2" style={{ marginBottom: "30px" }}>
             {currentPage > 1 && (
@@ -109,9 +140,15 @@ const ProductTab = ({ selectedCategoryId }) => {
                     onClick={() => setCurrentPage(currentPage - 1)}
                 />
             )}
-            {[...Array(totalPages)].map((_, index) => {
-                const pageNumber = index + 1;
-                return currentPage === pageNumber ? (
+            {pageNumbers.map((page, index) => {
+                if (page === '...') {
+                    return <ButtonComponent2
+                        textButton={"..."}
+                    />
+                }
+                const pageNumber = page;
+                const isActive = currentPage === pageNumber;
+                return isActive ? (
                     <ButtonComponent
                         key={pageNumber}
                         textButton={String(pageNumber)}
@@ -199,8 +236,8 @@ const ProductTab = ({ selectedCategoryId }) => {
                         {isLoadingProduct || isLoadingCategories ? (
                             <tr><td colSpan="7" className="text-center"><LoadingComponent /></td></tr>
                         ) : paginatedProducts.length > 0 ? (paginatedProducts
-  .filter((product) => product.isDeleted !== true) // chỉ lấy sản phẩm chưa xóa
-  .map((product) => (
+                            .filter((product) => product.isDeleted !== true) // chỉ lấy sản phẩm chưa xóa
+                            .map((product) => (
                                 <tr key={product._id}>
                                     <td>{product.img?.[0] ? (<img src={product.img[0]} alt={product.name} style={{ width: '80px', height: '100px', objectFit: 'cover' }} onError={(e) => (e.target.src = '/default-image.png')} />) : ('No image')}</td>
                                     <td title={product.name}>{product.name.length > 20 ? `${product.name.slice(0, 20)}...` : product.name}</td>

@@ -38,7 +38,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   const [priceEntry, setPriceEntry] = useState(0);
   const [previewImage, setPreviewImage] = useState([]);
 
-  const [height, setHeight] = useState(0);
+  const [dimensions, setDimensions] = useState(0);
   const [width, setWidth] = useState(0);
   const [length, setLength] = useState(0);
   const [price, setPrice] = useState(0);
@@ -68,9 +68,9 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
       setName(data?.data.name || "");
       setWeight(data?.data.weight || "");
       setWidth(data?.data.width || "");
-      setHeight(data?.data.height || "");
+      setDimensions(data?.data.dimensions || "");
       setLength(data?.data.length || "");
-      //setDate(data?.data.publishDate || "");
+      setDate(data?.data.publishYear || "");
       setPage(data?.data.page || "");
       setPrice(data?.data.price || "");
       setDiscount(data?.data.discount || "");
@@ -84,8 +84,8 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
       setSelectedSupplier(data?.data.supplier || "");
       setSelectedUnit(data?.data.unit || "");
       setSelectedAuthor(data?.data.author || "");
-      const publishdate = new Date(data?.data.publishDate).toISOString().split('T')[0];
-      setDate(publishdate);
+      // const publishdate = new Date(data?.data.publishDate).toISOString().split('T')[0];
+      // setDate(publishdate);
     };
     fetchProduct();
   }, [IDProduct, setID]);
@@ -96,9 +96,9 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
   const handleOnChangeDate = (value) => setDate(value);
   const handleOnChangeWeight = (value) => setWeight(value);
   const handleOnChangePage = (value) => setPage(value);
-  const handleOnChangeHeight = (value) => setHeight(value);
-  const handleOnChangeWidth = (value) => setWidth(value);
-  const handleOnChangeLength = (value) => setLength(value);
+  const handleOnChangeDimensions = (value) => setDimensions(value);
+  // const handleOnChangeWidth = (value) => setWidth(value);
+  // const handleOnChangeLength = (value) => setLength(value);
   const handleOnChangePrice = (value) => {
     setPrice(value);
     const calculatedPriceEntry = (value * (100 - discount)) / 100;
@@ -137,11 +137,11 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
 
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("publishDate", pubdate);
+    formData.append("publishYear", pubdate);
     formData.append("weight", weight);
-    formData.append("height", height);
-    formData.append("width", width);
-    formData.append("length", length);
+    formData.append("dimensions", dimensions);
+    // formData.append("width", width);
+    // formData.append("length", length);
     formData.append("page", page);
     formData.append("description", "");
     formData.append("price", price);
@@ -450,7 +450,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
           <FormComponent
             id="nameLanguageInput"
             label="Năm xuất bản"
-            type="date"
+            type="number"
             placeholder="Nhập năm xuất bản"
             value={pubdate}
             onChange={handleOnChangeDate}
@@ -486,37 +486,11 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
           <label className="form-label"></label>
           <FormComponent
             id="nameLanguageInput"
-            label="Chiều cao"
-            type="number"
-            placeholder="Nhập chiều cao (cm)"
-            value={height}
-            onChange={handleOnChangeHeight}
-            required={true}
-            enable={true}
-          />
-        </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-            id="nameLanguageInput"
-            label="Chiều rộng"
-            type="number"
-            placeholder="Nhập chiều rộng"
-            value={width}
-            onChange={handleOnChangeWidth}
-            required={true}
-            enable={true}
-          />
-        </div>
-        <div className="col-md-6 mb-3">
-          <label className="form-label"></label>
-          <FormComponent
-            id="nameLanguageInput"
-            label="Chiều dài"
-            type="number"
-            placeholder="Nhập chiều dài (cm)"
-            value={length}
-            onChange={handleOnChangeLength}
+            label="Kích thước"
+            type="text"
+            placeholder="Nhập kích thước"
+            value={dimensions}
+            onChange={handleOnChangeDimensions}
             required={true}
             enable={true}
           />
@@ -568,7 +542,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
             required={true}
           />
         </div>
-        <div className="col-md-6 mb-3">
+        {/* <div className="col-md-6 mb-3">
           <label className="form-label"></label>
           <FormSelectComponent
             label="Đơn vị"
@@ -578,7 +552,7 @@ const ProductDetailForm = ({ isOpen, IDProduct, onCancel }) => {
             onChange={handleOnChangeUnit}
             required={true}
           />
-        </div>
+        </div> */}
 
         <div className="mb-3">
           <label htmlFor="image" className="form-label" style={{ fontSize: '16px' }}>Hình ảnh</label>

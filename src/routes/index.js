@@ -22,7 +22,6 @@ import PolicyPage from "../pages/PolicyPage/PolicyPage";
 import ForgotPassword from "../pages/ForgotPasswordPage/ForgotPassword";
 import EnterOTP from "../pages/ForgotPasswordPage/EnterOTP";
 import EnterNewPassword from "../pages/ForgotPasswordPage/EnterNewPassword";
-import AdminChatPage from "../pages/AdminChat/AdminChatPage";
 import ReviewFeedbackChatbot from "../pages/ReviewFeedbackChatbot/ReviewFeedbackChatbot";
 import FavoriteProducts from "../pages/ProfilePage/ProductTab";
 import AboutUsPage from "../pages/AboutUsPage/AboutUsPage";
@@ -166,12 +165,6 @@ export const routes = [
     {
         path: '/admin/:tab?',
         page: AdminPage,
-        isPrivate: true,
-    },
-    {
-        path: '/admin/livechat',
-        page: AdminChatPage,
-        isShowHeader: true,
         isPrivate: true,
     },
     {
