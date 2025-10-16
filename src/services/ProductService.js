@@ -1,33 +1,33 @@
 import axios from "axios"
 
-export const addProduct=async(data)=>{
+export const addProduct = async (data) => {
   const res = await axios.post(
-      `${process.env.REACT_APP_API_URL_BACKEND}/product/create`,
-      data,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data" ,
-        },
-      }
-    );
-    return res.data;
+    `${process.env.REACT_APP_API_URL_BACKEND}/product/create`,
+    data,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return res.data;
 }
 
 export const updateProduct = async (id, formData) => {
-console.log("Gửi request update:", id, [...formData.entries()]);
+  console.log("Gửi request update:", id, [...formData.entries()]);
 
-const res = await axios.put(
+  const res = await axios.put(
     `${process.env.REACT_APP_API_URL_BACKEND}/product/update/${id}`,
     formData,
     {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        },
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     }
-);
+  );
 
-console.log("Kết quả response:", res.data);
-return res.data;
+  console.log("Kết quả response:", res.data);
+  return res.data;
 };
 
 export const deleteProduct = async (id) => {
@@ -35,9 +35,14 @@ export const deleteProduct = async (id) => {
   return res.data
 }
 
-export const getAllProduct = async () => {
-  const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/product/get-all`);
-  return res.data;
+export const getAllProduct = async (queryString = '') => {
+  try {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/product/get-all${queryString}`);
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw error;
+  }
 };
 
 export const getDetailProduct = async (id) => {
@@ -65,8 +70,8 @@ export const updateView = async (id) => {
   return res.data;
 };
 
-export const updateProductStock = async (id,data) => {
-  const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/update-stock/${id}`,data);
+export const updateProductStock = async (id, data) => {
+  const res = await axios.put(`${process.env.REACT_APP_API_URL_BACKEND}/product/update-stock/${id}`, data);
   return res.data;
 };
 

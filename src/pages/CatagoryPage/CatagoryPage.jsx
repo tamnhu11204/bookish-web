@@ -16,6 +16,7 @@ import CategoryTab from '../AdminPage/CategoryTab';
 import ProductTab from '../AdminPage/ProductTab';
 import './CatagoryPage.css';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
+import { debounce } from 'lodash'; // Thêm lodash để debounce
 
 const CatagoryPage = () => {
   const navigate = useNavigate();
@@ -27,7 +28,6 @@ const CatagoryPage = () => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [selectedFormats, setSelectedFormats] = useState([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9;
   const [totalPages, setTotalPages] = useState(1);
@@ -37,158 +37,96 @@ const CatagoryPage = () => {
   const [isManagingPromotions, setIsManagingPromotions] = useState(false);
   const user = useSelector(state => state.user);
   const isAdmin = user?.isAdmin === true;
-
   const [selectedAdminCategoryId, setSelectedAdminCategoryId] = useState(null);
-  // Lấy tất cả sản phẩm
-  const getAllProduct = async () => {
-    try {
-      const res = await ProductService.getAllProduct();
-      console.log('Product API response:', res);
-      return res.data;
-    } catch (error) {
-      console.error('Lỗi khi lấy sản phẩm:', error);
-      throw error;
-    }
-  };
 
-  const { isLoading: isLoadingPro, data: products } = useQuery({
-    queryKey: ['products'],
-    queryFn: getAllProduct,
-  });
+  // Debounce author search
+  const debouncedSetAuthorSearch = debounce(setAuthorSearch, 300);
 
-  // Lấy danh mục dạng cây
-  const getTreeCategory = async () => {
-    try {
-      const res = await CategoryService.getTreeCategory();
-      return res.data;
-    } catch (error) {
-      console.error('Lỗi khi lấy danh mục:', error);
-      throw error;
-    }
-  };
-
+  // Lấy tất cả danh mục, nhà xuất bản, tác giả, ngôn ngữ, hình thức (giữ nguyên)
   const { isLoading: isLoadingCategory, data: categoryTree } = useQuery({
     queryKey: ['categoryTree'],
-    queryFn: getTreeCategory,
-  });
-
-  // Lấy danh mục phẳng để hỗ trợ select all
-  const getAllCategory = async () => {
-    try {
-      const res = await CategoryService.getAllCategory();
+    queryFn: async () => {
+      const res = await CategoryService.getTreeCategory();
       return res.data;
-    } catch (error) {
-      console.error('Lỗi khi lấy danh mục:', error);
-      throw error;
     }
-  };
+  });
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: getAllCategory,
+    queryFn: async () => {
+      const res = await CategoryService.getAllCategory();
+      return res.data;
+    }
   });
 
   const AllCategory = Array.isArray(categories)
-    ? categories.map((categorie) => ({
+    ? categories.map(categorie => ({
       value: categorie._id,
-      label: categorie.name,
+      label: categorie.name
     }))
     : [];
-
-  // Lấy nhà xuất bản
-  const getAllPublisher = async () => {
-    try {
-      const res = await PublisherService.getAllPublisher();
-      return res.data;
-    } catch (error) {
-      console.error('Lỗi khi lấy nhà xuất bản:', error);
-      throw error;
-    }
-  };
 
   const { isLoading: isLoadingPublisher, data: publishers } = useQuery({
     queryKey: ['publishers'],
-    queryFn: getAllPublisher,
+    queryFn: async () => {
+      const res = await PublisherService.getAllPublisher();
+      return res.data;
+    }
   });
 
   const AllPub = Array.isArray(publishers)
-    ? publishers.map((publisher) => ({
+    ? publishers.map(publisher => ({
       value: publisher._id,
-      label: publisher.name,
+      label: publisher.name
     }))
     : [];
-
-  // Lấy tác giả
-  const getAllAuthor = async () => {
-    try {
-      const res = await AuthorService.getAllAuthor();
-      return res.data;
-    } catch (error) {
-      console.error('Lỗi khi lấy tác giả:', error);
-      throw error;
-    }
-  };
 
   const { isLoading: isLoadingAuthor, data: authors } = useQuery({
     queryKey: ['authors'],
-    queryFn: getAllAuthor,
+    queryFn: async () => {
+      const res = await AuthorService.getAllAuthor();
+      return res.data;
+    }
   });
 
   const AllAuthors = Array.isArray(authors)
-    ? authors.map((author) => ({
+    ? authors.map(author => ({
       value: author._id,
-      label: author.name,
+      label: author.name
     }))
     : [];
 
-  const filteredAuthors = AllAuthors.filter((author) =>
+  const filteredAuthors = AllAuthors.filter(author =>
     author.label.toLowerCase().includes(authorSearch.toLowerCase())
   );
 
-  // Lấy ngôn ngữ
-  const getAllLanguage = async () => {
-    try {
-      const res = await LanguageService.getAllLanguage();
-      return res.data;
-    } catch (error) {
-      console.error('Lỗi khi lấy ngôn ngữ:', error);
-      throw error;
-    }
-  };
-
   const { isLoading: isLoadingLanguage, data: languages } = useQuery({
     queryKey: ['languages'],
-    queryFn: getAllLanguage,
+    queryFn: async () => {
+      const res = await LanguageService.getAllLanguage();
+      return res.data;
+    }
   });
 
   const AllLanguages = Array.isArray(languages)
-    ? languages.map((language) => ({
+    ? languages.map(language => ({
       value: language._id,
-      label: language.name,
+      label: language.name
     }))
     : [];
 
-  // Lấy hình thức
-  const getAllFormat = async () => {
-    try {
-      const res = await FormatService.getAllFormat();
-
-      return res.data;
-    } catch (error) {
-      console.error('Lỗi khi lấy hình thức:', error);
-      throw error;
-    }
-  };
-
   const { isLoading: isLoadingFormat, data: formats } = useQuery({
     queryKey: ['formats'],
-    queryFn: getAllFormat,
+    queryFn: async () => {
+      const res = await FormatService.getAllFormat();
+      return res.data;
+    }
   });
 
   const AllFormat = Array.isArray(formats)
-    ? formats.map((format) => ({
+    ? formats.map(format => ({
       value: format._id,
-      label: format.name,
+      label: format.name
     }))
     : [];
 
@@ -206,40 +144,35 @@ const CatagoryPage = () => {
   const getAllCategoryIds = (categories, selectedIds) => {
     if (!categories || !selectedIds?.length) return selectedIds || [];
     const allIds = new Set(selectedIds);
-    const traverse = (cats) => {
-      cats.forEach((cat) => {
+    const traverse = cats => {
+      cats.forEach(cat => {
         if (selectedIds.includes(cat._id)) {
           allIds.add(cat._id);
           if (cat.children && cat.children.length > 0) {
-            cat.children.forEach((child) => {
-              allIds.add(child._id);
-            });
+            cat.children.forEach(child => allIds.add(child._id));
             traverse(cat.children);
           }
-        } else {
-          if (cat.children) {
-            traverse(cat.children);
-          }
+        } else if (cat.children) {
+          traverse(cat.children);
         }
       });
     };
     traverse(categories);
-    const result = Array.from(allIds);
-    return result;
+    return Array.from(allIds);
   };
 
   // Toggle mở/đóng category
-  const toggleCategory = (categoryId) => {
-    setOpenedCategories((prev) =>
+  const toggleCategory = categoryId => {
+    setOpenedCategories(prev =>
       prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
+        ? prev.filter(id => id !== categoryId)
         : [...prev, categoryId]
     );
   };
 
-  // Render danh mục dạng cây với +/- bên phải
+  // Render danh mục dạng cây
   const renderCategoryTree = (categories, level = 0) => {
-    return categories.map((cat) => (
+    return categories.map(cat => (
       <div key={cat._id} style={{ marginLeft: `${level * 20}px` }}>
         <div className="d-flex align-items-center justify-content-between">
           <div className="form-check flex-grow-1">
@@ -258,69 +191,71 @@ const CatagoryPage = () => {
           {cat.children && cat.children.length > 0 && (
             <span
               onClick={() => toggleCategory(cat._id)}
-              className='plus_minus'
+              className="plus_minus"
             >
               {openedCategories.includes(cat._id) ? '-' : '+'}
             </span>
           )}
         </div>
-        {cat.children && openedCategories.includes(cat._id) && renderCategoryTree(cat.children, level + 1)}
+        {cat.children &&
+          openedCategories.includes(cat._id) &&
+          renderCategoryTree(cat.children, level + 1)}
       </div>
     ));
   };
 
   // Xử lý sự kiện
-  const handleCategoryChange = (categoryValue) => {
-    setSelectedCategories((prev) =>
+  const handleCategoryChange = categoryValue => {
+    setSelectedCategories(prev =>
       prev.includes(categoryValue)
-        ? prev.filter((value) => value !== categoryValue)
+        ? prev.filter(value => value !== categoryValue)
         : [...prev, categoryValue]
     );
     setSelectAllCategories(false);
     setCurrentPage(1);
   };
 
-  const handlePublisherChange = (publisherValue) => {
-    setSelectedPublishers((prev) =>
+  const handlePublisherChange = publisherValue => {
+    setSelectedPublishers(prev =>
       prev.includes(publisherValue)
-        ? prev.filter((value) => value !== publisherValue)
+        ? prev.filter(value => value !== publisherValue)
         : [...prev, publisherValue]
     );
     setCurrentPage(1);
   };
 
-  const handleAuthorChange = (authorValue) => {
-    setSelectedAuthors((prev) =>
+  const handleAuthorChange = authorValue => {
+    setSelectedAuthors(prev =>
       prev.includes(authorValue)
-        ? prev.filter((value) => value !== authorValue)
+        ? prev.filter(value => value !== authorValue)
         : [...prev, authorValue]
     );
     setCurrentPage(1);
   };
 
-  const handleLanguageChange = (languageValue) => {
-    setSelectedLanguages((prev) =>
+  const handleLanguageChange = languageValue => {
+    setSelectedLanguages(prev =>
       prev.includes(languageValue)
-        ? prev.filter((value) => value !== languageValue)
+        ? prev.filter(value => value !== value)
         : [...prev, languageValue]
     );
     setCurrentPage(1);
   };
 
-  const handleFormatChange = (formatValue) => {
-    setSelectedFormats((prev) =>
+  const handleFormatChange = formatValue => {
+    setSelectedFormats(prev =>
       prev.includes(formatValue)
-        ? prev.filter((value) => value !== formatValue)
+        ? prev.filter(value => value !== formatValue)
         : [...prev, formatValue]
     );
     setCurrentPage(1);
   };
 
-  const handlePriceRangeChange = (range) => {
+  const handlePriceRangeChange = range => {
     const rangeStr = `${range[0]}-${range[1] === Infinity ? 'Infinity' : range[1]}`;
-    setSelectedPriceRanges((prev) =>
+    setSelectedPriceRanges(prev =>
       prev.includes(rangeStr)
-        ? prev.filter((r) => r !== rangeStr)
+        ? prev.filter(r => r !== rangeStr)
         : [...prev, rangeStr]
     );
     setCurrentPage(1);
@@ -328,7 +263,7 @@ const CatagoryPage = () => {
 
   const handleSelectAllCategoriesChange = () => {
     if (!selectAllCategories) {
-      const allCategoryValues = AllCategory.map((category) => category.value);
+      const allCategoryValues = AllCategory.map(category => category.value);
       setSelectedCategories(allCategoryValues);
     } else {
       setSelectedCategories([]);
@@ -340,22 +275,22 @@ const CatagoryPage = () => {
   const removeFilter = (type, value) => {
     switch (type) {
       case 'category':
-        setSelectedCategories((prev) => prev.filter((v) => v !== value));
+        setSelectedCategories(prev => prev.filter(v => v !== value));
         break;
       case 'price':
-        setSelectedPriceRanges((prev) => prev.filter((v) => v !== value));
+        setSelectedPriceRanges(prev => prev.filter(v => v !== value));
         break;
       case 'author':
-        setSelectedAuthors((prev) => prev.filter((v) => v !== value));
+        setSelectedAuthors(prev => prev.filter(v => v !== value));
         break;
       case 'publisher':
-        setSelectedPublishers((prev) => prev.filter((v) => v !== value));
+        setSelectedPublishers(prev => prev.filter(v => v !== value));
         break;
       case 'language':
-        setSelectedLanguages((prev) => prev.filter((v) => v !== value));
+        setSelectedLanguages(prev => prev.filter(v => v !== value));
         break;
       case 'format':
-        setSelectedFormats((prev) => prev.filter((v) => v !== value));
+        setSelectedFormats(prev => prev.filter(v => v !== value));
         break;
       default:
         break;
@@ -363,123 +298,71 @@ const CatagoryPage = () => {
     setCurrentPage(1);
   };
 
-  const handleSortChange = (sortValue) => {
+  const handleSortChange = sortValue => {
     setSelectedSort(sortValue);
     setCurrentPage(1);
   };
 
-  const sortProducts = (products, selectedSort) => {
-    if (!selectedSort || products.length === 0) return products;
-    const sortedProducts = [...products];
-    switch (selectedSort) {
-      case 'price-asc':
-        sortedProducts.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        sortedProducts.sort((a, b) => b.price - b.price);
-        break;
-      case 'name-asc':
-        sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'name-desc':
-        sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case 'sold':
-        sortedProducts.sort((a, b) => (b.sold || 0) - (a.sold || 0));
-        break;
-      case 'new':
-        sortedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        break;
-      default:
-        break;
-    }
-    return sortedProducts;
+  // API call
+  const getFilteredProducts = async () => {
+    const allCategoryIds = getAllCategoryIds(categoryTree, selectedCategories);
+    const filters = {
+      categories: allCategoryIds,
+      publishers: selectedPublishers,
+      authors: selectedAuthors,
+      languages: selectedLanguages,
+      formats: selectedFormats,
+      priceRanges: selectedPriceRanges
+    };
+    const sort = selectedSort ? [selectedSort.split('-')[0], selectedSort.split('-')[1]] : null;
+    const params = new URLSearchParams({
+      limit: productsPerPage,
+      page: currentPage,
+      sort: sort ? JSON.stringify(sort) : '',
+      filters: JSON.stringify(filters)
+    });
+    const res = await ProductService.getAllProduct(`?${params.toString()}`);
+    setTotalPages(res.totalPage);
+    return res.data;
   };
 
-  // Lọc sản phẩm
-  useEffect(() => {
-    if (products && products.length > 0 && categoryTree) {
-      const allCategoryIds = getAllCategoryIds(categoryTree, selectedCategories);
+  const { isLoading: isLoadingPro, data: products } = useQuery({
+    queryKey: [
+      'products',
+      currentPage,
+      selectedCategories,
+      selectedPublishers,
+      selectedAuthors,
+      selectedLanguages,
+      selectedFormats,
+      selectedPriceRanges,
+      selectedSort
+    ],
+    queryFn: getFilteredProducts
+  });
 
-      let filtered = products.filter((product) => {
-        const productCategoryId = product.category?._id || product.category;
-        const categoryMatch = selectedCategories.length === 0
-          ? true
-          : allCategoryIds.includes(productCategoryId);
-
-        console.log(`Product ${product._id}: category object=${JSON.stringify(product.category)}, categoryId='${productCategoryId}', allCategoryIds includes? ${allCategoryIds.includes(productCategoryId)}, match: ${categoryMatch}`);
-
-        const publisherMatch = selectedPublishers.length === 0
-          ? true
-          : selectedPublishers.includes(product.publisher?._id || product.publisher);
-        const authorMatch = selectedAuthors.length === 0
-          ? true
-          : selectedAuthors.includes(product.author?._id || product.author);
-        const languageMatch = selectedLanguages.length === 0
-          ? true
-          : selectedLanguages.includes(product.language?._id || product.language);
-        const formatMatch = selectedFormats.length === 0
-          ? true
-          : selectedFormats.includes(product.format?._id || product.format);
-        const priceAfterDiscount = (product.price * (100 - (product.discount || 0))) / 100;
-        const priceMatch = selectedPriceRanges.length === 0
-          ? true
-          : selectedPriceRanges.some((rangeStr) => {
-            const [min, max] = rangeStr.split('-').map((num) => num === 'Infinity' ? Infinity : Number(num));
-            return priceAfterDiscount >= min && priceAfterDiscount <= (isFinite(max) ? max : Infinity);
-          });
-
-        return categoryMatch && publisherMatch && authorMatch && languageMatch && formatMatch && priceMatch;
-      });
-
-
-      filtered = sortProducts(filtered, selectedSort);
-      setTotalPages(Math.ceil(filtered.length / productsPerPage));
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts([]);
-      setTotalPages(1);
-    }
-  }, [products, categoryTree, selectedCategories, selectedPublishers, selectedAuthors, selectedLanguages, selectedFormats, selectedPriceRanges, selectedSort]);
-
-  const handleOnClickProduct = (id) => {
+  const handleOnClickProduct = id => {
     navigate(`/product-detail/${id}`);
   };
 
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * productsPerPage;
-    return filteredProducts.slice(startIndex, startIndex + productsPerPage);
-  }, [currentPage, filteredProducts]);
+  const paginatedProducts = useMemo(() => products || [], [products]);
 
   const maxVisible = 5;
-
   const pageNumbers = [];
-
   if (totalPages <= maxVisible) {
     for (let i = 1; i <= totalPages; i++) {
       pageNumbers.push(i);
     }
   } else {
     pageNumbers.push(1);
-
-    if (currentPage > 3) {
-      pageNumbers.push('...');
-    }
-
+    if (currentPage > 3) pageNumbers.push('...');
     const startPage = Math.max(2, currentPage - 2);
     const endPage = Math.min(totalPages - 1, currentPage + 2);
-
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i);
     }
-
-    if (currentPage < totalPages - 2) {
-      pageNumbers.push('...');
-    }
-
-    if (endPage < totalPages) {
-      pageNumbers.push(totalPages);
-    }
+    if (currentPage < totalPages - 2) pageNumbers.push('...');
+    if (endPage < totalPages) pageNumbers.push(totalPages);
   }
 
   const paginationButtons = (
@@ -526,14 +409,15 @@ const CatagoryPage = () => {
       {isLoadingPro ? (
         <LoadingComponent />
       ) : paginatedProducts.length > 0 ? (
-        (paginatedProducts
-          .filter((product) => product.isDeleted !== true)).map((product) => (
+        paginatedProducts
+          .filter(product => product.isDeleted !== true)
+          .map(product => (
             <CardProductComponent
               key={product._id}
               id={product._id}
               img={product.img[0]}
               proName={product.name}
-              currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
+              currentPrice={((product.price * (100 - (product.discount || 0))) / 100).toLocaleString()}
               originalPrice={product.price}
               sold={product.sold}
               star={product.star}
@@ -552,15 +436,15 @@ const CatagoryPage = () => {
 
   const selectedFiltersDisplay = (
     <div className="selected-filters mb-3">
-      {selectedCategories.map((id) => {
-        const label = AllCategory.find((c) => c.value === id)?.label || 'Unknown Category';
+      {selectedCategories.map(id => {
+        const label = AllCategory.find(c => c.value === id)?.label || 'Unknown Category';
         return (
           <span key={`cat-${id}`} className="badge bg-secondary me-2">
             {label} <button type="button" onClick={() => removeFilter('category', id)}>×</button>
           </span>
         );
       })}
-      {selectedPriceRanges.map((range) => {
+      {selectedPriceRanges.map(range => {
         const displayRange = range.replace('-', 'đ - ').replace('Infinity', 'trở lên') + 'đ';
         return (
           <span key={`price-${range}`} className="badge bg-secondary me-2">
@@ -568,32 +452,32 @@ const CatagoryPage = () => {
           </span>
         );
       })}
-      {selectedAuthors.map((id) => {
-        const label = AllAuthors.find((a) => a.value === id)?.label || 'Unknown Author';
+      {selectedAuthors.map(id => {
+        const label = AllAuthors.find(a => a.value === id)?.label || 'Unknown Author';
         return (
           <span key={`auth-${id}`} className="badge bg-secondary me-2">
             {label} <button type="button" onClick={() => removeFilter('author', id)}>×</button>
           </span>
         );
       })}
-      {selectedPublishers.map((id) => {
-        const label = AllPub.find((p) => p.value === id)?.label || 'Unknown Publisher';
+      {selectedPublishers.map(id => {
+        const label = AllPub.find(p => p.value === id)?.label || 'Unknown Publisher';
         return (
           <span key={`pub-${id}`} className="badge bg-secondary me-2">
             {label} <button type="button" onClick={() => removeFilter('publisher', id)}>×</button>
           </span>
         );
       })}
-      {selectedLanguages.map((id) => {
-        const label = AllLanguages.find((l) => l.value === id)?.label || 'Unknown Language';
+      {selectedLanguages.map(id => {
+        const label = AllLanguages.find(l => l.value === id)?.label || 'Unknown Language';
         return (
           <span key={`lang-${id}`} className="badge bg-secondary me-2">
             {label} <button type="button" onClick={() => removeFilter('language', id)}>×</button>
           </span>
         );
       })}
-      {selectedFormats.map((id) => {
-        const label = AllFormat.find((f) => f.value === id)?.label || 'Unknown Format';
+      {selectedFormats.map(id => {
+        const label = AllFormat.find(f => f.value === id)?.label || 'Unknown Format';
         return (
           <span key={`fmt-${id}`} className="badge bg-secondary me-2">
             {label} <button type="button" onClick={() => removeFilter('format', id)}>×</button>
@@ -605,48 +489,23 @@ const CatagoryPage = () => {
 
   const sortButtons = (
     <div className="sort-buttons d-flex gap-2 mb-3 flex-wrap">
-      <button
-        type="button"
-        onClick={() => handleSortChange('name-asc')}
-        className={selectedSort === 'name-asc' ? 'active' : ''}
-      >
-        Tên A-Z
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSortChange('name-desc')}
-        className={selectedSort === 'name-desc' ? 'active' : ''}
-      >
-        Tên Z-A
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSortChange('new')}
-        className={selectedSort === 'new' ? 'active' : ''}
-      >
-        Hàng mới
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSortChange('price-asc')}
-        className={selectedSort === 'price-asc' ? 'active' : ''}
-      >
-        Giá thấp đến cao
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSortChange('price-desc')}
-        className={selectedSort === 'price-desc' ? 'active' : ''}
-      >
-        Giá cao đến thấp
-      </button>
-      <button
-        type="button"
-        onClick={() => handleSortChange('sold')}
-        className={selectedSort === 'sold' ? 'active' : ''}
-      >
-        Bán chạy
-      </button>
+      {[
+        { value: 'name-asc', label: 'Tên A-Z' },
+        { value: 'name-desc', label: 'Tên Z-A' },
+        { value: 'new', label: 'Hàng mới' },
+        { value: 'price-asc', label: 'Giá thấp đến cao' },
+        { value: 'price-desc', label: 'Giá cao đến thấp' },
+        { value: 'sold', label: 'Bán chạy' }
+      ].map(({ value, label }) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => handleSortChange(value)}
+          className={selectedSort === value ? 'active' : ''}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 
@@ -655,8 +514,11 @@ const CatagoryPage = () => {
       <div className="container">
         {isAdmin && (
           <div className="admin-controls">
-            <button className="edit-page-button" onClick={() => setIsManagingPromotions(!isManagingPromotions)}>
-              <i className={isManagingPromotions ? "bi bi-eye" : "bi bi-gear"}></i>
+            <button
+              className="edit-page-button"
+              onClick={() => setIsManagingPromotions(!isManagingPromotions)}
+            >
+              <i className={isManagingPromotions ? 'bi bi-eye' : 'bi bi-gear'}></i>
               {isManagingPromotions ? 'Xem trang danh mục' : 'Quản lý danh mục và sản phẩm'}
             </button>
           </div>
@@ -670,9 +532,7 @@ const CatagoryPage = () => {
               />
             </div>
             <div className="col-8">
-              <ProductTab
-                selectedCategoryId={selectedAdminCategoryId}
-              />
+              <ProductTab selectedCategoryId={selectedAdminCategoryId} />
             </div>
           </div>
         ) : (
@@ -680,9 +540,13 @@ const CatagoryPage = () => {
             <div className="col-3">
               <div className="card-catagory">
                 {selectedFiltersDisplay}
-                {selectedCategories.length + selectedPriceRanges.length + selectedAuthors.length + selectedPublishers.length + selectedLanguages.length + selectedFormats.length === 0 && (
-                  <span className="text-muted">Chưa chọn bộ lọc nào</span>
-                )}
+                {selectedCategories.length +
+                  selectedPriceRanges.length +
+                  selectedAuthors.length +
+                  selectedPublishers.length +
+                  selectedLanguages.length +
+                  selectedFormats.length ===
+                  0 && <span className="text-muted">Chưa chọn bộ lọc nào</span>}
                 <div className="card-header-catagory">DANH MỤC SẢN PHẨM</div>
                 <div className="list-check">
                   <div className="form-check">
@@ -739,14 +603,13 @@ const CatagoryPage = () => {
                   type="text"
                   className="form-control mb-2"
                   placeholder="Tìm kiếm tác giả..."
-                  value={authorSearch}
-                  onChange={(e) => setAuthorSearch(e.target.value)}
+                  onChange={e => debouncedSetAuthorSearch(e.target.value)}
                 />
                 <div className="list-check" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                   {isLoadingAuthor ? (
                     <LoadingComponent />
                   ) : filteredAuthors.length > 0 ? (
-                    filteredAuthors.map((author) => (
+                    filteredAuthors.map(author => (
                       <div className="form-check" key={author.value}>
                         <input
                           className="form-check-input"
@@ -773,7 +636,7 @@ const CatagoryPage = () => {
                   {isLoadingPublisher ? (
                     <LoadingComponent />
                   ) : AllPub.length > 0 ? (
-                    AllPub.map((publisher) => (
+                    AllPub.map(publisher => (
                       <div className="form-check" key={publisher.value}>
                         <input
                           className="form-check-input"
@@ -798,7 +661,7 @@ const CatagoryPage = () => {
                   {isLoadingLanguage ? (
                     <LoadingComponent />
                   ) : AllLanguages.length > 0 ? (
-                    AllLanguages.map((language) => (
+                    AllLanguages.map(language => (
                       <div className="form-check" key={language.value}>
                         <input
                           className="form-check-input"
@@ -823,7 +686,7 @@ const CatagoryPage = () => {
                   {isLoadingFormat ? (
                     <LoadingComponent />
                   ) : AllFormat.length > 0 ? (
-                    AllFormat.map((format) => (
+                    AllFormat.map(format => (
                       <div className="form-check" key={format.value}>
                         <input
                           className="form-check-input"
@@ -846,7 +709,7 @@ const CatagoryPage = () => {
             </div>
             <div className="col-9">
               <div className="card-catagory">
-                <h4 style={{ marginTop: '-5px', marginBottom: "15px" }}>Sắp xếp theo:</h4>
+                <h4 style={{ marginTop: '-5px', marginBottom: '15px' }}>Sắp xếp theo:</h4>
                 {sortButtons}
                 <div style={{ backgroundColor: '#F9F6F2' }}>
                   <CardComponent bodyContent={BookInfo} />
@@ -854,7 +717,8 @@ const CatagoryPage = () => {
                 {paginationButtons}
               </div>
             </div>
-          </div>)}
+          </div>
+        )}
       </div>
     </div>
   );
