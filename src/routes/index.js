@@ -16,7 +16,6 @@ import ProfilePage from "../pages/ProfilePage/ProfilePage";
 import PromoCodeSelectionPage from "../pages/PromoSelectionPage/PromoSelectionPage";
 import ShoppingCartPage from "../pages/ShoppingCartPage/ShoppingCartPage";
 import SignUpPage from "../pages/SignUpPage/SignUpPage";
-import SearchPage from "../pages/SearchPage/SearchPage";
 import InstructionPage from "../pages/InstructionPage/InstructionPage";
 import PolicyPage from "../pages/PolicyPage/PolicyPage";
 import ForgotPassword from "../pages/ForgotPasswordPage/ForgotPassword";
@@ -122,11 +121,6 @@ export const routes = [
     {
         path: '/author',
         page: AuthorPage,
-        isShowHeader: true,
-    },
-    {
-        path: '/search',
-        page: SearchPage,
         isShowHeader: true,
     },
     {

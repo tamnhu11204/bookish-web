@@ -10,12 +10,14 @@ import './HeaderComponent.css';
 import CategoryDropdown from '../CategoryDropdownComponent/CategoryDropdown';
 import * as FavoriteProductService from '../../services/FavoriteProductService';
 import * as ProductService from '../../services/ProductService';
+import * as AIService from '../../services/AIService';
 
 const HeaderComponent = () => {
   const user = useSelector((state) => state.user);
   const shop = useSelector((state) => state.shop);
   const order = useSelector((state) => state.order);
   const [productFavorite, setProductFavorite] = useState([]);
+
 
   const fetchFavoriteProducts = async () => {
     if (user?.id) {
@@ -61,9 +63,20 @@ const HeaderComponent = () => {
     navigate('/login');
   };
 
-  const handleSearch = () => {
-    if (searchTerm.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      alert('Vui lòng nhập từ khóa tìm kiếm');
+      return;
+    }
+    setLoading(true);
+    try {
+      const results = await AIService.searchBooks(searchTerm);
+      console.log('Search results from SearchService:', results); // Thêm dòng này
+      navigate(`/category`, { state: { searchResults: results, searchQuery: searchTerm } });
+    } catch (error) {
+      alert(error.message || 'Đã có lỗi xảy ra khi tìm kiếm');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,6 +104,20 @@ const HeaderComponent = () => {
             <i className="bi bi-stars"></i>
             <span>Chào mừng bạn đến với Bookish!</span>
           </p>
+
+          <div className="search-container">
+            <input
+              className="form-control search-input"
+              type="text"
+              placeholder="Tìm kiếm sách..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <button className="search-button" onClick={handleSearch}>
+              <i className="bi bi-search"></i>
+            </button>
+          </div>
 
           <div className="user-actions">
             <LoadingComponent isLoading={loading}>
@@ -156,18 +183,7 @@ const HeaderComponent = () => {
             <li className="nav-item"><NavLink className="nav-link" to="/about-us">Giới thiệu</NavLink></li>
             <li className="nav-item"><NavLink className="nav-link" to="/news">Tin tức</NavLink></li>
           </ul>
-          <div className="search-container">
-            <input
-              className="form-control search-input"
-              type="text"
-              placeholder="Tìm"
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            />
-            <button className="search-button" onClick={handleSearch}>
-              <i className="bi bi-search"></i>
-            </button>
-          </div>
+
         </div>
       </nav>
     </>

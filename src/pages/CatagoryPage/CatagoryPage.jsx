@@ -16,7 +16,7 @@ import CategoryTab from '../AdminPage/CategoryTab';
 import ProductTab from '../AdminPage/ProductTab';
 import './CatagoryPage.css';
 import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
-import { debounce } from 'lodash'; // Thêm lodash để debounce
+import { debounce } from 'lodash';
 
 const CatagoryPage = () => {
   const navigate = useNavigate();
@@ -39,10 +39,15 @@ const CatagoryPage = () => {
   const isAdmin = user?.isAdmin === true;
   const [selectedAdminCategoryId, setSelectedAdminCategoryId] = useState(null);
 
+  // Lấy searchResults và searchQuery từ state
+  const { searchResults = [], searchQuery = '' } = location.state || {};
+  console.log('Search results in CatagoryPage:', searchResults); // Thêm dòng này
+  console.log('Search query in CatagoryPage:', searchQuery);
+
   // Debounce author search
   const debouncedSetAuthorSearch = debounce(setAuthorSearch, 300);
 
-  // Lấy tất cả danh mục, nhà xuất bản, tác giả, ngôn ngữ, hình thức (giữ nguyên)
+  // Lấy tất cả danh mục, nhà xuất bản, tác giả, ngôn ngữ, hình thức
   const { isLoading: isLoadingCategory, data: categoryTree } = useQuery({
     queryKey: ['categoryTree'],
     queryFn: async () => {
@@ -303,6 +308,12 @@ const CatagoryPage = () => {
     setCurrentPage(1);
   };
 
+  // Xóa kết quả tìm kiếm
+  const clearSearchResults = () => {
+    navigate('/category', { state: {} }); // Xóa state
+    setCurrentPage(1);
+  };
+
   // API call
   const getFilteredProducts = async () => {
     const allCategoryIds = getAllCategoryIds(categoryTree, selectedCategories);
@@ -338,14 +349,16 @@ const CatagoryPage = () => {
       selectedPriceRanges,
       selectedSort
     ],
-    queryFn: getFilteredProducts
+    queryFn: getFilteredProducts,
+    enabled: !searchResults.length // Chỉ gọi API nếu không có searchResults
   });
 
   const handleOnClickProduct = id => {
     navigate(`/product-detail/${id}`);
   };
 
-  const paginatedProducts = useMemo(() => products || [], [products]);
+  const displayProducts = searchResults.length > 0 ? searchResults : products || [];
+  const paginatedProducts = useMemo(() => displayProducts, [displayProducts]);
 
   const maxVisible = 5;
   const pageNumbers = [];
@@ -375,9 +388,7 @@ const CatagoryPage = () => {
       )}
       {pageNumbers.map((page, index) => {
         if (page === '...') {
-          return <ButtonComponent2
-            textButton={"..."}
-          />
+          return <ButtonComponent2 key={`ellipsis-${index}`} textButton="..." />;
         }
         const pageNumber = page;
         const isActive = currentPage === pageNumber;
@@ -406,7 +417,7 @@ const CatagoryPage = () => {
 
   const BookInfo = (
     <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-      {isLoadingPro ? (
+      {isLoadingPro && !searchResults.length ? (
         <LoadingComponent />
       ) : paginatedProducts.length > 0 ? (
         paginatedProducts
@@ -415,7 +426,7 @@ const CatagoryPage = () => {
             <CardProductComponent
               key={product._id}
               id={product._id}
-              img={product.img[0]}
+              img={product.img?.[0] || ''} // Đảm bảo img không undefined
               proName={product.name}
               currentPrice={((product.price * (100 - (product.discount || 0))) / 100).toLocaleString()}
               originalPrice={product.price}
@@ -436,6 +447,11 @@ const CatagoryPage = () => {
 
   const selectedFiltersDisplay = (
     <div className="selected-filters mb-3">
+      {searchQuery && (
+        <span className="badge bg-primary me-2">
+          Tìm kiếm: {searchQuery} <button type="button" onClick={clearSearchResults}>×</button>
+        </span>
+      )}
       {selectedCategories.map(id => {
         const label = AllCategory.find(c => c.value === id)?.label || 'Unknown Category';
         return (
@@ -545,8 +561,8 @@ const CatagoryPage = () => {
                   selectedAuthors.length +
                   selectedPublishers.length +
                   selectedLanguages.length +
-                  selectedFormats.length ===
-                  0 && <span className="text-muted">Chưa chọn bộ lọc nào</span>}
+                  selectedFormats.length === 0 &&
+                  !searchQuery && <span className="text-muted">Chưa chọn bộ lọc nào</span>}
                 <div className="card-header-catagory">DANH MỤC SẢN PHẨM</div>
                 <div className="list-check">
                   <div className="form-check">
@@ -709,12 +725,14 @@ const CatagoryPage = () => {
             </div>
             <div className="col-9">
               <div className="card-catagory">
-                <h4 style={{ marginTop: '-5px', marginBottom: '15px' }}>Sắp xếp theo:</h4>
+                <h4 style={{ marginTop: '-5px', marginBottom: '15px' }}>
+                  {searchQuery ? `Kết quả tìm kiếm cho "${searchQuery}"` : 'Sắp xếp theo:'}
+                </h4>
                 {sortButtons}
                 <div style={{ backgroundColor: '#F9F6F2' }}>
                   <CardComponent bodyContent={BookInfo} />
                 </div>
-                {paginationButtons}
+                {!searchResults.length && paginationButtons}
               </div>
             </div>
           </div>
