@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import CardComponent from '../../components/CardComponent/CardComponent';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import TableComparison from '../../components/TableComponent/TableComponent';
@@ -12,12 +13,15 @@ import * as UnitService from '../../services/OptionService/UnitService';
 import * as ProductService from '../../services/ProductService';
 import './ComparisonPage.css';
 import ProductSearchModal from './ProductSearchModal';
+import * as UserEventService from '../../services/UserEventService';
 
 const ComparisonPage = () => {
   const { id } = useParams();
   const [selectedProducts, setSelectedProducts] = useState([null, null, null]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalIndex, setModalIndex] = useState(null);
+
+  const user = useSelector((state) => state.user);
 
   // Lấy chi tiết sản phẩm đầu tiên dựa trên id
   const { data: firstProduct } = useQuery({
@@ -56,12 +60,24 @@ const ComparisonPage = () => {
     setModalIndex(null);
   };
 
-  const handleSelectProduct = (index, product) => {
-    console.log('Selected product for index', index, ':', product);
-    const newSelectedProducts = [...selectedProducts];
-    newSelectedProducts[index] = product;
-    setSelectedProducts(newSelectedProducts);
-  };
+  const handleSelectProduct = async (index, product) => {
+  console.log('Selected product for index', index, ':', product);
+  const newSelectedProducts = [...selectedProducts];
+  newSelectedProducts[index] = product;
+  setSelectedProducts(newSelectedProducts);
+
+  // 🆕 Ghi lại sự kiện chọn sản phẩm để so sánh
+  try {
+    await UserEventService.trackUserEvent({
+      eventType: 'compare',
+      productId: product?._id || product?.id, // hỗ trợ cả 2 dạng dữ liệu
+      userId: user?.id || null,
+    });
+  } catch (error) {
+    console.error('Error tracking compare event:', error);
+  }
+};
+
 
   const handleRemoveProduct = (index) => {
     if (index !== 0) {

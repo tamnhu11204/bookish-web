@@ -7,6 +7,7 @@ import { decreaseAmount, increaseAmount, removeAllOrderProduct, removeOrderProdu
 import * as ProductService from '../../services/ProductService';
 import * as PromotionService from '../../services/PromotionService';
 import "./ShoppingCartPage.css";
+import * as UserEventService from '../../services/UserEventService';
 
 export const ShoppingCartPage = () => {
   const order = useSelector((state) => state.order);
@@ -15,6 +16,7 @@ export const ShoppingCartPage = () => {
   const [productDetails, setProductDetails] = useState([]);
   const [listChecked, setListChecked] = useState([]);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     const productIds = order.orderItems.map(item => item.product);
@@ -77,7 +79,22 @@ export const ShoppingCartPage = () => {
   };
 
   const handleCountChange = (idProduct, type) => dispatch(type === 'increase' ? increaseAmount({ idProduct }) : decreaseAmount({ idProduct }));
-  const handleDelete = (idProduct) => dispatch(removeOrderProduct({ idProduct }));
+ const handleDelete = async (idProduct) => {
+  // 🆕 Ghi lại sự kiện xóa sản phẩm khỏi giỏ hàng
+  try {
+    await UserEventService.trackUserEvent({
+      eventType: 'remove_from_cart',
+      productId: idProduct,
+      userId: user?.id || null,
+    });
+  } catch (error) {
+    console.error('Error tracking remove_from_cart event:', error);
+  }
+
+  
+  dispatch(removeOrderProduct({ idProduct }));
+};
+
   const handleDeleteAll = () => dispatch(removeAllOrderProduct({ listChecked }));
   const handleCheckAll = (e) => setListChecked(e.target.checked ? order.orderItems.map(item => item.product) : []);
   const handleCheck = (e) => {

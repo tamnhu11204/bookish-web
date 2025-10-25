@@ -11,6 +11,7 @@ import { useMutationHook } from "../../hooks/useMutationHook";
 import * as FeedbackService from '../../services/FeedbackService';
 import * as OrderService from '../../services/OrderService';
 import * as ProductService from '../../services/ProductService';
+import * as UserEventService from '../../services/UserEventService';
 
 const OrderTab = () => {
     const user = useSelector((state) => state.user);
@@ -103,32 +104,47 @@ const OrderTab = () => {
     );
 
     const handleSaveFeedback = () => {
-        if (!currentProductForFeedback) return;
+    if (!currentProductForFeedback) return;
 
-        const formData = new FormData();
-        formData.append('star', starRating);
-        formData.append('content', feedbackContent);
-        formData.append('user', user.id);
-        formData.append('product', currentProductForFeedback._id);
+    const formData = new FormData();
+    formData.append('star', starRating);
+    formData.append('content', feedbackContent);
+    formData.append('user', user.id);
+    formData.append('product', currentProductForFeedback._id);
 
-        if (imageFile) {
-            formData.append('img', imageFile); // Thêm file ảnh thật vào FormData
-        }
+    if (imageFile) {
+        formData.append('img', imageFile); // Thêm file ảnh thật vào FormData
+    }
 
-        addFeedbackMutation.mutate(formData, {
-            onSuccess: async () => {
-                message.success("Gửi đánh giá thành công!");
-                await ProductService.updateRating(currentProductForFeedback._id, { star: starRating });
-                await OrderService.updateIsFeedback(currentOrderId, currentProductForFeedback._id);
-                queryClient.invalidateQueries({ queryKey: ["orders", user?.id] });
-                handleCloseFeedbackModal();
-            },
-            onError: (error) => {
-                console.error('Error saving feedback:', error);
-                message.error("Có lỗi xảy ra, vui lòng thử lại.");
+    addFeedbackMutation.mutate(formData, {
+        onSuccess: async (response) => {
+            message.success("Gửi đánh giá thành công!");
+
+            // 🟢 Ghi nhận sự kiện tạo đánh giá
+            try {
+                
+                await UserEventService.trackUserEvent({
+                    eventType: 'create_feedback',     // loại sự kiện
+                    productId: currentProductForFeedback._id,
+                    userId: user?.id || null,
+                    
+                });
+            } catch (error) {
+                console.error('Error tracking feedback creation event:', error);
             }
-        });
-    };
+
+            // ⚙️ Các bước logic gốc
+            await ProductService.updateRating(currentProductForFeedback._id, { star: starRating });
+            await OrderService.updateIsFeedback(currentOrderId, currentProductForFeedback._id);
+            queryClient.invalidateQueries({ queryKey: ["orders", user?.id] });
+            handleCloseFeedbackModal();
+        },
+        onError: (error) => {
+            console.error('Error saving feedback:', error);
+            message.error("Có lỗi xảy ra, vui lòng thử lại.");
+        }
+    });
+};
 
     // --- CÁC HÀM XỬ LÝ KHÁC ---
     const handleCancelOrder = async (orderID) => {

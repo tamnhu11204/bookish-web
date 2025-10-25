@@ -5,6 +5,7 @@ import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import ModalComponent from '../../components/ModalComponent/ModalComponent';
 import * as FeedbackService from '../../services/FeedbackService';
 import * as ProductService from '../../services/ProductService';
+import * as UserEventService from '../../services/UserEventService';
 
 const FeedbackTab = () => {
     const user = useSelector((state) => state.user);
@@ -82,61 +83,90 @@ const FeedbackTab = () => {
     };
 
     const handleUpdateSave = async () => {
-        const formData = new FormData();
-        formData.append('star', starRating);
-        formData.append('content', feedbackContent);
+  const formData = new FormData();
+  formData.append('star', starRating);
+  formData.append('content', feedbackContent);
 
-        if (imageFile) {
-            formData.append('img', imageFile);
-        } else if (previewImage) {
-            formData.append('img', previewImage);
-        } else {
-            formData.append('img', '');
-        }
+  if (imageFile) {
+    formData.append('img', imageFile);
+  } else if (previewImage) {
+    formData.append('img', previewImage);
+  } else {
+    formData.append('img', '');
+  }
 
-        try {
-            const oldRating = selectedFeedback.star || 0;
-            const newRating = starRating;
+  try {
+    const oldRating = selectedFeedback.star || 0;
+    const newRating = starRating;
 
-            const updatedFeedbackData = await FeedbackService.updateFeedback(selectedFeedback._id, formData);
+    const updatedFeedbackData = await FeedbackService.updateFeedback(selectedFeedback._id, formData);
 
-            if (oldRating !== newRating) {
-                await ProductService.updateRating2(selectedFeedback.productDetail._id, {
-                    oldRating,
-                    newRating,
-                });
-            }
+    if (oldRating !== newRating) {
+      await ProductService.updateRating2(selectedFeedback.productDetail._id, {
+        oldRating,
+        newRating,
+      });
+    }
 
-            setFeedbacks((prev) =>
-                prev.map((fb) =>
-                    fb._id === selectedFeedback._id ? { ...fb, ...updatedFeedbackData.data } : fb
-                )
-            );
+    setFeedbacks((prev) =>
+      prev.map((fb) =>
+        fb._id === selectedFeedback._id ? { ...fb, ...updatedFeedbackData.data } : fb
+      )
+    );
 
-            alert('Cập nhật đánh giá thành công!');
-            setShowModal(false);
-        } catch (error) {
-            console.error('Failed to update feedback:', error);
-            alert('Cập nhật đánh giá thất bại!');
-        }
-    };
+    // 🟩 Ghi event: cập nhật đánh giá
+   
+    await UserEventService.trackUserEvent({
+      eventType: 'update_feedback',
+      productId: selectedFeedback.productDetail._id,
+      userId: user?._id || null,
+      
+      details: {
+        oldRating,
+        newRating,
+        feedbackId: selectedFeedback._id,
+      },
+    });
+
+    alert('Cập nhật đánh giá thành công!');
+    setShowModal(false);
+  } catch (error) {
+    console.error('Failed to update feedback:', error);
+    alert('Cập nhật đánh giá thất bại!');
+  }
+};
 
     const handleDeleteFeedback = async (feedback) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) {
-            try {
-                const oldRating = feedback.star || 0;
+  if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) {
+    try {
+      const oldRating = feedback.star || 0;
 
-                await FeedbackService.deleteFeedback(feedback._id);
-                await ProductService.deleteRating(feedback.productDetail._id, { rating: oldRating });
+      await FeedbackService.deleteFeedback(feedback._id);
+      await ProductService.deleteRating(feedback.productDetail._id, { rating: oldRating });
 
-                setFeedbacks((prev) => prev.filter((fb) => fb._id !== feedback._id));
-                alert('Xóa đánh giá thành công!');
-            } catch (error) {
-                console.error('Failed to delete feedback:', error);
-                alert('Xóa đánh giá thất bại!');
-            }
-        }
-    };
+      setFeedbacks((prev) => prev.filter((fb) => fb._id !== feedback._id));
+
+      // 🟩 Ghi event: xóa đánh giá
+      
+      await UserEventService.trackUserEvent({
+        eventType: 'delete_feedback',
+        productId: feedback.productDetail._id,
+        userId: user?._id || null,
+        
+        details: {
+          rating: oldRating,
+          feedbackId: feedback._id,
+        },
+      });
+
+      alert('Xóa đánh giá thành công!');
+    } catch (error) {
+      console.error('Failed to delete feedback:', error);
+      alert('Xóa đánh giá thất bại!');
+    }
+  }
+};
+
 
     return (
         <div className="container" style={{ padding: '0 20px' }}>
