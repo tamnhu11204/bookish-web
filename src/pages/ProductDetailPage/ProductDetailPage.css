@@ -187,3 +187,9 @@
   font-size: 20px;
   font-weight: bold;
 }
+
+.product-name-des {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}

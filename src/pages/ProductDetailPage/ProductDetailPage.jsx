@@ -165,17 +165,14 @@ const ProductDetailPage = () => {
     { criteria: 'Nhà xuất bản', detail: publisher?.name || 'N/A' },
     {
       criteria: 'Năm xuất bản',
-      detail: product?.publishDate
-        ? new Date(product.publishDate).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : 'N/A'
+      detail: product?.publishYear || 'N/A'
     },
     { criteria: 'Ngôn ngữ', detail: language?.name || 'N/A' },
     { criteria: 'Trọng lượng', detail: product?.weight || 'N/A' },
-    { criteria: 'Kích thước', detail: `${product?.length} x ${product?.width} x ${product?.height}( cm)` || 'N/A' },
+    { criteria: 'Kích thước', detail: product?.dimensions || 'N/A' },
     { criteria: 'Số trang', detail: product?.page || 'N/A' },
     { criteria: 'Hình thức', detail: format?.name || 'N/A' },
     { criteria: 'Nhà cung cấp', detail: supplier?.name || 'N/A' },
-    { criteria: 'Đơn vị', detail: unit?.name || 'N/A' },
   ];
 
   const priceCurrent = (product.price * (100 - (product.discount || 0))) / 100;
@@ -242,62 +239,62 @@ const ProductDetailPage = () => {
     );
   };
 
- const handleOnAddToCart = async () => {
-  if (!user?.id) {
-    alert('Hãy đăng nhập để tiếp tục mua sắm!');
-    navigate('/login', { state: location?.pathname });
-    return;
-  }
+  const handleOnAddToCart = async () => {
+    if (!user?.id) {
+      alert('Hãy đăng nhập để tiếp tục mua sắm!');
+      navigate('/login', { state: location?.pathname });
+      return;
+    }
 
-  if (amount > product.stock) {
-    alert(`Số lượng sản phẩm trong kho chỉ còn ${product.stock}. Vui lòng chọn số lượng nhỏ hơn hoặc bằng số lượng tồn kho!`);
-    return;
-  }
+    if (amount > product.stock) {
+      alert(`Số lượng sản phẩm trong kho chỉ còn ${product.stock}. Vui lòng chọn số lượng nhỏ hơn hoặc bằng số lượng tồn kho!`);
+      return;
+    }
 
-  try {
-    dispatch(addOrderProduct({
-      orderItem: {
-        product: product._id,
-        price: priceCurrent,
-        amount: amount
-      }
-    }));
-
-    alert('Sản phẩm đã được thêm vào giỏ hàng thành công!');
-
-    // 🆕 Ghi lại sự kiện thêm vào giỏ hàng
     try {
+      dispatch(addOrderProduct({
+        orderItem: {
+          product: product._id,
+          price: priceCurrent,
+          amount: amount
+        }
+      }));
+
+      alert('Sản phẩm đã được thêm vào giỏ hàng thành công!');
+
+      // 🆕 Ghi lại sự kiện thêm vào giỏ hàng
+      try {
+        await UserEventService.trackUserEvent({
+          eventType: 'add_to_cart',
+          productId: product._id,
+          userId: user?.id || null,
+        });
+      } catch (error) {
+        console.error('Error tracking add_to_cart event:', error);
+      }
+
+    } catch (error) {
+      console.error('Error in handleOnAddToCart:', error);
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau!');
+    }
+  };
+
+
+  const handleOnClickCompare = async () => {
+    try {
+      // 🆕 Ghi lại sự kiện so sánh sản phẩm
       await UserEventService.trackUserEvent({
-        eventType: 'add_to_cart',
-        productId: product._id,
+        eventType: 'compare',
+        productId: id,
         userId: user?.id || null,
       });
     } catch (error) {
-      console.error('Error tracking add_to_cart event:', error);
+      console.error('Error tracking compare event:', error);
     }
 
-  } catch (error) {
-    console.error('Error in handleOnAddToCart:', error);
-    alert('Đã xảy ra lỗi, vui lòng thử lại sau!');
-  }
-};
-
-
- const handleOnClickCompare = async () => {
-  try {
-    // 🆕 Ghi lại sự kiện so sánh sản phẩm
-    await UserEventService.trackUserEvent({
-      eventType: 'compare',
-      productId: id,
-      userId: user?.id || null,
-    });
-  } catch (error) {
-    console.error('Error tracking compare event:', error);
-  }
-
-  // điều hướng 
-  navigate(`/comparison/${id}`);
-};
+    // điều hướng 
+    navigate(`/comparison/${id}`);
+  };
 
   const feedbackProduct = (
     <div>
@@ -333,59 +330,59 @@ const ProductDetailPage = () => {
   );
 
   const handleAddToFavorite = async () => {
-  if (!user?.id) {
-    alert('Hãy đăng nhập để tiếp tục sử dụng tính năng này!');
-    navigate('/login', { state: location?.pathname });
-    return;
-  }
-
-  try {
-    const favoriteData = { user: user.id, product: id };
-
-    if (isFavorite) {
-      const response = await FavoriteProductService.deleteFavoriteProduct(productFavorite);
-      if (response?.status !== 'ERR') {
-        alert('Xóa sản phẩm khỏi danh sách yêu thích!');
-        setIsFavorite(false);
-        setProductFavorite('');
-        fetchFavoriteProducts();
-
-        // 🆕 Ghi lại sự kiện xóa khỏi yêu thích
-        try {
-          await UserEventService.trackUserEvent({
-            eventType: 'favorite_remove',
-            productId: id,
-            userId: user?.id || null,
-          });
-        } catch (error) {
-          console.error('Error tracking favorite_remove event:', error);
-        }
-      }
-    } else {
-      const response = await FavoriteProductService.addFavoriteProduct(favoriteData);
-      if (response?.status !== 'ERR') {
-        alert('Thêm sản phẩm vào danh sách yêu thích!');
-        setIsFavorite(true);
-        setProductFavorite(response?.data?._id);
-        fetchFavoriteProducts();
-
-        // 🆕 Ghi lại sự kiện thêm vào yêu thích
-        try {
-          await UserEventService.trackUserEvent({
-            eventType: 'favorite_add',
-            productId: id,
-            userId: user?.id || null,
-          });
-        } catch (error) {
-          console.error('Error tracking favorite_add event:', error);
-        }
-      }
+    if (!user?.id) {
+      alert('Hãy đăng nhập để tiếp tục sử dụng tính năng này!');
+      navigate('/login', { state: location?.pathname });
+      return;
     }
-  } catch (error) {
-    console.error('Error in handleAddToFavorite:', error);
-    alert('Đã xảy ra lỗi, vui lòng thử lại sau!');
-  }
-};
+
+    try {
+      const favoriteData = { user: user.id, product: id };
+
+      if (isFavorite) {
+        const response = await FavoriteProductService.deleteFavoriteProduct(productFavorite);
+        if (response?.status !== 'ERR') {
+          alert('Xóa sản phẩm khỏi danh sách yêu thích!');
+          setIsFavorite(false);
+          setProductFavorite('');
+          fetchFavoriteProducts();
+
+          // 🆕 Ghi lại sự kiện xóa khỏi yêu thích
+          try {
+            await UserEventService.trackUserEvent({
+              eventType: 'favorite_remove',
+              productId: id,
+              userId: user?.id || null,
+            });
+          } catch (error) {
+            console.error('Error tracking favorite_remove event:', error);
+          }
+        }
+      } else {
+        const response = await FavoriteProductService.addFavoriteProduct(favoriteData);
+        if (response?.status !== 'ERR') {
+          alert('Thêm sản phẩm vào danh sách yêu thích!');
+          setIsFavorite(true);
+          setProductFavorite(response?.data?._id);
+          fetchFavoriteProducts();
+
+          // 🆕 Ghi lại sự kiện thêm vào yêu thích
+          try {
+            await UserEventService.trackUserEvent({
+              eventType: 'favorite_add',
+              productId: id,
+              userId: user?.id || null,
+            });
+          } catch (error) {
+            console.error('Error tracking favorite_add event:', error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in handleAddToFavorite:', error);
+      alert('Đã xảy ra lỗi, vui lòng thử lại sau!');
+    }
+  };
 
 
   return (
@@ -562,8 +559,8 @@ const ProductDetailPage = () => {
                   title="Mô tả sản phẩm"
                   icon="bi bi-blockquote-left"
                   bodyContent={
-                    <>
-                      <p className="product-name">{product.name}</p>
+                    <div style={{ fontSize: "14px" }}>
+                      <p className="product-name-des">{product.name}</p>
                       <div className={!expanded ? "truncate-5" : ""}>
                         {product.description ? parse(product.description) : 'Không có mô tả.'}
                       </div>
@@ -576,7 +573,7 @@ const ProductDetailPage = () => {
                           />
                         </div>
                       )}
-                    </>
+                    </div>
                   } />
               </div>
             </div>
