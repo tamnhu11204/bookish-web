@@ -27,7 +27,10 @@ const ConfirmAddItemModal = ({ isOpen, product, importPrice, quantity, onConfirm
                 </div>
                 <div className="col-md-8">
                   <p><strong>Tên sản phẩm:</strong> {product.name}</p>
-                  <p><strong>Mã sản phẩm:</strong> {product.code || product._id.slice(-6)}</p>
+                  <p>
+  <strong>Mã sản phẩm:</strong>{' '}
+  {product.code || (product._id ? product._id.slice(-6) : 'N/A')}
+</p>
                   <p><strong>Số lượng tồn kho:</strong> {product.stock || 0}</p>
                   <p><strong>Giá nhập:</strong> {parseInt(importPrice).toLocaleString()}đ</p>
                   <p><strong>Số lượng:</strong> {quantity}</p>
