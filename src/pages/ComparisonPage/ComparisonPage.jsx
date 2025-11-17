@@ -61,22 +61,22 @@ const ComparisonPage = () => {
   };
 
   const handleSelectProduct = async (index, product) => {
-  console.log('Selected product for index', index, ':', product);
-  const newSelectedProducts = [...selectedProducts];
-  newSelectedProducts[index] = product;
-  setSelectedProducts(newSelectedProducts);
+    console.log('Selected product for index', index, ':', product);
+    const newSelectedProducts = [...selectedProducts];
+    newSelectedProducts[index] = product;
+    setSelectedProducts(newSelectedProducts);
 
-  // 🆕 Ghi lại sự kiện chọn sản phẩm để so sánh
-  try {
-    await UserEventService.trackUserEvent({
-      eventType: 'compare',
-      productId: product?._id || product?.id, // hỗ trợ cả 2 dạng dữ liệu
-      userId: user?.id || null,
-    });
-  } catch (error) {
-    console.error('Error tracking compare event:', error);
-  }
-};
+    // 🆕 Ghi lại sự kiện chọn sản phẩm để so sánh
+    try {
+      await UserEventService.trackUserEvent({
+        eventType: 'compare',
+        productId: product?._id || product?.id, // hỗ trợ cả 2 dạng dữ liệu
+        userId: user?.id || null,
+      });
+    } catch (error) {
+      console.error('Error tracking compare event:', error);
+    }
+  };
 
 
   const handleRemoveProduct = (index) => {
