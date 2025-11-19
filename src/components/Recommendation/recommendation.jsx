@@ -1,44 +1,37 @@
+// components/Recommendation/Recommendation.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import * as ProductService from '../../services/ProductService';
-import * as RecommendationService from '../../services/RecommendationService';
+import * as RecomendService from '../../services/RecommendService';
 import './recommendation.css';
 
 const Recommendation = ({ userId }) => {
-  const [recommendedBooks, setRecommendedBooks] = useState([]);
+  const [combos, setCombos] = useState([]);
+  const [allBooks, setAllBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  console.log('User ID in :', userId);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
+    const fetchData = async () => {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await RecommendationService.getRecommendations(userId);
-        if (response.status === 'OK') {
-          setRecommendedBooks(response.recommendedBooks);
-        } else {
-          setError('Không thể lấy gợi ý sách.');
+        setLoading(true);
+        const response = await RecomendService.getRecommend(userId);
+        if (response.status === 'OK' && response.data?.combos?.length > 0) {
+          setCombos(response.data.combos);
+          setAllBooks(response.data.books || []);
         }
-      } catch (error) {
-        console.error('Lỗi khi lấy gợi ý sách:', error);
-        if (error.response?.status === 404) {
-          setError('Không tìm thấy người dùng. Vui lòng kiểm tra lại thông tin đăng nhập.');
-        } else {
-          setError('Có lỗi xảy ra khi lấy gợi ý sách.');
-        }
+      } catch (err) {
+        console.error('Lỗi gợi ý:', err);
       } finally {
         setLoading(false);
       }
     };
-
-    if (userId) {
-      fetchRecommendations();
-    } else {
-      setError('Vui lòng đăng nhập để nhận gợi ý sách.');
-      setLoading(false);
-    }
+    fetchData();
   }, [userId]);
 
   const handleOnClickProduct = async (id) => {
@@ -46,32 +39,44 @@ const Recommendation = ({ userId }) => {
     navigate(`/product-detail/${id}`);
   };
 
-  if (loading) return <div>Đang tải gợi ý...</div>;
-  if (error) return <div className="text-center text-danger">{error}</div>;
-  if (!recommendedBooks || recommendedBooks.length === 0) return <div>Không có sách gợi ý.</div>;
+  if (loading || combos.length === 0) return null;
 
   return (
-    <div className="recommendation-section">
-      {/* <h3>Sách gợi ý cho bạn </h3> */}
-      <div className="book-list">
-        {recommendedBooks.map(product => (
-          <CardProductComponent
-            key={product._id}
-            id={product._id}
-            img={product.img[0]}
-            proName={product.name}
-            currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
-            originalPrice={product.price}
-            sold={product.sold}
-            star={product.star}
-            feedbackCount={product.feedbackCount}
-            onClick={() => handleOnClickProduct(product._id)}
-            view={product.view}
-            stock={product.stock}
-            discount={product.discount}
-          />
-        ))}
-      </div>
+    <div className="recommendation-master">
+      {combos.map((combo, index) => (
+        <div key={index} className="combo-section">
+          <div className="combo-header">
+            <h3 className="combo-title">{combo.title}</h3>
+            <p className="combo-reason">{combo.reason}</p>
+          </div>
+
+          <div className="combo-books">
+            {combo.book_ids.map((bookId) => {
+              const book = allBooks.find(b => b._id === bookId || b._id.toString() === bookId);
+              if (!book) return null;
+
+              return (
+                <div key={book._id} className="book-card-wrapper">
+                  <CardProductComponent
+                    id={book._id}
+                    img={book.img?.[0]}
+                    proName={book.name}
+                    currentPrice={(book.price * (100 - (book.discount || 0)) / 100).toLocaleString()}
+                    originalPrice={book.price}
+                    sold={book.sold}
+                    star={book.star}
+                    feedbackCount={book.feedbackCount}
+                    onClick={() => handleOnClickProduct(book._id)}
+                    view={book.view}
+                    stock={book.stock}
+                    discount={book.discount || 0}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
