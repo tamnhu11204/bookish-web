@@ -29,7 +29,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await ProductService.getAllProduct();
+        const res = await ProductService.getAllProduct('?limit=99999');
         setProducts(res.data);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -53,9 +53,9 @@ const AddImport = ({ isOpen, type, onCancel }) => {
 
   const AllSupplier = Array.isArray(suppliers)
     ? suppliers.map((supplier) => ({
-        value: supplier._id,
-        label: supplier.name,
-      }))
+      value: supplier._id,
+      label: supplier.name,
+    }))
     : [];
 
   const productOptions = products.map((product) => ({
@@ -63,6 +63,8 @@ const AddImport = ({ isOpen, type, onCancel }) => {
     label: product.name,
     image: Array.isArray(product.img) ? product.img[0] : product.img || 'https://placehold.co/40x40', // Thêm ảnh sản phẩm cho dropdown
   }));
+
+  console.log("productOptions", products)
 
   const handleProductChange = (e) => {
     console.log("Selected product ID:", e.target.value);
@@ -228,7 +230,9 @@ const AddImport = ({ isOpen, type, onCancel }) => {
             onChange={handleProductChange}
             required={true}
             isSearchable={true}
+            type="autocomplete"
           />
+
         </div>
         <div className="col-md-3">
           <FormComponent

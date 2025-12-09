@@ -48,6 +48,7 @@ const Recommendation = ({ userId }) => {
           <div className="combo-header">
             <h3 className="combo-title">{combo.title}</h3>
             <p className="combo-reason">{combo.reason}</p>
+            <p className="combo-reason">{combo.source}</p>
           </div>
 
           <div className="combo-books">
