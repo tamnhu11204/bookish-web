@@ -49,6 +49,9 @@ const HeaderComponent = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -63,22 +66,41 @@ const HeaderComponent = () => {
     navigate('/login');
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      alert('Vui lòng nhập từ khóa tìm kiếm');
-      return;
-    }
-    setLoading(true);
-    try {
-      const results = await AIService.searchBooks(searchTerm);
-      console.log('Search results from SearchService:', results); // Thêm dòng này
-      navigate(`/category`, { state: { searchResults: results, searchQuery: searchTerm } });
-    } catch (error) {
-      alert(error.message || 'Đã có lỗi xảy ra khi tìm kiếm');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSearch = async (customQuery = null) => {
+  const query = (customQuery || searchTerm).trim();
+  
+  if (!query) {
+    alert('Vui lòng nhập từ khóa tìm kiếm');
+    return;
+  }
+
+  // LƯU LỊCH SỬ TÌM KIẾM (CHO CẢ USER VÀ KHÁCH VÃNG LAI)
+  const newHistory = [
+    query,
+    ...searchHistory.filter(item => item !== query)
+  ].slice(0, 10); // tối đa 10 từ khóa
+
+  localStorage.setItem('search_history', JSON.stringify(newHistory));
+  setSearchHistory(newHistory);
+
+  setLoading(true);
+  try {
+    const results = await AIService.searchBooks(query);
+    console.log('Search results from SearchService:', results);
+    
+    navigate(`/category`, { 
+      state: { 
+        searchResults: results, 
+        searchQuery: query 
+      } 
+    });
+  } catch (error) {
+    alert(error.message || 'Đã có lỗi xảy ra khi tìm kiếm');
+  } finally {
+    setLoading(false);
+    setShowHistory(false); // ẩn dropdown sau khi tìm
+  }
+};
 
   const headerRef = useRef(null);
 
@@ -96,6 +118,14 @@ const HeaderComponent = () => {
     };
   }, [user?.name]);
 
+
+  // Load lịch sử khi component mount
+useEffect(() => {
+  const saved = localStorage.getItem('search_history');
+  if (saved) {
+    setSearchHistory(JSON.parse(saved));
+  }
+}, []);
   return (
     <>
       <div className="top-header sticky-header">
@@ -105,19 +135,99 @@ const HeaderComponent = () => {
             <span>Chào mừng bạn đến với Bookish!</span>
           </p>
 
-          <div className="search-container">
-            <input
-              className="form-control search-input"
-              type="text"
-              placeholder="Tìm kiếm sách..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <button className="search-button" onClick={handleSearch}>
-              <i className="bi bi-search"></i>
-            </button>
-          </div>
+         <div className="search-container position-relative">
+
+  {/* INPUT */}
+  <input
+    className="form-control search-input pe-5"
+    type="text"
+    placeholder="Tìm kiếm sách..."
+    value={searchTerm}
+    onChange={(e) => {
+      setSearchTerm(e.target.value);
+      setShowHistory(true);     // ← HIỆN LỊCH SỬ KHI GÕ CHỮ
+    }}
+    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+    onBlur={() => setTimeout(() => setShowHistory(false), 150)}
+  />
+
+  {/* BUTTON SEARCH */}
+  <button 
+    className="search-button" 
+    onClick={() => {
+      setShowHistory(true);
+      handleSearch();
+    }}
+    onMouseDown={() => setShowHistory(true)}
+  >
+    <i className="bi bi-search"></i>
+  </button>
+
+  {/* DROPDOWN */}
+  {showHistory && searchHistory.length > 0 && (
+    <div
+      className="position-absolute w-100 bg-white shadow-lg border mt-1 rounded-bottom"
+      style={{
+        top: '100%',
+        zIndex: 9999,
+        pointerEvents: 'auto',
+        backgroundColor: 'white',
+        overflow: 'visible',
+      }}
+      onMouseDown={(e) => e.preventDefault()}
+    >
+      {/* HEADER */}
+      <div className="p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
+        <small className="text-muted fw-bold">Lịch sử tìm kiếm</small>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            localStorage.removeItem('search_history');
+            setSearchHistory([]);
+          }}
+          className="btn btn-sm text-danger p-0"
+          style={{ fontSize: '11px' }}
+        >
+          Xóa hết
+        </button>
+      </div>
+
+      {/* ITEMS */}
+      {searchHistory.map((item, index) => (
+        <div
+          key={index}
+          className="px-3 py-2 hover-bg-light cursor-pointer d-flex justify-content-between align-items-center"
+          style={{ fontSize: '14px' }}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            setSearchTerm(item);
+            handleSearch(item);
+          }}
+        >
+          <span className="d-flex align-items-center" style={{ color: "black" }}>
+            <i className="bi bi-clock-history me-2 text-muted"></i>
+            {item}
+          </span>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const newHistory = searchHistory.filter((_, i) => i !== index);
+              localStorage.setItem('search_history', JSON.stringify(newHistory));
+              setSearchHistory(newHistory);
+            }}
+            className="btn btn-sm p-0 text"
+          >
+            <i className="bi bi-x"></i>
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+
+</div>
+
 
           <div className="user-actions">
             <LoadingComponent isLoading={loading}>

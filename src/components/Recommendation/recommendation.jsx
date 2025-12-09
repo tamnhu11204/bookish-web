@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import * as ProductService from '../../services/ProductService';
 import * as RecomendService from '../../services/RecommendService';
+import { getSessionId } from '../../../src/utils/session';
 import './recommendation.css';
 
 const Recommendation = ({ userId }) => {
@@ -14,13 +15,18 @@ const Recommendation = ({ userId }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
       try {
         setLoading(true);
-        const response = await RecomendService.getRecommend(userId);
+
+        // TỰ ĐỘNG TẠO + LẤY SESSION ID CHO KHÁCH VÃNG LAI
+        const sessionId = getSessionId();
+
+        // GỌI SERVICE MỚI – TRUYỀN CẢ userId VÀ sessionId
+        const response = await RecomendService.getRecommend(
+          userId || null,  // nếu không có userId → null
+          sessionId        // luôn có sessionId
+        );
+
         if (response.status === 'OK' && response.data?.combos?.length > 0) {
           setCombos(response.data.combos);
           setAllBooks(response.data.books || []);
@@ -31,6 +37,7 @@ const Recommendation = ({ userId }) => {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [userId]);
 
@@ -39,7 +46,23 @@ const Recommendation = ({ userId }) => {
     navigate(`/product-detail/${id}`);
   };
 
-  if (loading || combos.length === 0) return null;
+  // LOADING ĐẸP KHI ĐANG TẢI
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border text-success" role="status" style={{ width: '3rem', height: '3rem' }}>
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-3 fw-bold text-success" style={{ fontSize: '1.2rem' }}>
+          Đang tìm sách hay cho bạn...
+        </p>
+        <small className="text-muted">AI đang phân tích sở thích của bạn</small>
+      </div>
+    );
+  }
+
+  // Nếu không có gợi ý → ẩn section (không hiện trắng)
+  if (combos.length === 0) return null;
 
   return (
     <div className="recommendation-master">
@@ -51,13 +74,13 @@ const Recommendation = ({ userId }) => {
             <p className="combo-reason">{combo.source}</p>
           </div>
 
-          <div className="combo-books">
+          <div className="combo-books row g-3 justify-content-center">
             {combo.book_ids.map((bookId) => {
               const book = allBooks.find(b => b._id === bookId || b._id.toString() === bookId);
               if (!book) return null;
 
               return (
-                <div key={book._id} className="book-card-wrapper">
+                <div key={book._id} className="col-6 col-sm-4 col-md-3 col-lg-2">
                   <CardProductComponent
                     id={book._id}
                     img={book.img?.[0]}

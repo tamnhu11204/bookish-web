@@ -14,6 +14,7 @@ import * as ProductService from '../../services/ProductService';
 import './ComparisonPage.css';
 import ProductSearchModal from './ProductSearchModal';
 import * as UserEventService from '../../services/UserEventService';
+import { getSessionId } from '../../../src/utils/session';
 
 const ComparisonPage = () => {
   const { id } = useParams();
@@ -72,6 +73,7 @@ const ComparisonPage = () => {
         eventType: 'compare',
         productId: product?._id || product?.id, // hỗ trợ cả 2 dạng dữ liệu
         userId: user?.id || null,
+        sessionId: user?.id ? null : getSessionId(),
       });
     } catch (error) {
       console.error('Error tracking compare event:', error);

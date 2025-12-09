@@ -5,6 +5,7 @@ import * as FavoriteProductService from '../../services/FavoriteProductService';
 import * as UserEventService from '../../services/UserEventService'; 
 import { addOrderProduct } from '../../redux/slides/OrderSlide';
 import './CardProductComponent.css';
+import { getSessionId } from '../../../src/utils/session';
 
 const CardProductComponent = ({
     id,
@@ -58,7 +59,8 @@ const handleTrackView = async () => {
         await UserEventService.trackUserEvent({
             eventType: 'view',             
             productId: id,                 
-            userId: user?.id || null,      
+            userId: user?.id || null,   
+            sessionId: user?.id ? null : getSessionId(),   
         });
     } catch (error) {
         console.error('Error tracking view event:', error);
@@ -101,6 +103,7 @@ const handleTrackView = async () => {
                 eventType: 'add_to_cart',
                 productId: id,
                 userId: user?.id || null,
+                sessionId: user?.id ? null : getSessionId(),
             });
         } catch (error) {
             console.error('Error tracking add_to_cart event:', error);
@@ -134,6 +137,7 @@ const handleTrackView = async () => {
                         eventType: 'favorite_remove',
                         productId: id,
                         userId: user?.id || null,
+                        sessionId: user?.id ? null : getSessionId(),
                     });
                 } catch (error) {
                     console.error('Error tracking favorite_remove event:', error);
@@ -153,6 +157,7 @@ const handleTrackView = async () => {
                         eventType: 'favorite_add',
                         productId: id,
                         userId: user?.id || null,
+                        sessionId: user?.id ? null : getSessionId(),
                     });
                 } catch (error) {
                     console.error('Error tracking favorite_add event:', error);

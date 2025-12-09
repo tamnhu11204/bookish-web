@@ -22,6 +22,7 @@ import * as AuthorService from '../../services/AuthorService';
 import './ProductDetailPage.css';
 import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 import * as UserEventService from '../../services/UserEventService';
+import { getSessionId } from '../../../src/utils/session';
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user);
@@ -268,6 +269,7 @@ const ProductDetailPage = () => {
           eventType: 'add_to_cart',
           productId: product._id,
           userId: user?.id || null,
+          sessionId: user?.id ? null : getSessionId(),
         });
       } catch (error) {
         console.error('Error tracking add_to_cart event:', error);
@@ -287,6 +289,7 @@ const ProductDetailPage = () => {
         eventType: 'compare',
         productId: id,
         userId: user?.id || null,
+        sessionId: user?.id ? null : getSessionId(),
       });
     } catch (error) {
       console.error('Error tracking compare event:', error);
@@ -353,6 +356,7 @@ const ProductDetailPage = () => {
               eventType: 'favorite_remove',
               productId: id,
               userId: user?.id || null,
+              sessionId: user?.id ? null : getSessionId(),
             });
           } catch (error) {
             console.error('Error tracking favorite_remove event:', error);
@@ -372,6 +376,7 @@ const ProductDetailPage = () => {
               eventType: 'favorite_add',
               productId: id,
               userId: user?.id || null,
+              sessionId: user?.id ? null : getSessionId(),
             });
           } catch (error) {
             console.error('Error tracking favorite_add event:', error);
