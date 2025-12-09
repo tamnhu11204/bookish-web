@@ -8,6 +8,7 @@ import * as ProductService from '../../services/ProductService';
 import * as PromotionService from '../../services/PromotionService';
 import "./ShoppingCartPage.css";
 import * as UserEventService from '../../services/UserEventService';
+import { getSessionId } from '../../../src/utils/session';
 
 export const ShoppingCartPage = () => {
   const order = useSelector((state) => state.order);
@@ -86,6 +87,7 @@ export const ShoppingCartPage = () => {
       eventType: 'remove_from_cart',
       productId: idProduct,
       userId: user?.id || null,
+      sessionId: user?.id ? null : getSessionId(),
     });
   } catch (error) {
     console.error('Error tracking remove_from_cart event:', error);
