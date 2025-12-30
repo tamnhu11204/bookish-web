@@ -173,9 +173,9 @@ const ImportDetails = ({ isOpen, importId, onCancel }) => {
             <hr />
 
             <h5 className="bg-light p-2">Mã nhập hàng: {importDetails._id.slice(-6)}</h5>
-            <table className="table table-bordered">
+            <table className="table custom-table">
               <thead>
-                <tr className="table-success">
+                <tr >
                   <th>Mã sản phẩm</th>
                   <th>Hình ảnh</th>
                   <th>Tên sản phẩm</th>

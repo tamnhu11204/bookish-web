@@ -1,53 +1,45 @@
 // components/Recommendation/Recommendation.jsx
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
-import * as ProductService from '../../services/ProductService';
 import * as RecomendService from '../../services/RecommendService';
+import * as ProductService from '../../services/ProductService';
 import { getSessionId } from '../../../src/utils/session';
 import './recommendation.css';
 
 const Recommendation = ({ userId }) => {
-  const [combos, setCombos] = useState([]);
-  const [allBooks, setAllBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const sessionId = getSessionId();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+  const queryKey = ['recommend', userId || 'guest', sessionId];
+  console.log('Recommendation queryKey:', queryKey);
 
-        // TỰ ĐỘNG TẠO + LẤY SESSION ID CHO KHÁCH VÃNG LAI
-        const sessionId = getSessionId();
-
-        // GỌI SERVICE MỚI – TRUYỀN CẢ userId VÀ sessionId
-        const response = await RecomendService.getRecommend(
-          userId || null,  // nếu không có userId → null
-          sessionId        // luôn có sessionId
-        );
-
-        if (response.status === 'OK' && response.data?.combos?.length > 0) {
-          setCombos(response.data.combos);
-          setAllBooks(response.data.books || []);
-        }
-      } catch (err) {
-        console.error('Lỗi gợi ý:', err);
-      } finally {
-        setLoading(false);
+  const { data, isLoading } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const response = await RecomendService.getRecommend(userId || null, sessionId);
+      if (response.status === 'OK') {
+        return response.data;
       }
-    };
+      return null;
+    },
+    staleTime: 1000 * 60 * 30,
+    cacheTime: 1000 * 60 * 60 * 24,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
 
-    fetchData();
-  }, [userId]);
+  const combos = data?.combos || [];
+  const allBooks = data?.books || [];
 
   const handleOnClickProduct = async (id) => {
     await ProductService.updateView(id);
     navigate(`/product-detail/${id}`);
   };
 
-  // LOADING ĐẸP KHI ĐANG TẢI
-  if (loading) {
+  // Loading đẹp
+  if (isLoading) {
     return (
       <div className="text-center py-5">
         <div className="spinner-border text-success" role="status" style={{ width: '3rem', height: '3rem' }}>
@@ -61,7 +53,7 @@ const Recommendation = ({ userId }) => {
     );
   }
 
-  // Nếu không có gợi ý → ẩn section (không hiện trắng)
+  // Không có gợi ý → ẩn section
   if (combos.length === 0) return null;
 
   return (
@@ -69,9 +61,9 @@ const Recommendation = ({ userId }) => {
       {combos.map((combo, index) => (
         <div key={index} className="combo-section">
           <div className="combo-header">
-            <h3 className="combo-title">{combo.title}</h3>
-            <p className="combo-reason">{combo.reason}</p>
-            <p className="combo-reason">{combo.source}</p>
+            <p className="combo-reason"
+            >{combo.title}</p>
+            <p className="combo-reason text-muted small">{combo.reason}</p>
           </div>
 
           <div className="combo-books row g-3 justify-content-center">

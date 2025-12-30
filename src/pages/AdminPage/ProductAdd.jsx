@@ -350,7 +350,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
         </div>
 
         {/* Hàng 7: Đơn vị */}
-        <div className="col-md-6 mb-3">
+        {/* <div className="col-md-6 mb-3">
           <FormSelectComponent
             label="Đơn vị"
             placeholder="Chọn đơn vị"
@@ -358,7 +358,7 @@ const AddProductForm = ({ isOpen, onCancel }) => {
             selectedValue={selectedUnit}
             onChange={handleOnChangeUnit}
           />
-        </div>
+        </div> */}
 
         {/* Mô tả sản phẩm */}
         <div className="col-12 my-3">

@@ -9,7 +9,6 @@ import UnitSubTab from './UnitSubTab';
 
 const OptionTab = () => {
     const [activeTab, setActiveTab] = useState("language");
-    const [activeTab1, setActiveTab1] = useState("supplier");
 
     return (
         <div style={{ padding: '0 20px' }}>
@@ -38,14 +37,14 @@ const OptionTab = () => {
                                 Hình thức
                             </button>
                         </li>
-                        <li className="nav-item">
+                        {/* <li className="nav-item">
                             <button
                                 className={`nav-link ${activeTab === "unit" ? "active" : ""}`}
                                 onClick={() => setActiveTab("unit")}
                             >
                                 Đơn vị
                             </button>
-                        </li>
+                        </li> */}
                         <li className="nav-item">
                             <button
                                 className={`nav-link ${activeTab === "publisher" ? "active" : ""}`}

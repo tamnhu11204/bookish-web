@@ -47,10 +47,6 @@ const HeaderComponent = () => {
   }, [user?.id]);
 
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const [searchHistory, setSearchHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -66,41 +62,6 @@ const HeaderComponent = () => {
     navigate('/login');
   };
 
-  const handleSearch = async (customQuery = null) => {
-  const query = (customQuery || searchTerm).trim();
-  
-  if (!query) {
-    alert('Vui lòng nhập từ khóa tìm kiếm');
-    return;
-  }
-
-  // LƯU LỊCH SỬ TÌM KIẾM (CHO CẢ USER VÀ KHÁCH VÃNG LAI)
-  const newHistory = [
-    query,
-    ...searchHistory.filter(item => item !== query)
-  ].slice(0, 10); // tối đa 10 từ khóa
-
-  localStorage.setItem('search_history', JSON.stringify(newHistory));
-  setSearchHistory(newHistory);
-
-  setLoading(true);
-  try {
-    const results = await AIService.searchBooks(query);
-    console.log('Search results from SearchService:', results);
-    
-    navigate(`/category`, { 
-      state: { 
-        searchResults: results, 
-        searchQuery: query 
-      } 
-    });
-  } catch (error) {
-    alert(error.message || 'Đã có lỗi xảy ra khi tìm kiếm');
-  } finally {
-    setLoading(false);
-    setShowHistory(false); // ẩn dropdown sau khi tìm
-  }
-};
 
   const headerRef = useRef(null);
 
@@ -120,12 +81,104 @@ const HeaderComponent = () => {
 
 
   // Load lịch sử khi component mount
-useEffect(() => {
-  const saved = localStorage.getItem('search_history');
-  if (saved) {
-    setSearchHistory(JSON.parse(saved));
-  }
-}, []);
+  useEffect(() => {
+    const saved = localStorage.getItem('search_history');
+    if (saved) {
+      setSearchHistory(JSON.parse(saved));
+    }
+  }, []);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  const searchInputRef = useRef(null);
+  const historyDropdownRef = useRef(null);
+
+  // Load lịch sử khi component mount
+  useEffect(() => {
+    const saved = localStorage.getItem('search_history');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setSearchHistory(parsed);
+        }
+      } catch (e) {
+        console.error('Error parsing search history', e);
+        localStorage.removeItem('search_history');
+      }
+    }
+  }, []);
+
+  // Hàm xử lý tìm kiếm
+  const handleSearch = async (customQuery = null) => {
+    const query = (customQuery || searchTerm).trim();
+
+    if (!query) {
+      alert('Vui lòng nhập từ khóa tìm kiếm');
+      return;
+    }
+
+    // Cập nhật lịch sử tìm kiếm
+    const newHistory = [
+      query,
+      ...searchHistory.filter(item => item !== query)
+    ].slice(0, 10);
+
+    setSearchHistory(newHistory);
+    localStorage.setItem('search_history', JSON.stringify(newHistory));
+
+    setLoading(true);
+    try {
+      const results = await AIService.searchBooks(query);
+      navigate(`/category`, {
+        state: {
+          searchResults: results,
+          searchQuery: query
+        }
+      });
+    } catch (error) {
+      alert(error.message || 'Đã có lỗi xảy ra khi tìm kiếm');
+    } finally {
+      setLoading(false);
+      setShowHistory(false);
+      searchInputRef.current?.focus(); // Giữ focus sau khi tìm
+    }
+  };
+
+  // Xử lý xóa một mục lịch sử
+  const handleDeleteHistoryItem = (e, index) => {
+    e.stopPropagation();
+    const newHistory = searchHistory.filter((_, i) => i !== index);
+    setSearchHistory(newHistory);
+    localStorage.setItem('search_history', JSON.stringify(newHistory));
+  };
+
+  // Xóa toàn bộ lịch sử
+  const handleClearAllHistory = (e) => {
+    e.stopPropagation();
+    setSearchHistory([]);
+    localStorage.removeItem('search_history');
+  };
+
+  // Click ngoài để ẩn dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        historyDropdownRef.current &&
+        !historyDropdownRef.current.contains(event.target) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target)
+      ) {
+        setShowHistory(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <>
       <div className="top-header sticky-header">
@@ -135,98 +188,83 @@ useEffect(() => {
             <span>Chào mừng bạn đến với Bookish!</span>
           </p>
 
-         <div className="search-container position-relative">
+          <div className="search-container position-relative">
 
-  {/* INPUT */}
-  <input
-    className="form-control search-input pe-5"
-    type="text"
-    placeholder="Tìm kiếm sách..."
-    value={searchTerm}
-    onChange={(e) => {
-      setSearchTerm(e.target.value);
-      setShowHistory(true);     // ← HIỆN LỊCH SỬ KHI GÕ CHỮ
-    }}
-    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-    onBlur={() => setTimeout(() => setShowHistory(false), 150)}
-  />
+            {/* INPUT TÌM KIẾM */}
+            <input
+              ref={searchInputRef}
+              className="form-control search-input pe-5"
+              type="text"
+              placeholder="Tìm kiếm sách..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowHistory(true);
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onFocus={() => searchHistory.length > 0 && setShowHistory(true)}
+            />
 
-  {/* BUTTON SEARCH */}
-  <button 
-    className="search-button" 
-    onClick={() => {
-      setShowHistory(true);
-      handleSearch();
-    }}
-    onMouseDown={() => setShowHistory(true)}
-  >
-    <i className="bi bi-search"></i>
-  </button>
+            {/* NÚT TÌM KIẾM */}
+            <button
+              className="search-button"
+              onClick={handleSearch}
+            >
+              <i className="bi bi-search"></i>
+            </button>
 
-  {/* DROPDOWN */}
-  {showHistory && searchHistory.length > 0 && (
-    <div
-      className="position-absolute w-100 bg-white shadow-lg border mt-1 rounded-bottom"
-      style={{
-        top: '100%',
-        zIndex: 9999,
-        pointerEvents: 'auto',
-        backgroundColor: 'white',
-        overflow: 'visible',
-      }}
-      onMouseDown={(e) => e.preventDefault()}
-    >
-      {/* HEADER */}
-      <div className="p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
-        <small className="text-muted fw-bold">Lịch sử tìm kiếm</small>
+            {/* DROPDOWN LỊCH SỬ TÌM KIẾM */}
+            {showHistory && searchHistory.length > 0 && (
+              <div
+                ref={historyDropdownRef}
+                className="position-absolute w-100 bg-white shadow-lg border mt-1 rounded-bottom"
+                style={{
+                  top: '100%',
+                  zIndex: 9999,
+                  maxHeight: '300px',
+                  overflowY: 'auto'
+                }}
+              >
+                {/* Header dropdown */}
+                <div className="p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
+                  <small className="text-muted fw-bold">Lịch sử tìm kiếm</small>
+                  <button
+                    onClick={handleClearAllHistory}
+                    className="btn btn-sm text-danger p-0"
+                    style={{ fontSize: '11px' }}
+                  >
+                    Xóa hết
+                  </button>
+                </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            localStorage.removeItem('search_history');
-            setSearchHistory([]);
-          }}
-          className="btn btn-sm text-danger p-0"
-          style={{ fontSize: '11px' }}
-        >
-          Xóa hết
-        </button>
-      </div>
+                {/* Các mục lịch sử */}
+                {searchHistory.map((item, index) => (
+                  <div
+                    key={index}
+                    className="px-3 py-2 hover-bg-light cursor-pointer d-flex justify-content-between align-items-center"
+                    style={{ fontSize: '14px' }}
+                    onClick={() => {
+                      setSearchTerm(item);
+                      handleSearch(item);
+                    }}
+                  >
+                    <span className="d-flex align-items-center text-dark">
+                      <i className="bi bi-clock-history me-2 text-muted"></i>
+                      {item}
+                    </span>
 
-      {/* ITEMS */}
-      {searchHistory.map((item, index) => (
-        <div
-          key={index}
-          className="px-3 py-2 hover-bg-light cursor-pointer d-flex justify-content-between align-items-center"
-          style={{ fontSize: '14px' }}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => {
-            setSearchTerm(item);
-            handleSearch(item);
-          }}
-        >
-          <span className="d-flex align-items-center" style={{ color: "black" }}>
-            <i className="bi bi-clock-history me-2 text-muted"></i>
-            {item}
-          </span>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              const newHistory = searchHistory.filter((_, i) => i !== index);
-              localStorage.setItem('search_history', JSON.stringify(newHistory));
-              setSearchHistory(newHistory);
-            }}
-            className="btn btn-sm p-0 text"
-          >
-            <i className="bi bi-x"></i>
-          </button>
-        </div>
-      ))}
-    </div>
-  )}
-
-</div>
+                    <button
+                      onClick={(e) => handleDeleteHistoryItem(e, index)}
+                      className="btn btn-sm p-0 text-muted"
+                      title="Xóa mục này"
+                    >
+                      <i className="bi bi-x"></i>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
 
           <div className="user-actions">

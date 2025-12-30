@@ -182,7 +182,7 @@ const AuthorPage = () => {
                         <div className="author-info-container">
                             <div className="author-image-wrapper">
                                 <img
-                                    src={selectedAuthorDetails.img || 'https://via.placeholder.com/300x400.png?text=No+Image'}
+                                    src={selectedAuthorDetails.img || 'https://s.gr-assets.com/assets/nophoto/user/u_200x266-e183445fd1a1b5cc7075bb1cf7043306.png'}
                                     alt={selectedAuthorDetails.name}
                                     className="author-detail-image"
                                 />
@@ -190,7 +190,7 @@ const AuthorPage = () => {
                             <div className="author-details-content">
                                 <h1 className="author-full-name">{selectedAuthorDetails.name}</h1>
                                 <p className="author-full-description">
-                                    {parseDescription(selectedAuthorDetails.info)}
+                                    {parseDescription(selectedAuthorDetails.info)} Chưa có thông tin !!!
                                 </p>
                             </div>
                         </div>

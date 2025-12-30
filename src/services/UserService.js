@@ -88,13 +88,20 @@ export const deleteUser = async (id, access_token) => {
 }
 
 export const toggleActiveUser = async (id, access_token) => {
-  const res = await axiosJWT.put(`${process.env.REACT_APP_API_URL_BACKEND}/user/toggle-active/${id}`, {
-    headers: {
-      token: `Bearer ${access_token}`,
+  console.log("access_token:", access_token);
+
+  const res = await axiosJWT.put(
+    `${process.env.REACT_APP_API_URL_BACKEND}/user/toggle-active/${id}`,
+    {},  // body trống (vì không cần gửi data)
+    {
+      headers: {
+        token: `Bearer ${access_token}`,  // hoặc Authorization: `Bearer ${access_token}`
+      }
     }
-  })
-  return res.data
-}
+  );
+
+  return res.data;
+};
 
 
 ///////////--------có phân quyền------------/////////////////////

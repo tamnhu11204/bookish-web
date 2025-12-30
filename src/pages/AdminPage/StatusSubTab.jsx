@@ -169,8 +169,8 @@ const StatusSubTab = () => {
                         <tr>
                             <th scope="col" style={{ width: '30%' }}>Mã</th>
                             <th scope="col" style={{ width: '20%' }}>Tên trạng thái đơn hàng</th>
-                            <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}>Hành động</th>
+                            <th scope="col" style={{ width: '30%' }}>Ghi chú</th>
+                            <th scope="col" style={{ width: '20%' }}>Hành động</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">
@@ -185,7 +185,7 @@ const StatusSubTab = () => {
                                 <tr key={status._id}>
                                     <td>{status._id}</td>
                                     <td>{status.name}</td>
-                                    <td>{status.note || '*'}</td>
+                                    <td>{status.note || 'Không có'}</td>
                                     <td>
                                         <button
                                             className="btn btn-sm btn-primary me-2"

@@ -180,8 +180,8 @@ const FormSubTab = () => {
                         <tr>
                             <th scope="col" style={{ width: '30%' }}>Mã</th>
                             <th scope="col" style={{ width: '20%' }}>Tên hình thức</th>
-                            <th scope="col" style={{ width: '40%' }}>Ghi chú</th>
-                            <th scope="col" style={{ width: '10%' }}>Sửa/Xóa</th>
+                            <th scope="col" style={{ width: '30%' }}>Ghi chú</th>
+                            <th scope="col" style={{ width: '20%' }}>Sửa/Xóa</th>
                         </tr>
                     </thead>
                     <tbody className="table-content">

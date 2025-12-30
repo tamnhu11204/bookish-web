@@ -173,7 +173,6 @@ const ImportTab = () => {
                     <thead>
                         <tr>
                             <th>Mã</th>
-                            <th>Hình ảnh</th>
                             <th>Nhà cung cấp</th>
                             <th>Ngày nhập hàng</th>
                             <th>Tổng số tiền</th>
@@ -191,17 +190,10 @@ const ImportTab = () => {
                             filteredImports.map((importItem) => (
                                 <tr key={importItem._id}>
                                     <td>{importItem._id.slice(-6)}</td>
-                                    <td>
-                                        <img
-                                            src={importItem.supplier?.img || 'https://placehold.co/50x50'}
-                                            alt={importItem.supplier?.name || 'Nhập hàng'}
-                                            className="supplier-img"
-                                        />
-                                    </td>
                                     <td>{importItem.supplier?.name || 'Không xác định'}</td>
                                     <td>{new Date(importItem.importDate).toLocaleDateString('vi-VN')}</td>
                                     <td>{importItem.totalImportPrice.toLocaleString('vi-VN')}đ</td>
-                                    <td>
+                                    {/* <td>
                                         <button
                                             className="action-btn view-btn"
                                             onClick={() => handleViewImportDetails(importItem)}
@@ -210,6 +202,20 @@ const ImportTab = () => {
                                         </button>
                                         <button
                                             className="action-btn delete-btn"
+                                            onClick={() => handleDeleteImport(importItem)}
+                                        >
+                                            <i className="bi bi-trash"></i>
+                                        </button>
+                                    </td> */}
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-primary me-2"
+                                            onClick={() => handleViewImportDetails(importItem)}
+                                        >
+                                            <i className="bi bi-eye"></i>
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-danger"
                                             onClick={() => handleDeleteImport(importItem)}
                                         >
                                             <i className="bi bi-trash"></i>

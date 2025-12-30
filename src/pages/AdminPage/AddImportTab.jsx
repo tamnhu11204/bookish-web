@@ -267,7 +267,7 @@ const AddImport = ({ isOpen, type, onCancel }) => {
 
       <hr />
 
-      <table className="table table-bordered">
+      <table className="table custom-table">
         <thead>
           <tr className="table-success">
             <th>Mã sản phẩm</th>

@@ -484,7 +484,7 @@ const HomePage = () => {
       </section>
 
       <div className="section-wrapper"> <div className="container"> <CardComponent title="Thể loại nổi bật" bodyContent={catagoryInfo} icon="bi bi-ui-checks-grid" /> </div> </div>
-      <div className="section-wrapper"> <div className="container"> <CardComponent title="Sách gợi ý cho bạn" bodyContent={<Recommendation userId={userId} />} icon="bi bi-heart" /> </div> </div>
+      <div className="section-wrapper"> <div className="container"> <CardComponent title="Có thể bạn sẽ thích" bodyContent={<Recommendation userId={userId} />} icon="bi bi-heart" /> </div> </div>
       <div className="section-wrapper"> <div className="container"> <CardComponent title="Sách mới" bodyContent={newBookInfo} icon="bi bi-book" /> </div> </div>
 
       {isLoadingAuthors || isLoadingFeaturedAuthor ? (<LoadingComponent />) : featuredAuthor && (
