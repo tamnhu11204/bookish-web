@@ -76,10 +76,14 @@ export const updateProductStock = async (id, data) => {
 };
 
 export const getAllProductBySort = async (params = {}) => {
+  const { filters, sort, ...rest } = params; // Tách filters và sort ra
+
   const response = await axios.get(`${process.env.REACT_APP_API_URL_BACKEND}/product/get-all`, {
     params: {
-      ...params,
-      sort: params.sort ? JSON.stringify(params.sort) : undefined,
+      ...rest,
+      sort: sort ? JSON.stringify(sort) : undefined,
+      // QUAN TRỌNG: Backend yêu cầu filters phải là JSON string
+      filters: filters ? JSON.stringify(filters) : undefined,
     },
   });
 

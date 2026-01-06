@@ -61,9 +61,9 @@ const Recommendation = ({ userId }) => {
       {combos.map((combo, index) => (
         <div key={index} className="combo-section">
           <div className="combo-header">
-            <p className="combo-reason"
+            <p className="combo-title"
             >{combo.title}</p>
-            <p className="combo-reason text-muted small">{combo.reason}</p>
+            <p className="combo-reason">{combo.reason}</p>
           </div>
 
           <div className="combo-books row g-3 justify-content-center">

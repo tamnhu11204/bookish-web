@@ -353,6 +353,8 @@
     background-color: #fceae1;
     padding: 2rem;
     border-radius: 12px;
+    width: 250px;
+    height: auto
 }
 
 .author-image-decorated>img {
@@ -530,7 +532,7 @@
 }
 
 .featured-author-edit {
-    background-color: rgb(228, 247, 203);
+    background-color: rgb(144, 202, 68);
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;

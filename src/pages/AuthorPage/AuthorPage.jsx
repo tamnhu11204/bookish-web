@@ -8,124 +8,106 @@ import ButtonComponent from '../../components/ButtonComponent/ButtonComponent';
 import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 
-// Component AuthorPage
 const AuthorPage = () => {
     const { authorId } = useParams();
-    console.log('authorId from URL:', authorId); // Debug
     const navigate = useNavigate();
     const detailSectionRef = useRef(null);
     const [selectedAlphabet, setSelectedAlphabet] = useState('All');
 
-    // Debug: Theo dõi URL và authorId
-    useEffect(() => {
-        console.log('Current URL:', window.location.pathname);
-        console.log('useParams authorId:', authorId);
-    }, [authorId]);
-
-    // Query danh sách tác giả
+    // 1. Query danh sách tất cả tác giả
     const authorsQuery = useQuery({
         queryKey: ['allAuthors'],
         queryFn: () => AuthorService.getAllAuthor(),
         staleTime: 1000 * 60 * 5,
     });
 
-    // Query danh sách tác phẩm
+    // 2. Query danh sách tác phẩm theo tác giả đang chọn
     const productsQuery = useQuery({
         queryKey: ['products-by-author', authorId],
         queryFn: () => ProductService.getAllProductBySort({
-            filter: ['author', authorId]
+            limit: 'all', // Lấy hết sách của tác giả này
+            filters: {
+                authors: [authorId] // Backend yêu cầu 'authors' (số nhiều) và phải là Mảng []
+            }
         }),
         enabled: !!authorId,
     });
 
-    // Xử lý danh sách tác giả
+    // 3. Xử lý dữ liệu danh sách tác giả từ API
     const allAuthors = useMemo(() => {
         const rawData = authorsQuery.data;
-        console.log('Raw data from authorsQuery:', rawData); // Debug
         if (Array.isArray(rawData)) return rawData;
         if (Array.isArray(rawData?.data)) return rawData.data;
         return [];
     }, [authorsQuery.data]);
 
-    // Lọc tác giả theo alphabet
+    // 4. Lọc tác giả hiển thị theo chữ cái (Alphabet)
     const filteredAuthors = useMemo(() => {
-        if (!Array.isArray(allAuthors)) return [];
         if (selectedAlphabet === 'All') return allAuthors;
         return allAuthors.filter(author =>
             author?.name?.trim().toUpperCase().startsWith(selectedAlphabet)
         );
     }, [allAuthors, selectedAlphabet]);
 
-    // Tìm chi tiết tác giả
+    // 5. Lấy thông tin chi tiết của tác giả đang chọn
     const selectedAuthorDetails = useMemo(() => {
-        console.log('authorId:', authorId, 'allAuthors:', allAuthors); // Debug
-        if (!authorId || !Array.isArray(allAuthors)) return null;
-        const author = allAuthors.find(author => author?._id === authorId) || null;
-        console.log('selectedAuthorDetails:', author); // Debug
-        return author;
+        if (!authorId || allAuthors.length === 0) return null;
+        return allAuthors.find(a => a._id === authorId) || null;
     }, [allAuthors, authorId]);
 
-    // Danh sách tác phẩm
     const products = useMemo(() => {
-        console.log('productsQuery data:', productsQuery.data); // Debug
+        // Backend trả về { status: 'OK', data: [...] }
         return productsQuery.data?.data || [];
     }, [productsQuery.data]);
 
-    // Đồng bộ alphabet và cuộn
+    // 7. Đồng bộ chữ cái và tự động cuộn xuống khi chọn tác giả
     useEffect(() => {
         if (authorId && allAuthors.length > 0) {
             const authorToSelect = allAuthors.find(a => a._id === authorId);
-            console.log('authorToSelect in useEffect:', authorToSelect); // Debug
             if (authorToSelect && authorToSelect.name) {
                 const firstChar = authorToSelect.name.charAt(0).toUpperCase();
-                if (firstChar) {
-                    setSelectedAlphabet(firstChar);
-                    setTimeout(() => {
-                        detailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                }
-            } else {
-                console.log('No valid author or name found for authorId:', authorId);
-                setSelectedAlphabet('All'); // Mặc định về 'All'
+                setSelectedAlphabet(firstChar);
+
+                // Đợi một chút để UI render rồi mới cuộn
+                setTimeout(() => {
+                    detailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
             }
         }
     }, [authorId, allAuthors]);
 
-    // Hàm xử lý chọn alphabet
+    // Hàm chọn chữ cái
     const handleAlphabetSelect = (char) => {
         setSelectedAlphabet(char);
-        if (authorId) navigate('/author');
+        if (authorId) navigate('/author'); // Thoát chế độ xem chi tiết nếu đang xem dở tác giả khác
     };
 
-    // Hàm xử lý chọn tác giả
+    // Hàm chọn tác giả
     const handleAuthorSelect = (selectedId) => {
-        console.log('Selected author ID:', selectedId); // Debug
         if (authorId === selectedId) {
             navigate('/author');
         } else {
             navigate(`/author/${selectedId}`);
-            console.log('Navigated to:', `/author/${selectedId}`); // Debug
         }
     };
 
-    // Hàm parse HTML
+    // Chuyển đổi thông tin tác giả từ HTML sang Text
     const parseDescription = (htmlString) => {
-        if (!htmlString) return '';
+        if (!htmlString) return "Thông tin đang được cập nhật...";
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlString, 'text/html');
-        return doc.body.textContent || '';
+        return doc.body.textContent || "";
     };
 
-    const alphabet = ['All', ...Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))];
-
-    // Render
-    if (authorsQuery.isLoading) return <div className="status-message">Đang tải danh sách tác giả...</div>;
-    if (authorsQuery.isError) return <div className="status-message error">Lỗi: {authorsQuery.error.message}</div>;
-
+    // Xử lý khi click vào sản phẩm
     const handleOnClickProduct = async (id) => {
         await ProductService.updateView(id);
         navigate(`/product-detail/${id}`);
     };
+
+    const alphabetList = ['All', ...Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))];
+
+    if (authorsQuery.isLoading) return <div className="status-message">Đang tải danh sách tác giả...</div>;
 
     return (
         <div className="author-page-combined">
@@ -133,8 +115,10 @@ const AuthorPage = () => {
                 <div className="header-hero-section">
                     <h1>Tác giả</h1>
                 </div>
+
+                {/* Bộ lọc chữ cái */}
                 <div className="alphabet-filter-section">
-                    {alphabet.map(char => (
+                    {alphabetList.map(char => (
                         selectedAlphabet === char ? (
                             <ButtonComponent
                                 key={char}
@@ -153,6 +137,7 @@ const AuthorPage = () => {
                     ))}
                 </div>
 
+                {/* Danh sách các thẻ tác giả */}
                 <div className="author-tags-section">
                     <div className="author-tags-container">
                         {filteredAuthors.length > 0 ? (
@@ -171,14 +156,16 @@ const AuthorPage = () => {
                     </div>
                 </div>
 
+                {/* Chi tiết tác giả và sản phẩm */}
                 {selectedAuthorDetails ? (
                     <div ref={detailSectionRef} className="author-detail-section">
                         <div className="text-featured-author section-header-left">
-                            <i class="bi bi-stars"></i>
-                            <p >Về tác giả</p>
-                            <i class="bi bi-stars"></i>
+                            <i className="bi bi-stars"></i>
+                            <p>Về tác giả</p>
+                            <i className="bi bi-stars"></i>
                             <div className="header-line"></div>
                         </div>
+
                         <div className="author-info-container">
                             <div className="author-image-wrapper">
                                 <img
@@ -190,17 +177,20 @@ const AuthorPage = () => {
                             <div className="author-details-content">
                                 <h1 className="author-full-name">{selectedAuthorDetails.name}</h1>
                                 <p className="author-full-description">
-                                    {parseDescription(selectedAuthorDetails.info)} Chưa có thông tin !!!
+                                    {parseDescription(selectedAuthorDetails.info)}
                                 </p>
                             </div>
                         </div>
+
+                        {/* Danh sách sản phẩm của tác giả */}
                         <div className="author-products-container">
                             <div className="text-featured-author section-header-left">
-                                <i class="bi bi-stars"></i>
-                                <p >Tác giả nổi bật</p>
-                                <i class="bi bi-stars"></i>
+                                <i className="bi bi-stars"></i>
+                                <p>Tác phẩm tiêu biểu</p>
+                                <i className="bi bi-stars"></i>
                                 <div className="header-line"></div>
                             </div>
+
                             <div className="d-flex flex-wrap justify-content-center gap-3">
                                 {productsQuery.isLoading ? (
                                     <p>Đang tải tác phẩm...</p>
@@ -209,7 +199,7 @@ const AuthorPage = () => {
                                         <CardProductComponent
                                             key={product._id}
                                             id={product._id}
-                                            img={product.img[0]}
+                                            img={product.img?.[0]}
                                             proName={product.name}
                                             currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
                                             originalPrice={product.price}
@@ -223,13 +213,15 @@ const AuthorPage = () => {
                                         />
                                     ))
                                 ) : (
-                                    <p className='text'>Tác giả này hiện chưa có tác phẩm nào được liệt kê.</p>
+                                    <p className='text'>Tác giả này hiện chưa có tác phẩm nào.</p>
                                 )}
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <p className='text'>Vui lòng chọn một tác giả.</p>
+                    <div style={{ textAlign: 'center', padding: '50px' }}>
+                        <p className='text'>Vui lòng chọn một tác giả để xem chi tiết.</p>
+                    </div>
                 )}
             </div>
         </div>

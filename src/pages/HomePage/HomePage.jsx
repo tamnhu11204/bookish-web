@@ -42,11 +42,14 @@ const AuthorCard = ({ author }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Lấy sản phẩm của tác giả để hiển thị khi hover
+  // Sửa lại đoạn useQuery trong AuthorCard
   const { data: authorProductsData } = useQuery({
     queryKey: ['products_for_author_card', author._id],
     queryFn: () => ProductService.getAllProductBySort({
       limit: 5,
-      filter: ['author', author._id]
+      filters: {        // QUAN TRỌNG: Phải có key filters
+        authors: [author._id] // Backend Service tìm parsedFilters.authors
+      }
     }),
     staleTime: 1000 * 60 * 5,
     enabled: isHovered,
@@ -317,17 +320,19 @@ const HomePage = () => {
   });
 
   const { data: authorProducts, isLoading: isLoadingAuthorProducts } = useQuery({
-    queryKey: ['products', 'author', config?.featuredAuthorId],
+    queryKey: ['products', 'author', config?.featuredAuthorId?._id], // Dùng ID làm key để tránh lỗi cache
     queryFn: async () => {
       const params = {
         limit: 4,
-        page: 0,
-        filter: ['author', config.featuredAuthorId._id]
+        page: 1, // Backend của bạn dùng page 1-based (sau đó trừ 1)
+        filters: {
+          authors: [config.featuredAuthorId._id] // Backend Service tìm parsedFilters.authors (mảng)
+        }
       };
       const res = await ProductService.getAllProductBySort(params);
       return res.data;
     },
-    enabled: !!config?.featuredAuthorId,
+    enabled: !!config?.featuredAuthorId?._id,
   });
 
 
@@ -519,7 +524,7 @@ const HomePage = () => {
                 />
               </div>
               <div className="author-image-decorated">
-                <img src={featuredAuthor.img} alt={featuredAuthor.name} />
+                <img src={featuredAuthor?.img || 'https://s.gr-assets.com/assets/nophoto/user/u_200x266-e183445fd1a1b5cc7075bb1cf7043306.png'} alt={featuredAuthor.name} />
                 <div className="author-image-info">
                   <h3>Tác giả</h3>
                   <h2>{featuredAuthor.name}</h2>
