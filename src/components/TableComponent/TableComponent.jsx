@@ -7,27 +7,27 @@ const TableComparison = ({ data, pro1, pro2, pro3 }) => {
       <table className="table table-bordered table-striped custom-table">
         <thead className="custom-header">
           <tr>
-            <th className="col-4">Tiêu chí</th>
-            <th className="col-4">{pro1}</th>
-            <th className="col-4">{pro2}</th>
-            <th className="col-4">{pro3}</th>
+            <th className="col-2">Tiêu chí</th>
+            <th className="col-2">{pro1}</th>
+            <th className="col-2">{pro2}</th>
+            <th className="col-2">{pro3}</th>
           </tr>
         </thead>
         <tbody className="custom-body">
           {data.map((row, index) => (
             <tr key={index}>
-              <td className="col-4">{row.criteria}</td>
-              <td className="col-4">
+              <td className="col-2">{row.criteria}</td>
+              <td className="col-2">
                 <span className={row.product1}>
                   {row.product1}
                 </span>
               </td>
-              <td className="col-4">
+              <td className="col-2">
                 <span className={row.product2}>
                   {row.product2}
                 </span>
               </td>
-              <td className="col-4">
+              <td className="col-2">
                 <span className={row.product3}>
                   {row.product3}
                 </span>

@@ -17,8 +17,25 @@ const HeaderComponent = () => {
   const shop = useSelector((state) => state.shop);
   const order = useSelector((state) => state.order);
   const [productFavorite, setProductFavorite] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
+  const [isHovering, setIsHovering] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+
+  const searchInputRef = useRef(null);
+  const historyDropdownRef = useRef(null);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Tính toán khi nào hiện prompt guide
+  const showPromptGuide = (isHovering || isFocused) && searchTerm.trim() === '';
+
+  // Fetch favorite products
   const fetchFavoriteProducts = async () => {
     if (user?.id) {
       try {
@@ -31,13 +48,9 @@ const HeaderComponent = () => {
           });
           const productDetails = await Promise.all(productDetailsPromises);
           setProductFavorite(productDetails);
-        } else {
-          console.error('Product data is not available or not in expected format');
         }
       } catch (error) {
         console.error('Error fetching favorite products:', error);
-      } finally {
-        setLoading(false);
       }
     }
   };
@@ -46,11 +59,7 @@ const HeaderComponent = () => {
     fetchFavoriteProducts();
   }, [user?.id]);
 
-  const [loading, setLoading] = useState(false);
-
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
+  // Handle logout
   const handleLogout = async () => {
     setLoading(true);
     await UserService.logoutUser();
@@ -62,13 +71,11 @@ const HeaderComponent = () => {
     navigate('/login');
   };
 
-
+  // Adjust navbar position based on header height
   const headerRef = useRef(null);
-
   useEffect(() => {
     if (headerRef.current) {
       const headerHeight = headerRef.current.offsetHeight;
-      console.log('Sticky-header height:', headerHeight);
       const navbarElement = document.querySelector('.navbar:nth-child(2)');
       if (navbarElement) {
         navbarElement.style.top = `${headerHeight}px`;
@@ -79,23 +86,7 @@ const HeaderComponent = () => {
     };
   }, [user?.name]);
 
-
-  // Load lịch sử khi component mount
-  useEffect(() => {
-    const saved = localStorage.getItem('search_history');
-    if (saved) {
-      setSearchHistory(JSON.parse(saved));
-    }
-  }, []);
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchHistory, setSearchHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
-
-  const searchInputRef = useRef(null);
-  const historyDropdownRef = useRef(null);
-
-  // Load lịch sử khi component mount
+  // Load search history
   useEffect(() => {
     const saved = localStorage.getItem('search_history');
     if (saved) {
@@ -111,21 +102,16 @@ const HeaderComponent = () => {
     }
   }, []);
 
-  // Hàm xử lý tìm kiếm
+  // Handle search
   const handleSearch = async (customQuery = null) => {
     const query = (customQuery || searchTerm).trim();
-
     if (!query) {
       alert('Vui lòng nhập từ khóa tìm kiếm');
       return;
     }
 
-    // Cập nhật lịch sử tìm kiếm
-    const newHistory = [
-      query,
-      ...searchHistory.filter(item => item !== query)
-    ].slice(0, 10);
-
+    // Update search history
+    const newHistory = [query, ...searchHistory.filter(item => item !== query)].slice(0, 10);
     setSearchHistory(newHistory);
     localStorage.setItem('search_history', JSON.stringify(newHistory));
 
@@ -143,11 +129,11 @@ const HeaderComponent = () => {
     } finally {
       setLoading(false);
       setShowHistory(false);
-      searchInputRef.current?.focus(); // Giữ focus sau khi tìm
+      searchInputRef.current?.focus();
     }
   };
 
-  // Xử lý xóa một mục lịch sử
+  // Delete single history item
   const handleDeleteHistoryItem = (e, index) => {
     e.stopPropagation();
     const newHistory = searchHistory.filter((_, i) => i !== index);
@@ -155,14 +141,14 @@ const HeaderComponent = () => {
     localStorage.setItem('search_history', JSON.stringify(newHistory));
   };
 
-  // Xóa toàn bộ lịch sử
+  // Clear all history
   const handleClearAllHistory = (e) => {
     e.stopPropagation();
     setSearchHistory([]);
     localStorage.removeItem('search_history');
   };
 
-  // Click ngoài để ẩn dropdown
+  // Click outside to hide history dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -181,16 +167,18 @@ const HeaderComponent = () => {
 
   return (
     <>
-      <div className="top-header sticky-header">
+      <div className="top-header sticky-header" ref={headerRef}>
         <div className="container top-header-container">
           <p className="text-welcome">
             <i className="bi bi-stars"></i>
             <span>Chào mừng bạn đến với Bookish!</span>
           </p>
 
-          <div className="search-container position-relative">
-
-            {/* INPUT TÌM KIẾM */}
+          <div
+            className="search-container position-relative"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+          >
             <input
               ref={searchInputRef}
               className="form-control search-input pe-5"
@@ -202,18 +190,41 @@ const HeaderComponent = () => {
                 setShowHistory(true);
               }}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              onFocus={() => searchHistory.length > 0 && setShowHistory(true)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setTimeout(() => setIsFocused(false), 180)}
             />
 
-            {/* NÚT TÌM KIẾM */}
-            <button
-              className="search-button"
-              onClick={handleSearch}
-            >
+            {/* Prompt hướng dẫn */}
+            {showPromptGuide && (
+              <div
+                className="position-absolute w-100 bg-white border shadow rounded p-3"
+                style={{
+                  top: 'calc(100% + 6px)',
+                  zIndex: 1000,
+                  borderColor: '#0d6efd40',
+                  boxShadow: '0 6px 16px rgba(13,110,253,0.15)',
+                }}
+              >
+                <div className="d-flex align-items-center mb-2">
+                  <span className="fw-bold text-primary " style={{ fontSize: "14px" }}>💡 Tìm kiếm thông minh</span>
+                </div>
+                <div className="text-muted" style={{ fontSize: "14px" }}>
+                  Mô tả theo cấu trúc này để có trải nghiệm tốt:
+                </div>
+                <div className="text-muted" style={{ fontSize: "14px" }}>
+                  Chủ đề + mục đích + đối tượng đọc
+                </div>
+                <div className="text-primary" style={{ fontSize: "14px" }}>
+                  Ví dụ: "Sách phát triển bản thân về quản lý thời gian cho sinh viên"
+                </div>
+              </div>
+            )}
+
+            <button className="search-button" onClick={() => handleSearch()}>
               <i className="bi bi-search"></i>
             </button>
 
-            {/* DROPDOWN LỊCH SỬ TÌM KIẾM */}
+            {/* Search history dropdown */}
             {showHistory && searchHistory.length > 0 && (
               <div
                 ref={historyDropdownRef}
@@ -221,11 +232,10 @@ const HeaderComponent = () => {
                 style={{
                   top: '100%',
                   zIndex: 9999,
-                  maxHeight: '300px',
-                  overflowY: 'auto'
+                  maxHeight: '320px',
+                  overflowY: 'auto',
                 }}
               >
-                {/* Header dropdown */}
                 <div className="p-2 border-bottom d-flex justify-content-between align-items-center bg-light">
                   <small className="text-muted fw-bold">Lịch sử tìm kiếm</small>
                   <button
@@ -237,7 +247,6 @@ const HeaderComponent = () => {
                   </button>
                 </div>
 
-                {/* Các mục lịch sử */}
                 {searchHistory.map((item, index) => (
                   <div
                     key={index}
@@ -252,7 +261,6 @@ const HeaderComponent = () => {
                       <i className="bi bi-clock-history me-2 text-muted"></i>
                       {item}
                     </span>
-
                     <button
                       onClick={(e) => handleDeleteHistoryItem(e, index)}
                       className="btn btn-sm p-0 text-muted"
@@ -266,35 +274,60 @@ const HeaderComponent = () => {
             )}
           </div>
 
-
           <div className="user-actions">
             <LoadingComponent isLoading={loading}>
               {user?.name ? (
                 <div className="user-actions-inner">
-                  <button type="button" className="icon-button" onClick={() => navigate('/favorite-products')} title="Sản phẩm yêu thích">
+                  <button
+                    type="button"
+                    className="icon-button"
+                    onClick={() => navigate('/favorite-products')}
+                    title="Sản phẩm yêu thích"
+                  >
                     <i className="bi bi-heart"></i>
                     <span className="badge-count">{productFavorite?.length || 0}</span>
                   </button>
 
-                  <button type="button" className="icon-button" onClick={() => navigate('/shoppingcart')} title="Giỏ hàng">
+                  <button
+                    type="button"
+                    className="icon-button"
+                    onClick={() => navigate('/shoppingcart')}
+                    title="Giỏ hàng"
+                  >
                     <i className="bi bi-cart3"></i>
                     <span className="badge-count">{order?.orderItems?.length || 0}</span>
                   </button>
 
                   <div className="user-menu btn-group" role="group">
-                    <button type="button" className="btn dropdown-toggle user-dropdown-button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button
+                      type="button"
+                      className="btn dropdown-toggle user-dropdown-button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
                       Chào, {user.name}
                     </button>
                     <ul className="dropdown-menu">
                       {user?.isAdmin && (
                         <>
-                          <li><NavLink className="dropdown-item" to="/admin-profile"><i className="bi bi-person-circle"></i> Hồ sơ</NavLink></li>
-                          <li><NavLink className="dropdown-item" to="/admin/shopManagement"><i className="bi bi-house-gear"></i> Hệ thống</NavLink></li>
-                          {/* <li><NavLink className="dropdown-item" to="/admin/livechat"><i className="bi bi-chat-dots"></i> Nhắn tin</NavLink></li> */}
+                          <li>
+                            <NavLink className="dropdown-item" to="/admin-profile">
+                              <i className="bi bi-person-circle"></i> Hồ sơ
+                            </NavLink>
+                          </li>
+                          <li>
+                            <NavLink className="dropdown-item" to="/admin/shopManagement">
+                              <i className="bi bi-house-gear"></i> Hệ thống
+                            </NavLink>
+                          </li>
                         </>
                       )}
                       {!user?.isAdmin && (
-                        <li><NavLink className="dropdown-item" to="/profile"><i className="bi bi-person-circle"></i> Hồ sơ</NavLink></li>
+                        <li>
+                          <NavLink className="dropdown-item" to="/profile">
+                            <i className="bi bi-person-circle"></i> Hồ sơ
+                          </NavLink>
+                        </li>
                       )}
                       <li><hr className="dropdown-divider" /></li>
                       <li>
@@ -315,23 +348,39 @@ const HeaderComponent = () => {
         </div>
       </div>
 
-      {/* Thanh điều hướng chính không thay đổi */}
-      <nav className="navbar main-nav ">
+      <nav className="navbar main-nav">
         <div className="container main-nav-container">
           <NavLink className="navbar-brand" to="/">
             <img src={shop?.logo || logo} alt="Logo" className="logo-img" />
           </NavLink>
           <ul className="nav nav-links">
-            <li className="nav-item"><NavLink className="nav-link" to="/" end>Trang chủ</NavLink></li>
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/" end>
+                Trang chủ
+              </NavLink>
+            </li>
             <li className="nav-item has-dropdown" style={{ position: 'relative' }}>
-              <NavLink className="nav-link" to="/category">Danh mục</NavLink>
+              <NavLink className="nav-link" to="/category">
+                Danh mục
+              </NavLink>
               <CategoryDropdown />
             </li>
-            <li className="nav-item"><NavLink className="nav-link" to="/discount">Khuyến mãi</NavLink></li>
-            <li className="nav-item"><NavLink className="nav-link" to="/about-us">Giới thiệu</NavLink></li>
-            <li className="nav-item"><NavLink className="nav-link" to="/news">Tin tức</NavLink></li>
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/discount">
+                Khuyến mãi
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/about-us">
+                Giới thiệu
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/news">
+                Tin tức
+              </NavLink>
+            </li>
           </ul>
-
         </div>
       </nav>
     </>

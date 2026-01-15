@@ -449,7 +449,8 @@ const CatagoryPage = () => {
     <div className="selected-filters mb-3">
       {searchQuery && (
         <span className="badge bg-primary me-2">
-          Tìm kiếm: {searchQuery} <button type="button" onClick={clearSearchResults}>×</button>
+          Tìm kiếm: {searchQuery.length > 10 ? searchQuery.substring(0, 10) + '...' : searchQuery}
+          <button type="button" onClick={clearSearchResults}>×</button>
         </span>
       )}
       {selectedCategories.map(id => {

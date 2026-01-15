@@ -23,6 +23,7 @@ import './ProductDetailPage.css';
 import ButtonComponent2 from '../../components/ButtonComponent/ButtonComponent2';
 import * as UserEventService from '../../services/UserEventService';
 import { getSessionId } from '../../../src/utils/session';
+import Recommendation from '../../components/Recommendation/recommendation';
 
 const ProductDetailPage = () => {
   const user = useSelector((state) => state.user);
@@ -38,6 +39,7 @@ const ProductDetailPage = () => {
   const [proCategory, setProCategory] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [expanded, setExpanded] = useState(false);
+  const userId = user?.id || null;
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -195,35 +197,9 @@ const ProductDetailPage = () => {
     </div>
   );
 
-  const relatedProductInfo = (
-    <div className="d-flex flex-wrap justify-content-center align-items-center gap-3">
-      {proCategory && proCategory.length > 0 ? (
-        proCategory.map((product) => (
-          <CardProductComponent
-            key={product._id}
-            id={product._id}
-            img={product.img[0]}
-            proName={product.name}
-            currentPrice={(product.price * (100 - product.discount) / 100).toLocaleString()}
-            originalPrice={product.price}
-            sold={product.sold}
-            star={product.star}
-            feedbackCount={product.feedbackCount}
-            onClick={() => handleOnClickProduct(product._id)}
-            view={product.view}
-            stock={product.stock}
-            discount={product.discount}
-          />
-        ))
-      ) : (
-        <tr>
-          <td colSpan="4" className="text-center">
-            Không có dữ liệu để hiển thị.
-          </td>
-        </tr>
-      )}
-    </div>
-  );
+  // const relatedProductInfo = (
+  //   <Recommendation userId={userId} />
+  // );
 
   const images = product.img || [];
   const mainImage = images[currentImageIndex] || img4;
@@ -585,13 +561,13 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        <div className="row">
+        {/* <div className="row">
           <div className="section-wrapper">
             <div className="container">
               <CardComponent title="Có thể bạn sẽ quan tâm" bodyContent={relatedProductInfo} icon="bi bi-bag-heart" />
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="row">
           <div className="section-wrapper">

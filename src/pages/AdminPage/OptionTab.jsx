@@ -19,7 +19,6 @@ const OptionTab = () => {
             {/* Tabs về sản phẩm */}
             <div className="content-section" style={{ marginTop: '30px' }}>
                 <div className="row mt-4">
-                    <h4>VỀ SẢN PHẨM</h4>
                     <ul className="nav nav-tabs" style={{ marginTop: '20px' }}>
                         <li className="nav-item">
                             <button

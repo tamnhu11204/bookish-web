@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import CardComponent from '../../components/CardComponent/CardComponent';
 import CardProductComponent from '../../components/CardProductComponent/CardProductComponent';
 import TableComparison from '../../components/TableComponent/TableComponent';
@@ -11,6 +11,7 @@ import * as PublisherService from '../../services/OptionService/PublisherService
 import * as SupplierService from '../../services/OptionService/SupplierService';
 import * as UnitService from '../../services/OptionService/UnitService';
 import * as ProductService from '../../services/ProductService';
+import * as AuthorService from '../../services/AuthorService';
 import './ComparisonPage.css';
 import ProductSearchModal from './ProductSearchModal';
 import * as UserEventService from '../../services/UserEventService';
@@ -21,18 +22,19 @@ const ComparisonPage = () => {
   const [selectedProducts, setSelectedProducts] = useState([null, null, null]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalIndex, setModalIndex] = useState(null);
+  const [loadingSlots, setLoadingSlots] = useState({}); // index nào đang load chi tiết
 
   const user = useSelector((state) => state.user);
 
-  // Lấy chi tiết sản phẩm đầu tiên dựa trên id
-  const { data: firstProduct } = useQuery({
+  // Sản phẩm đầu tiên từ URL
+  const { data: firstProduct, isLoading: isFirstLoading } = useQuery({
     queryKey: ['product', id],
     queryFn: () => ProductService.getDetailProduct(id).then((res) => res.data),
     enabled: !!id,
   });
 
-  // Lấy danh sách sản phẩm cho modal
-  const { data: products } = useQuery({
+  // Danh sách sản phẩm cho modal
+  const { data: products = [] } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
       try {
@@ -61,25 +63,41 @@ const ComparisonPage = () => {
     setModalIndex(null);
   };
 
-  const handleSelectProduct = async (index, product) => {
-    console.log('Selected product for index', index, ':', product);
-    const newSelectedProducts = [...selectedProducts];
-    newSelectedProducts[index] = product;
-    setSelectedProducts(newSelectedProducts);
+  const handleSelectProduct = async (index, productFromList) => {
+    if (!productFromList?._id) return;
 
-    // 🆕 Ghi lại sự kiện chọn sản phẩm để so sánh
+    setLoadingSlots((prev) => ({ ...prev, [index]: true }));
+
     try {
-      await UserEventService.trackUserEvent({
-        eventType: 'compare',
-        productId: product?._id || product?.id, // hỗ trợ cả 2 dạng dữ liệu
-        userId: user?.id || null,
-        sessionId: user?.id ? null : getSessionId(),
-      });
+      // Lấy dữ liệu CHI TIẾT đầy đủ
+      const res = await ProductService.getDetailProduct(productFromList._id);
+      const fullProduct = res.data;
+
+      const newSelectedProducts = [...selectedProducts];
+      newSelectedProducts[index] = fullProduct;
+      setSelectedProducts(newSelectedProducts);
+
+      // Track event
+      try {
+        await UserEventService.trackUserEvent({
+          eventType: 'compare',
+          productId: fullProduct._id || fullProduct.id,
+          userId: user?.id || null,
+          sessionId: user?.id ? null : getSessionId(),
+        });
+      } catch (err) {
+        console.error('Error tracking compare event:', err);
+      }
     } catch (error) {
-      console.error('Error tracking compare event:', error);
+      console.error('Lỗi khi lấy chi tiết sản phẩm:', error);
+      // Fallback dùng dữ liệu từ danh sách nếu API detail lỗi
+      const newSelectedProducts = [...selectedProducts];
+      newSelectedProducts[index] = productFromList;
+      setSelectedProducts(newSelectedProducts);
+    } finally {
+      setLoadingSlots((prev) => ({ ...prev, [index]: false }));
     }
   };
-
 
   const handleRemoveProduct = (index) => {
     if (index !== 0) {
@@ -89,6 +107,7 @@ const ComparisonPage = () => {
     }
   };
 
+  // Hook lấy thông tin chi tiết các trường tham chiếu (giữ nguyên như bạn)
   const useProductDetails = (product) => {
     const { data: publisher } = useQuery({
       queryKey: ['publisher', product?.publisher],
@@ -135,7 +154,16 @@ const ComparisonPage = () => {
       enabled: !!product?.unit,
     });
 
-    return { publisher, language, supplier, format, unit };
+    const { data: author } = useQuery({
+      queryKey: ['author', product?.author],
+      queryFn: () =>
+        product?.author
+          ? AuthorService.getDetailAuthor(product.author).then((res) => res.data)
+          : null,
+      enabled: !!product?.author,
+    });
+
+    return { publisher, language, supplier, format, unit, author };
   };
 
   const productDetails1 = useProductDetails(firstProduct);
@@ -143,8 +171,22 @@ const ComparisonPage = () => {
   const productDetails3 = useProductDetails(selectedProducts[2]);
 
   const renderProductSlot = (product, index) => {
-    console.log(`Rendering slot ${index}:`, product);
+    const isLoading = loadingSlots[index];
+
     if (index === 0) {
+      if (isFirstLoading) {
+        return (
+          <div
+            className="col-3 d-flex justify-content-center align-items-center"
+            style={{ height: '200px', border: '1px solid #ccc', borderRadius: '8px' }}
+          >
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        );
+      }
+
       if (firstProduct && typeof firstProduct === 'object' && firstProduct.name) {
         return (
           <div className="col-3">
@@ -170,6 +212,20 @@ const ComparisonPage = () => {
       }
     }
 
+    // Slot 2 & 3
+    if (isLoading) {
+      return (
+        <div
+          className="col-3 d-flex justify-content-center align-items-center"
+          style={{ height: '200px', border: '1px solid #ccc', borderRadius: '8px' }}
+        >
+          <div className="spinner-border text-success" role="status">
+            <span className="visually-hidden">Đang tải...</span>
+          </div>
+        </div>
+      );
+    }
+
     if (product && typeof product === 'object' && product.name) {
       return (
         <div className="col-3">
@@ -190,25 +246,26 @@ const ComparisonPage = () => {
           </button>
         </div>
       );
-    } else {
-      return (
-        <div
-          className="col-3 d-flex justify-content-center align-items-center"
-          style={{ height: '200px', border: '1px solid #ccc', borderRadius: '8px' }}
-        >
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => openModal(index)}
-            style={{ backgroundColor: '#198754', color: 'white', borderColor: '#198754', fontSize: '14px' }}
-          >
-            Thêm sản phẩm
-          </button>
-        </div>
-      );
     }
+
+    return (
+      <div
+        className="col-3 d-flex justify-content-center align-items-center"
+        style={{ height: '200px', border: '1px solid #ccc', borderRadius: '8px' }}
+      >
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => openModal(index)}
+          style={{ backgroundColor: '#198754', color: 'white', borderColor: '#198754', fontSize: '14px' }}
+        >
+          Thêm sản phẩm
+        </button>
+      </div>
+    );
   };
 
+  // Giữ nguyên phần dữ liệu bảng so sánh của bạn
   const comparisonData = [
     {
       criteria: 'Giá bìa',
@@ -245,15 +302,15 @@ const ComparisonPage = () => {
   const comparisonData1 = [
     {
       criteria: 'Mã hàng',
-      product1: firstProduct?.code || '-',
-      product2: selectedProducts[1]?.code || '-',
-      product3: selectedProducts[2]?.code || '-',
+      product1: firstProduct?._id || '-',
+      product2: selectedProducts[1]?._id || '-',
+      product3: selectedProducts[2]?._id || '-',
     },
     {
       criteria: 'Tác giả',
-      product1: firstProduct?.author || '-',
-      product2: selectedProducts[1]?.author || '-',
-      product3: selectedProducts[2]?.author || '-',
+      product1: productDetails1.author?.name || '-',
+      product2: productDetails2.author?.name || '-',
+      product3: productDetails3.author?.name || '-',
     },
     {
       criteria: 'Nhà xuất bản',
@@ -263,22 +320,22 @@ const ComparisonPage = () => {
     },
     {
       criteria: 'Năm xuất bản',
-      product1: firstProduct?.publishDate
-        ? new Date(firstProduct.publishDate).toLocaleDateString('vi-VN', {
+      product1: firstProduct?.publishYear
+        ? new Date(firstProduct.publishYear).toLocaleDateString('vi-VN', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
         })
         : '-',
-      product2: selectedProducts[1]?.publishDate
-        ? new Date(selectedProducts[1].publishDate).toLocaleDateString('vi-VN', {
+      product2: selectedProducts[1]?.publishYear
+        ? new Date(selectedProducts[1].publishYear).toLocaleDateString('vi-VN', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
         })
         : '-',
-      product3: selectedProducts[2]?.publishDate
-        ? new Date(selectedProducts[2].publishDate).toLocaleDateString('vi-VN', {
+      product3: selectedProducts[2]?.publishYear
+        ? new Date(selectedProducts[2].publishYear).toLocaleDateString('vi-VN', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
@@ -299,9 +356,9 @@ const ComparisonPage = () => {
     },
     {
       criteria: 'Kích thước',
-      product1: `${firstProduct?.length || '-'}x${firstProduct?.width || '-'}x${firstProduct?.height || '-'}`,
-      product2: `${selectedProducts[1]?.length || '-'}x${selectedProducts[1]?.width || '-'}x${selectedProducts[1]?.height || '-'}`,
-      product3: `${selectedProducts[2]?.length || '-'}x${selectedProducts[2]?.width || '-'}x${selectedProducts[2]?.height || '-'}`,
+      product1: firstProduct?.dimensions || '-',
+      product2: selectedProducts[1]?.dimensions || '-',
+      product3: selectedProducts[2]?.dimensions || '-',
     },
     {
       criteria: 'Số trang',
